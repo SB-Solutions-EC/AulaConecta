@@ -42,13 +42,17 @@ Ninguna de las tres ramas permite force push ni borrado.
 ## Estructura del repositorio
 
 ```
-.github/          CODEOWNERS, plantilla de PR, reglas de protección (rulesets) y workflows
-docs/             Planificación, requisitos, análisis, modelos y entregables
-scripts/          Scripts de apoyo (por ejemplo, creación del Product Backlog)
-backend/          API NestJS (sprint 3)
-frontend/         PWA React + Vite (sprint 3)
-packages/         Código compartido, como el cálculo de notas (sprint 4)
+backend/             API NestJS + PostgreSQL (desde el sprint 3)
+frontend/            PWA React + Vite (desde el sprint 3)
+packages/calculo/    Motor de cálculo de notas compartido (sprint 5)
+infra/               docker-compose, Nginx y despliegue
+prototipo/           Prototipo navegable con datos ficticios
+docs/                Planificación, requisitos, análisis, modelos, arquitectura, seguridad, sprints y entregables
+scripts/github/      Creación del Product Backlog y de las tareas del cronograma
+.github/             CODEOWNERS, plantilla de PR, rulesets y workflows
 ```
+
+La carpeta `privado/` existe solo en el computador de cada integrante (documentos reales del colegio) y está excluida por `.gitignore`.
 
 ## Metodología
 

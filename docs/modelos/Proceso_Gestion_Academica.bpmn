@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="defs_1" targetNamespace="http://sbsolutions.ec/bpmn" exporter="SB Solutions" exporterVersion="1.0">
+  <collaboration id="collab_1">
+    <participant id="pool_andoas" name="Unidad Educativa Andoas — Gestión académica" processRef="proc_1"/>
+    <participant id="pool_rep" name="Representante (padre o madre)"/>
+    <messageFlow id="mf1" name="Aviso por WhatsApp" sourceRef="t10" targetRef="pool_rep"/>
+  </collaboration>
+  <process id="proc_1" name="Planificación, evaluación y comunicación" isExecutable="false">
+    <laneSet id="ls_1">
+      <lane id="lane_doc" name="Docente">
+        <flowNodeRef>start1</flowNodeRef>
+        <flowNodeRef>t1</flowNodeRef>
+        <flowNodeRef>t2</flowNodeRef>
+        <flowNodeRef>t5</flowNodeRef>
+        <flowNodeRef>t8</flowNodeRef>
+      </lane>
+      <lane id="lane_adm" name="Administrador (Vicerrector)">
+        <flowNodeRef>t3</flowNodeRef>
+        <flowNodeRef>gw1</flowNodeRef>
+        <flowNodeRef>t6</flowNodeRef>
+      </lane>
+      <lane id="lane_pla" name="Plataforma">
+        <flowNodeRef>t7</flowNodeRef>
+        <flowNodeRef>t9</flowNodeRef>
+        <flowNodeRef>gw2</flowNodeRef>
+        <flowNodeRef>t10</flowNodeRef>
+        <flowNodeRef>end1</flowNodeRef>
+        <flowNodeRef>end2</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="start1" name="Inicio de trimestre">
+      <outgoing>f1</outgoing>
+    </startEvent>
+    <task id="t1" name="Elaborar planificación en la plantilla">
+      <incoming>f1</incoming>
+      <outgoing>f2</outgoing>
+    </task>
+    <task id="t2" name="Enviar a revisión">
+      <incoming>f2</incoming>
+      <incoming>f6</incoming>
+      <outgoing>f3</outgoing>
+    </task>
+    <task id="t5" name="Corregir según observaciones">
+      <incoming>f5</incoming>
+      <outgoing>f6</outgoing>
+    </task>
+    <task id="t8" name="Registrar notas, asistencia y comportamiento">
+      <incoming>f9</incoming>
+      <outgoing>f10</outgoing>
+    </task>
+    <task id="t3" name="Revisar planificación y registrar observaciones por campo">
+      <incoming>f3</incoming>
+      <outgoing>f4</outgoing>
+    </task>
+    <exclusiveGateway id="gw1" name="¿Cumple los estándares?">
+      <incoming>f4</incoming>
+      <outgoing>f5</outgoing>
+      <outgoing>f7</outgoing>
+    </exclusiveGateway>
+    <task id="t6" name="Aprobar planificación">
+      <incoming>f7</incoming>
+      <outgoing>f8</outgoing>
+    </task>
+    <task id="t7" name="Generar calendario del curso">
+      <incoming>f8</incoming>
+      <outgoing>f9</outgoing>
+    </task>
+    <task id="t9" name="Calcular nota final, cualitativo y reportes">
+      <incoming>f10</incoming>
+      <outgoing>f11</outgoing>
+    </task>
+    <exclusiveGateway id="gw2" name="¿Promedio menor a 7 o falta sin justificar?">
+      <incoming>f11</incoming>
+      <outgoing>f12</outgoing>
+      <outgoing>f13</outgoing>
+    </exclusiveGateway>
+    <task id="t10" name="Alertar al estudiante y avisar al representante por WhatsApp">
+      <incoming>f12</incoming>
+      <outgoing>f14</outgoing>
+    </task>
+    <endEvent id="end1" name="Seguimiento normal">
+      <incoming>f13</incoming>
+    </endEvent>
+    <endEvent id="end2" name="Aviso enviado">
+      <incoming>f14</incoming>
+    </endEvent>
+    <sequenceFlow id="f1" sourceRef="start1" targetRef="t1"/>
+    <sequenceFlow id="f2" sourceRef="t1" targetRef="t2"/>
+    <sequenceFlow id="f3" sourceRef="t2" targetRef="t3"/>
+    <sequenceFlow id="f4" sourceRef="t3" targetRef="gw1"/>
+    <sequenceFlow id="f5" name="No" sourceRef="gw1" targetRef="t5"/>
+    <sequenceFlow id="f6" sourceRef="t5" targetRef="t2"/>
+    <sequenceFlow id="f7" name="Sí" sourceRef="gw1" targetRef="t6"/>
+    <sequenceFlow id="f8" sourceRef="t6" targetRef="t7"/>
+    <sequenceFlow id="f9" sourceRef="t7" targetRef="t8"/>
+    <sequenceFlow id="f10" sourceRef="t8" targetRef="t9"/>
+    <sequenceFlow id="f11" sourceRef="t9" targetRef="gw2"/>
+    <sequenceFlow id="f12" name="Sí" sourceRef="gw2" targetRef="t10"/>
+    <sequenceFlow id="f13" name="No" sourceRef="gw2" targetRef="end1"/>
+    <sequenceFlow id="f14" sourceRef="t10" targetRef="end2"/>
+  </process>
+  <bpmndi:BPMNDiagram id="diagram_1" name="Gestión académica (propuesto)">
+    <bpmndi:BPMNPlane id="plane_1" bpmnElement="collab_1">
+      <bpmndi:BPMNShape id="sh_pool_andoas" bpmnElement="pool_andoas" isHorizontal="true"><dc:Bounds x="160" y="40" width="1500" height="540"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_lane_doc" bpmnElement="lane_doc" isHorizontal="true"><dc:Bounds x="190" y="40" width="1470" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_lane_adm" bpmnElement="lane_adm" isHorizontal="true"><dc:Bounds x="190" y="220" width="1470" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_lane_pla" bpmnElement="lane_pla" isHorizontal="true"><dc:Bounds x="190" y="400" width="1470" height="180"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_pool_rep" bpmnElement="pool_rep" isHorizontal="true"><dc:Bounds x="160" y="640" width="1500" height="60"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_start1" bpmnElement="start1"><dc:Bounds x="215" y="112" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="183" y="150" width="100" height="30"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t1" bpmnElement="t1"><dc:Bounds x="290" y="95" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t2" bpmnElement="t2"><dc:Bounds x="440" y="95" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t5" bpmnElement="t5"><dc:Bounds x="710" y="95" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t8" bpmnElement="t8"><dc:Bounds x="1000" y="95" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t3" bpmnElement="t3"><dc:Bounds x="590" y="275" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_gw1" bpmnElement="gw1" isMarkerVisible="true"><dc:Bounds x="740" y="285" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="695" y="240" width="140" height="40"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t6" bpmnElement="t6"><dc:Bounds x="850" y="275" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t7" bpmnElement="t7"><dc:Bounds x="1000" y="455" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t9" bpmnElement="t9"><dc:Bounds x="1145" y="455" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_gw2" bpmnElement="gw2" isMarkerVisible="true"><dc:Bounds x="1300" y="465" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1255" y="420" width="140" height="40"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_t10" bpmnElement="t10"><dc:Bounds x="1400" y="455" width="110" height="70"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_end1" bpmnElement="end1"><dc:Bounds x="1307" y="537" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1275" y="575" width="100" height="30"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="sh_end2" bpmnElement="end2"><dc:Bounds x="1560" y="472" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1528" y="510" width="100" height="30"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="ed_f1" bpmnElement="f1"><di:waypoint x="251" y="130"/><di:waypoint x="290" y="130"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f2" bpmnElement="f2"><di:waypoint x="400" y="130"/><di:waypoint x="440" y="130"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f3" bpmnElement="f3"><di:waypoint x="495" y="165"/><di:waypoint x="495" y="310"/><di:waypoint x="590" y="310"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f4" bpmnElement="f4"><di:waypoint x="700" y="310"/><di:waypoint x="740" y="310"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f5" bpmnElement="f5"><di:waypoint x="765" y="285"/><di:waypoint x="765" y="165"/><bpmndi:BPMNLabel><dc:Bounds x="771" y="263" width="24" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f6" bpmnElement="f6"><di:waypoint x="710" y="130"/><di:waypoint x="550" y="130"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f7" bpmnElement="f7"><di:waypoint x="790" y="310"/><di:waypoint x="850" y="310"/><bpmndi:BPMNLabel><dc:Bounds x="796" y="288" width="24" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f8" bpmnElement="f8"><di:waypoint x="905" y="345"/><di:waypoint x="905" y="490"/><di:waypoint x="1000" y="490"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f9" bpmnElement="f9"><di:waypoint x="1055" y="455"/><di:waypoint x="1055" y="165"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f10" bpmnElement="f10"><di:waypoint x="1110" y="130"/><di:waypoint x="1200" y="130"/><di:waypoint x="1200" y="455"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f11" bpmnElement="f11"><di:waypoint x="1255" y="490"/><di:waypoint x="1300" y="490"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f12" bpmnElement="f12"><di:waypoint x="1350" y="490"/><di:waypoint x="1400" y="490"/><bpmndi:BPMNLabel><dc:Bounds x="1356" y="468" width="24" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f13" bpmnElement="f13"><di:waypoint x="1325" y="515"/><di:waypoint x="1325" y="537"/><bpmndi:BPMNLabel><dc:Bounds x="1331" y="493" width="24" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_f14" bpmnElement="f14"><di:waypoint x="1510" y="490"/><di:waypoint x="1560" y="490"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="ed_mf1" bpmnElement="mf1"><di:waypoint x="1455" y="525"/><di:waypoint x="1455" y="640"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

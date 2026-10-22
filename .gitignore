@@ -1,0 +1,36 @@
+# Dependencias y compilados
+node_modules/
+dist/
+build/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Variables de entorno y secretos (nunca se suben)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Datos reales del colegio (nunca se suben: el repositorio es público)
+privado/
+datos-reales/
+*.real.xlsx
+*.real.csv
+
+# Archivos temporales de Office y del sistema
+~$*
+*.tmp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Registros
+*.log
+npm-debug.log*

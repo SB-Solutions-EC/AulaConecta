@@ -1,7 +1,8 @@
 # Arquitectura
 
-| Documento | Responsable | Fecha |
-|---|---|---|
-| `seleccion_tecnologias.md` | Marcelo | 22/10 |
-| `c4_contexto_contenedores.md` (Mermaid) y diseño del trabajo sin conexión | Christian | 23/10 |
-| `modelo_datos.md` (Mermaid) | Marcelo | 23/10 |
+| Documento | Responsable | Fecha | Estado |
+|---|---|---|---|
+| [seleccion_tecnologias.md](seleccion_tecnologias.md): criterios, comparación y stack final | Marcelo | 22/10 | Listo |
+| [modelo_datos.md](modelo_datos.md): diagrama entidad-relación v1 (Mermaid) y decisiones | Marcelo | 23/10 | Listo |
+| [guia_visual.md](guia_visual.md): colores, componentes, animaciones y dashboards por rol | Equipo | 24/10 | Listo |
+| `c4_contexto_contenedores.md` (Mermaid) y diseño del trabajo sin conexión | Christian | 23/10 | Pendiente |

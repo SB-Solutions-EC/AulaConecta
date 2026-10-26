@@ -109,4 +109,8 @@ jobs:
             chat_id = $env:TELEGRAM_CHAT_ID
             text = $message
           }
-          Invoke-RestMethod -Method Post -Uri $uri -Body $body | Out-Null
+          try {
+            Invoke-RestMethod -Method Post -Uri $uri -Body $body | Out-Null
+          } catch {
+            Write-Warning "Telegram notification failed: $($_.Exception.Message)"
+          }

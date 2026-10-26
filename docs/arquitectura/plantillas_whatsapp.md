@@ -1,5 +1,12 @@
 # Plantillas de mensajes de WhatsApp (v1)
 
+> **Canales (decisión del 26/10, esquema por niveles).** El mismo texto de estas 3 plantillas se usa en:
+> 1. **Notificación push de la PWA**: gratis y automática (canal principal).
+> 2. **WhatsApp asistido**: gratis; el docente o la secretaría presiona "Avisar por WhatsApp" y se abre `https://wa.me/<número>?text=<mensaje>` con el texto ya llenado.
+> 3. **WhatsApp Cloud API**: automático y de pago por mensaje; queda listo con el número de prueba y se activa solo si el colegio lo paga.
+>
+> Detalle en [modelo_datos.md](modelo_datos.md) (sección "Canales de aviso") y la solicitud de cambio CR-01 en [docs/requisitos/cambios_requisitos.md](../requisitos/cambios_requisitos.md).
+
 AulaConecta envía **solo tres mensajes** por WhatsApp. WhatsApp Cloud API únicamente permite iniciar una conversación con **plantillas aprobadas por Meta**; las variables van como `{{1}}`, `{{2}}`… y ms-notificaciones las llena con los datos del evento. Categoría: **Utilidad** (avisos del servicio, no publicidad). Idioma: español.
 
 | Código | Cuándo se envía | Requisito |

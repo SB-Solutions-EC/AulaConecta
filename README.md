@@ -56,7 +56,7 @@ La carpeta `privado/` existe solo en el computador de cada integrante (documento
 
 ## Metodología
 
-Scrum con prácticas DevSecOps, en 10 sprints del 30/09/2026 al 15/01/2027. El orden de construcción sigue la matriz de priorización de Wiegers. El detalle día por día está en [docs/planificacion/Planificacion.xlsx](docs/planificacion/Planificacion.xlsx) y el Product Backlog en GitHub Projects.
+Scrum con prácticas DevSecOps, en 10 sprints del 30/09/2026 al 15/01/2027. El orden de construcción sigue la matriz de priorización de Wiegers. El detalle día por día está en [docs/planificacion/Planificacion_v2.xlsx](docs/planificacion/Planificacion_v2.xlsx) (la v1 se conserva como historial) y el Product Backlog en GitHub Projects.
 
 ## Equipo — SB Solutions
 

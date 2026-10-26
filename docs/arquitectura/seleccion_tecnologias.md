@@ -2,6 +2,18 @@
 
 **Tarea:** T1022-M · **Responsable:** Christian Marcelo Acuña Gamboa · **Fecha:** 22/10/2026 · **Sprint 3**
 
+> **Actualización v2 (26/10/2026).** El equipo adoptó la planificación v2 ([Planificacion_v2.xlsx](../planificacion/Planificacion_v2.xlsx)) con **3 microservicios**, cada uno con su base de datos. Lo que sigue en este documento (criterios, PostgreSQL, PWA, CI/CD, seguridad y pruebas) se mantiene. Cambia el backend:
+>
+> | Servicio | Tecnología | Base de datos y migraciones | Responsable del esqueleto |
+> |---|---|---|---|
+> | ms-identidad (usuarios, roles, JWT) | Spring Boot · Java 21 · Spring Security | `db_identidad` · Flyway | Abner |
+> | ms-academico (gestión académica, notas, planificación) | NestJS · TypeScript | `db_academico` · Prisma | Marcelo |
+> | ms-notificaciones (avisos por WhatsApp) | FastAPI · Python | `db_notificaciones` · SQLAlchemy + Alembic | Christian |
+> | Gateway | Traefik (TLS y límite de peticiones) | — | Abner |
+> | Mensajería entre servicios | RabbitMQ (patrón outbox) | — | Christian |
+>
+> El cálculo de notas (`packages/calculo`) sigue en TypeScript y lo comparten ms-academico y la PWA. El modelo de datos por servicio está en [modelo_datos.md](modelo_datos.md).
+
 ## 1. Criterios de selección
 
 Cada tecnología se evaluó con cinco criterios que salen de los requisitos del SRS y de las restricciones del proyecto (sección 6 del Entregable 3):

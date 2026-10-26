@@ -1,33 +1,42 @@
-# Modelo de datos v1
+# Modelo de datos por servicio v2
 
-**Tarea:** T1023-M · **Responsable:** Christian Marcelo Acuña Gamboa · **Fecha:** 23/10/2026 · **Sprint 3**
+**Tarea:** T1026-M · **Responsable:** Christian Marcelo Acuña Gamboa · **Fecha:** 26/10/2026 · **Sprint 3**
+**Cambia respecto a la v1 (23/10):** la arquitectura pasó de un solo backend a **3 microservicios** (planificación v2). Cada servicio tiene su propia base de datos y no lee las tablas de los otros.
 
-Modelo relacional para PostgreSQL. Parte de las entidades del prototipo validado (`courses`, `subjects`, `teachers`, `students`, `gradebooks`, `comportamiento`, `attendance`, `plans`…) y les agrega lo que el prototipo no tenía: usuarios con contraseña, representantes, auditoría, notificaciones y control de la sincronización sin conexión.
+| Servicio | Tecnología | Base de datos | Modelo de datos |
+|---|---|---|---|
+| ms-identidad | Spring Boot (Java 21) | `db_identidad` (Flyway) | Abner (T1026-A) |
+| **ms-academico** | NestJS (TypeScript) | `db_academico` (Prisma) | Este documento |
+| **ms-notificaciones** | FastAPI (Python) | `db_notificaciones` (SQLAlchemy + Alembic) | Este documento |
 
-## 1. Diagrama entidad-relación
+## 1. Reglas comunes a todas las tablas
+
+| Regla | Para qué | Requisito |
+|---|---|---|
+| **`id` UUID** generado por quien crea el registro (incluida la PWA sin conexión) | Dos docentes sin internet pueden crear registros a la vez sin chocar en el número de ID; al sincronizar, el ID ya es único | RNF-01 |
+| **`version` entero**, que sube en 1 con cada cambio | Base de la sincronización: si llega un cambio hecho sobre una versión vieja, hay conflicto y se resuelve con la regla por campo | RNF-01 |
+| `creado_en`, `actualizado_en`, `actualizado_por` | Saber quién cambió qué y cuándo | RNF-09 |
+| Referencias a otro servicio solo por UUID, **sin llave foránea** | Cada servicio es dueño de sus datos; las personas se identifican con el `usuario_id` del token emitido por ms-identidad | Arquitectura v2 |
+| Borrado lógico (`activo` o `estado`) en lugar de borrar filas | Conservar el historial académico | RNF-09 |
+
+En los diagramas, `ref` marca un UUID que apunta a otro servicio.
+
+## 2. ms-academico (`db_academico`)
 
 ```mermaid
 erDiagram
-    USUARIO ||--o| DOCENTE : "es"
-    USUARIO ||--o| ESTUDIANTE : "es"
-    USUARIO ||--o| REPRESENTANTE : "es"
-    ESTUDIANTE ||--o{ ESTUDIANTE_REPRESENTANTE : "tiene"
-    REPRESENTANTE ||--o{ ESTUDIANTE_REPRESENTANTE : "representa"
-
     ANIO_LECTIVO ||--o{ CURSO : "organiza"
     ANIO_LECTIVO ||--o{ DIA_NO_DICTADO : "registra"
     CURSO ||--o{ MATRICULA : "recibe"
-    ESTUDIANTE ||--o{ MATRICULA : "se matricula"
+    PERSONA ||--o{ MATRICULA : "se matricula"
+    PERSONA ||--o{ REPRESENTACION : "representa o es representado"
     MATERIA ||--o{ ASIGNACION : "se dicta en"
     CURSO ||--o{ ASIGNACION : "incluye"
-    DOCENTE ||--o{ ASIGNACION : "dicta"
+    PERSONA ||--o{ ASIGNACION : "dicta"
     ASIGNACION ||--o{ HORARIO : "ocupa"
-
     ASIGNACION ||--o{ PLANIFICACION : "se planifica"
     PLANIFICACION ||--o{ SEMANA_PLANIFICACION : "contiene"
     PLANIFICACION ||--o{ OBSERVACION : "recibe"
-    USUARIO ||--o{ OBSERVACION : "registra"
-
     ASIGNACION ||--o{ CALIFICACION : "califica"
     MATRICULA ||--o{ CALIFICACION : "obtiene"
     ASIGNACION ||--o{ TAREA : "asigna"
@@ -37,47 +46,21 @@ erDiagram
     MATRICULA ||--o{ ASISTENCIA : "tiene"
     MATRICULA ||--o{ COMPORTAMIENTO : "tiene"
 
-    ESTUDIANTE_REPRESENTANTE ||--o{ NOTIFICACION : "recibe"
-    USUARIO ||--o{ AUDITORIA : "genera"
-
-    USUARIO {
+    PERSONA {
         uuid id PK
-        string usuario UK "nombre.apellido + número si existe (RF-02)"
-        string hash_clave "argon2, nunca la clave en texto"
-        string rol "ADMIN, SECRETARIA, DOCENTE, ESTUDIANTE, REPRESENTANTE"
-        string cedula_cifrada "cifrada en reposo"
+        uuid usuario_id UK "ref: ms-identidad"
+        string tipo "DOCENTE, ESTUDIANTE, REPRESENTANTE"
         string nombres
         string apellidos
-        boolean debe_cambiar_clave "true en el primer ingreso (RF-03)"
-        int intentos_fallidos "bloqueo tras 3 (RNF-12)"
-        datetime bloqueado_hasta
-        boolean activo
+        string area "solo docentes"
+        int version
     }
-    DOCENTE {
-        uuid id PK
-        uuid usuario_id FK
-        string area
-        string telefono
-        string correo
-    }
-    ESTUDIANTE {
-        uuid id PK
-        uuid usuario_id FK
-        date fecha_nacimiento
-        string codigo_matricula UK
-    }
-    REPRESENTANTE {
-        uuid id PK
-        uuid usuario_id FK
-        string parentesco
-    }
-    ESTUDIANTE_REPRESENTANTE {
+    REPRESENTACION {
         uuid id PK
         uuid estudiante_id FK
         uuid representante_id FK
-        string whatsapp "E.164, verificado"
-        boolean autoriza_avisos "consentimiento (RF-29, RNF-05)"
-        datetime fecha_autorizacion
+        string parentesco
+        int version
     }
     ANIO_LECTIVO {
         uuid id PK
@@ -85,41 +68,48 @@ erDiagram
         date inicio
         date fin
         boolean activo
+        int version
     }
     DIA_NO_DICTADO {
         uuid id PK
         uuid anio_lectivo_id FK
         date fecha
-        string motivo "RF-08"
+        string motivo "RF-08 (opcional)"
+        int version
     }
     CURSO {
         uuid id PK
         uuid anio_lectivo_id FK
-        string nivel "7mo EGB, 1ro BGU…"
-        string paralelo "A, B, C"
+        string nivel
+        string paralelo
+        int version
     }
     MATERIA {
         uuid id PK
         string nombre
         string area
+        int version
     }
     ASIGNACION {
         uuid id PK
         uuid docente_id FK
         uuid materia_id FK
         uuid curso_id FK
+        int version
     }
     HORARIO {
         uuid id PK
         uuid asignacion_id FK
         int dia "1 a 5"
         string hora "h1 a h5"
+        int version
     }
     MATRICULA {
         uuid id PK
         uuid estudiante_id FK
         uuid curso_id FK
         string estado "ACTIVA, RETIRADA"
+        int version
     }
     PLANIFICACION {
         uuid id PK
@@ -127,10 +117,10 @@ erDiagram
         int unidad
         string titulo
         string estado "BORRADOR, EN_REVISION, APROBADA, CON_OBSERVACIONES"
-        jsonb datos_informativos "objetivos, ejes, estándar, DUA"
-        int version "documento único con historial (RF-14)"
+        jsonb datos_informativos
         datetime enviada_en
         datetime revisada_en
+        int version "documento único con historial (RF-14)"
     }
     SEMANA_PLANIFICACION {
         uuid id PK
@@ -138,30 +128,31 @@ erDiagram
         int numero
         date inicio
         date fin
-        jsonb contenido "destrezas, ERCA, recursos, indicador, instrumento"
+        jsonb contenido "destrezas, ERCA, recursos, indicador"
+        int version
     }
     OBSERVACION {
         uuid id PK
         uuid planificacion_id FK
-        uuid autor_id FK
-        string campo "campo o semana observada (RF-13)"
+        uuid autor_usuario_id "ref: ms-identidad"
+        string campo "RF-13"
         string texto
         boolean resuelta
-        datetime creada_en
+        int version
     }
     CALIFICACION {
         uuid id PK
         uuid asignacion_id FK
         uuid matricula_id FK
         int trimestre
-        jsonb aportes_bloque1 "5 aportes"
-        jsonb aportes_bloque2 "5 aportes"
-        decimal refuerzo "opcional"
+        jsonb aportes_bloque1
+        jsonb aportes_bloque2
+        decimal refuerzo
         decimal nota_proyecto
         decimal nota_examen
-        decimal nota_final "calculada por packages/calculo, truncada a 2 decimales"
+        decimal nota_final "packages/calculo, truncada a 2 decimales"
         string cualitativo "A+ a E-"
-        int version "control de conflictos sin conexión"
+        int version
     }
     TAREA {
         uuid id PK
@@ -170,6 +161,7 @@ erDiagram
         string titulo
         date fecha_entrega
         string enlace_recurso
+        int version
     }
     ENTREGA {
         uuid id PK
@@ -177,6 +169,7 @@ erDiagram
         uuid matricula_id FK
         decimal nota
         string retroalimentacion
+        int version
     }
     ASISTENCIA {
         uuid id PK
@@ -185,59 +178,114 @@ erDiagram
         date fecha
         string estado "PRESENTE, FALTA, ATRASO, JUSTIFICADA"
         string justificacion
+        int version
     }
     COMPORTAMIENTO {
         uuid id PK
         uuid matricula_id FK
         int trimestre
-        jsonb indicadores "9 indicadores: 4 cognitivos y 5 sociales"
+        jsonb indicadores "9 indicadores"
         decimal nota
         string cualitativo
-    }
-    NOTIFICACION {
-        uuid id PK
-        uuid estudiante_representante_id FK
-        string motivo "PROMEDIO_BAJO, FALTA, ATRASO, TAREA, COMUNICADO"
-        string clave_antiduplicado UK "evita repetir el mismo aviso (RF-34)"
-        string estado "EN_COLA, ENVIADA, ENTREGADA, FALLIDA"
-        datetime creada_en
-        datetime enviada_en
-    }
-    AUDITORIA {
-        uuid id PK
-        uuid usuario_id FK
-        string entidad
-        uuid entidad_id
-        string accion "CREAR, EDITAR, APROBAR, INICIAR_SESION…"
-        jsonb valor_anterior
-        jsonb valor_nuevo
-        datetime fecha
+        int version
     }
 ```
 
-La mensajería y los recursos de estudio (RF-36) son opcionales en el cronograma. Si se construyen, se agregan las tablas `MENSAJE` y `RECURSO`, ambas ligadas a `ASIGNACION`.
+Tablas de soporte de ms-academico (sin relaciones en el diagrama para no saturarlo):
 
-## 2. Decisiones del modelo
-
-| Decisión | Motivo | Requisito |
+| Tabla | Para qué | Requisito |
 |---|---|---|
-| Un solo `USUARIO` con rol, y tablas de perfil (docente, estudiante, representante) | La autenticación es la misma para todos y cada rol guarda solo sus datos | RF-01, RNF-04 |
-| `ASIGNACION` une docente, materia y curso | Casi todo (notas, asistencia, planificación, tareas) depende de quién dicta qué materia en qué curso; además permite validar en el servidor que el docente solo vea lo suyo | RF-05, RNF-04 |
-| Calificaciones, asistencia y comportamiento cuelgan de `MATRICULA` y no del estudiante | Si el estudiante cambia de curso o se retira, sus notas quedan ligadas al curso donde las obtuvo | RF-24 (retirados) |
-| Aportes y semanas en `JSONB` | El formato del Ministerio y el número de aportes pueden cambiar sin rehacer tablas | RNF-10 |
-| La nota final se guarda ya calculada | Se calcula con `packages/calculo` al guardar; los reportes no recalculan y la auditoría registra el valor | RF-18, RNF-02 |
-| Campo `version` en calificaciones y planificaciones | Detecta conflictos al sincronizar cambios hechos sin conexión | RNF-01 |
-| `clave_antiduplicado` única en notificaciones | Un mismo motivo no genera dos avisos en el periodo definido | RF-34 |
-| `AUDITORIA` con valor anterior y nuevo | Registra quién cambió qué y cuándo | RNF-09 |
-| Contraseña con hash argon2 y cédula cifrada | Protege los datos de menores aunque se filtre la base de datos | RNF-04, RNF-12 |
+| `PARAMETRO` | Ponderaciones, escalas y textos de comportamiento editables por el administrador | RNF-10 |
+| `AUDITORIA` | Quién cambió qué, con valor anterior y nuevo | RNF-09 |
+| `OUTBOX` | Eventos pendientes de publicar en RabbitMQ (`promedio_bajo`, `falta_registrada`). Se escriben en la **misma transacción** que el cambio, así no se pierde ningún aviso aunque RabbitMQ esté caído | RF-30, RF-31, RF-35 |
+| `CAMBIO_SINCRONIZADO` | Registro de cada cambio recibido desde la PWA, con su clave de idempotencia: el mismo cambio enviado dos veces se guarda una sola vez | RNF-01 |
 
-## 3. Relación con los módulos del cronograma
+## 3. ms-notificaciones (`db_notificaciones`)
 
-| Sprint | Tablas que se crean |
+```mermaid
+erDiagram
+    CONTACTO ||--o{ NOTIFICACION : "recibe"
+    PLANTILLA ||--o{ NOTIFICACION : "da formato a"
+    EVENTO_RECIBIDO ||--o| NOTIFICACION : "genera"
+
+    CONTACTO {
+        uuid id PK
+        uuid representante_id "ref: ms-academico PERSONA"
+        uuid estudiante_id "ref: ms-academico PERSONA"
+        string whatsapp "formato E.164, verificado"
+        boolean autoriza_avisos "consentimiento (RF-29, RNF-05)"
+        datetime fecha_autorizacion
+        datetime fecha_baja "el representante deja de recibir avisos"
+        int version
+    }
+    PLANTILLA {
+        uuid id PK
+        string codigo UK "CONFIRMACION_AUTORIZACION, PROMEDIO_BAJO, FALTA_SIN_JUSTIFICAR"
+        string nombre_meta "plantilla aprobada por WhatsApp"
+        string idioma
+        boolean activa
+        int version
+    }
+    EVENTO_RECIBIDO {
+        uuid id PK "id del evento publicado por ms-academico"
+        string tipo
+        jsonb datos "sin notas detalladas ni datos de otros estudiantes"
+        datetime recibido_en
+        boolean procesado
+    }
+    NOTIFICACION {
+        uuid id PK
+        uuid contacto_id FK
+        uuid plantilla_id FK
+        uuid evento_id FK
+        string motivo "CONFIRMACION_AUTORIZACION, PROMEDIO_BAJO, FALTA_SIN_JUSTIFICAR"
+        string clave_antiduplicado UK "contacto + motivo + periodo (RF-34)"
+        string estado "EN_COLA, ENVIADA, ENTREGADA, FALLIDA"
+        int intentos
+        string id_mensaje_proveedor
+        datetime creada_en
+        datetime enviada_en
+        int version
+    }
+```
+
+## 4. Cómo viaja un aviso entre los dos servicios
+
+```mermaid
+sequenceDiagram
+    participant D as Docente (PWA)
+    participant A as ms-academico
+    participant Q as RabbitMQ
+    participant N as ms-notificaciones
+    participant W as WhatsApp Cloud API
+    D->>A: Registra nota o falta
+    A->>A: Guarda el cambio y el evento en OUTBOX (misma transacción)
+    A->>Q: Publica promedio_bajo / falta_registrada
+    Q->>N: Entrega el evento
+    N->>N: EVENTO_RECIBIDO evita procesarlo dos veces
+    N->>N: Busca CONTACTO autorizado y arma la clave antiduplicado
+    N->>W: Envía la plantilla aprobada
+    W-->>N: Estado de entrega
+    N->>N: Actualiza NOTIFICACION (historial, RF-33)
+```
+
+## 5. Decisiones
+
+| Decisión | Motivo |
 |---|---|
-| 4 – Autenticación y matrícula | USUARIO, DOCENTE, ESTUDIANTE, REPRESENTANTE, ESTUDIANTE_REPRESENTANTE, ANIO_LECTIVO, DIA_NO_DICTADO, CURSO, MATERIA, ASIGNACION, HORARIO, MATRICULA, AUDITORIA |
-| 5 – Calificaciones | CALIFICACION, TAREA, ENTREGA, ASISTENCIA, COMPORTAMIENTO |
-| 6 – Reportes | Sin tablas nuevas: estándares y valoración de logros se calculan con consultas sobre CALIFICACION |
-| 7 – Planificación | PLANIFICACION, SEMANA_PLANIFICACION, OBSERVACION |
-| 8 – WhatsApp | NOTIFICACION |
-| 9 – Sin conexión | Campos `version` ya previstos; la cola local vive en el navegador (IndexedDB) |
+| Docentes, estudiantes y representantes se modelan como `PERSONA` en ms-academico, ligada al `usuario_id` de ms-identidad | ms-identidad solo guarda credenciales y roles; los datos académicos no salen de ms-academico |
+| El número de WhatsApp y el consentimiento viven en ms-notificaciones | Solo el servicio que envía mensajes ve los teléfonos (principio de mínimo privilegio, RNF-04) |
+| Patrón *outbox* + tabla de eventos recibidos | Garantiza que cada aviso se envíe una sola vez aunque fallen la red o RabbitMQ (RF-34, RF-35) |
+| `CALIFICACION` guarda la nota final ya calculada | Se calcula con `packages/calculo` al guardar; los reportes no recalculan (RNF-02) |
+| Calificaciones, asistencia y comportamiento cuelgan de `MATRICULA` | Conservan el historial si el estudiante cambia de curso o se retira (RF-24) |
+
+## 6. En qué sprint se crea cada tabla
+
+| Sprint | ms-academico | ms-notificaciones |
+|---|---|---|
+| 3 (28/10) | ANIO_LECTIVO, CURSO, MATERIA, MATRICULA (migración inicial) | Base vacía con Alembic |
+| 4 | PERSONA, REPRESENTACION, ASIGNACION, HORARIO, DIA_NO_DICTADO, AUDITORIA | — |
+| 5 | CALIFICACION, TAREA, ENTREGA, ASISTENCIA, COMPORTAMIENTO, PARAMETRO, OUTBOX | — |
+| 7 | PLANIFICACION, SEMANA_PLANIFICACION, OBSERVACION | — |
+| 8 | — | CONTACTO, PLANTILLA, EVENTO_RECIBIDO, NOTIFICACION |
+| 9 | CAMBIO_SINCRONIZADO | — |

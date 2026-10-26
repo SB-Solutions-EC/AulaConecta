@@ -76,17 +76,27 @@ jobs:
           }
 
       - name: SonarQube analysis
-        uses: SonarSource/sonarqube-scan-action@v6
+        shell: powershell
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.qualitygate.wait=true
+        run: |
+          $scanner = "C:\sonar-scanner\bin\sonar-scanner.bat"
+          if (-not (Test-Path -LiteralPath $scanner -PathType Leaf)) {
+            throw "SonarScanner no encontrado en $scanner. Instálalo en el runner autoalojado."
+          }
+          & $scanner `
+            "-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}" `
+            "-Dsonar.host.url=$env:SONAR_HOST_URL" `
+            "-Dsonar.token=$env:SONAR_TOKEN" `
+            "-Dsonar.qualitygate.wait=true"
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
 
       - name: Notify Telegram
         if: always()
+        continue-on-error: true
         shell: powershell
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}

@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   quality:
-    name: quality
+    name: quality-pr
     runs-on: [self-hosted, windows, x64]
 
     steps:

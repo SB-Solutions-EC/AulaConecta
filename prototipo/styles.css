@@ -1,0 +1,38 @@
+:root { color-scheme: light; }
+body { font-family: 'Inter', sans-serif; }
+* { box-sizing: border-box; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+input[type=checkbox], input[type=radio] { accent-color: #e8833a; width: 15px; height: 15px; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+
+.anim-fade { animation: fadeIn .15s ease; }
+.anim-slideup { animation: slideUp .2s ease; }
+.anim-popin { animation: popIn .16s ease; }
+
+.schedule-card { transition: transform .15s ease, box-shadow .15s ease; }
+.schedule-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+.sched-c0 { background: #eef2ff; border-left: 4px solid #4f46e5; color: #312e81; }
+.sched-c1 { background: #f5f3ff; border-left: 4px solid #7c3aed; color: #4c1d95; }
+.sched-c2 { background: #ecfdf5; border-left: 4px solid #059669; color: #064e3b; }
+.sched-c3 { background: #fffbeb; border-left: 4px solid #d97706; color: #78350f; }
+.sched-c4 { background: #fdf2f8; border-left: 4px solid #db2777; color: #831843; }
+.sched-c5 { background: #eff6ff; border-left: 4px solid #2563eb; color: #1e3a8a; }
+.sched-c6 { background: #f0fdfa; border-left: 4px solid #0d9488; color: #134e4a; }
+.sched-recreo { background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; }
+
+/* Print report: only #printArea is visible when printing */
+#printArea { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  #printArea, #printArea * { visibility: visible; }
+  #printArea { display: block !important; position: absolute; top: 0; left: 0; width: 100%; padding: 10mm; }
+  @page { margin: 12mm; }
+}

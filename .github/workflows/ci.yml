@@ -102,15 +102,28 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           JOB_STATUS: ${{ job.status }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
         run: |
-          $message = "AulaConecta CI: $env:JOB_STATUS`nBranch: ${{ github.ref_name }}`nCommit: ${{ github.sha }}"
-          $uri = "https://api.telegram.org/bot$env:TELEGRAM_BOT_TOKEN/sendMessage"
-          $body = @{
+          $message = "AulaConecta CI: $env:JOB_STATUS`nBranch: $env:BRANCH_NAME`nCommit: $env:COMMIT_SHA"
+          $payload = @{
             chat_id = $env:TELEGRAM_CHAT_ID
             text = $message
-          }
+          } | ConvertTo-Json -Compress
+          $bytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
+          $uri = "https://api.telegram.org/bot$env:TELEGRAM_BOT_TOKEN/sendMessage"
           try {
-            Invoke-RestMethod -Method Post -Uri $uri -Body $body | Out-Null
+            $response = Invoke-WebRequest `
+              -Method Post `
+              -Uri $uri `
+              -Body $bytes `
+              -ContentType "application/json; charset=utf-8" `
+              -UseBasicParsing
+            $result = $response.Content | ConvertFrom-Json
+            if (-not $result.ok) {
+              throw "Telegram API rejected the message: $($response.Content)"
+            }
+            Write-Output "Telegram notification sent."
           } catch {
             Write-Warning "Telegram notification failed: $($_.Exception.Message)"
           }

@@ -1,0 +1,28 @@
+# Configuración de Gitleaks para AulaConecta.
+# Mantiene las reglas por defecto (tokens, claves, contraseñas) y agrega reglas para datos
+# personales de Ecuador, porque el repositorio es público y el sistema maneja datos de menores.
+# Uso local:  gitleaks detect --source . -v           (historial de git)
+#             gitleaks detect --no-git --source . -v  (archivos aún sin commit)
+
+title = "AulaConecta"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "cedula-ecuador"
+description = "Posible cédula ecuatoriana: 10 dígitos con código de provincia (01-24 o 30) y tercer dígito 0-5"
+regex = '''\b(?:0[1-9]|1\d|2[0-4]|30)[0-5]\d{7}\b'''
+tags = ["datos-personales"]
+
+[[rules]]
+id = "celular-ecuador"
+description = "Posible número celular de Ecuador (09XXXXXXXX o +593 9XXXXXXXX)"
+regex = '''(?:\+593[ -]?|\b0)9\d{8}\b'''
+tags = ["datos-personales"]
+
+# Los documentos binarios (Word, Excel, PDF, imágenes) no se pueden leer como texto;
+# se revisan a mano antes de subirlos (ver docs/seguridad/datos_sensibles.md).
+[[allowlists]]
+description = "Archivos binarios"
+paths = ['''(?i)\.(?:png|jpe?g|gif|pdf|docx|xlsx|pptx|bpm|bpmn)$''']

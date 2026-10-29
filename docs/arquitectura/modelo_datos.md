@@ -5,7 +5,7 @@
 
 | Servicio | Tecnología | Base de datos | Modelo de datos |
 |---|---|---|---|
-| ms-identidad | Spring Boot (Java 21) | `db_identidad` (Flyway) | Abner (T1026-A) |
+| ms-identidad | Spring Boot (Java 21) | `db_identidad` (Flyway) | [c4.md, sección 5](c4.md#5-modelo-de-datos-de-ms-identidad-db_identidad) (T1026-A) |
 | **ms-academico** | NestJS (TypeScript) | `db_academico` (Prisma) | Este documento |
 | **ms-notificaciones** | FastAPI (Python) | `db_notificaciones` (SQLAlchemy + Alembic) | Este documento |
 

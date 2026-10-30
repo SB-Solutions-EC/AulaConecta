@@ -1,0 +1,15 @@
+{
+  "name": "@aulaconecta/ms-academico",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Microservicio académico de AulaConecta (NestJS + TypeScript)",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
+

@@ -1,0 +1,53 @@
+name: CI PWA
+
+# Lo llama ci.yml para verificar la PWA (lint/typecheck, pruebas con Vitest y cobertura,
+# compilación de producción y auditoría de dependencias) y entregar la cobertura a SonarQube.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: pwa
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/pwa
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar Node.js 22 (con Corepack)
+        run: |
+          node --version
+          npm --version
+
+      - name: Instalar dependencias de la PWA
+        run: npm install --no-audit --no-fund
+
+      - name: Lint y verificación de tipos (TypeScript)
+        run: npm run lint
+
+      - name: Ejecutar pruebas unitarias y cobertura con Vitest
+        run: npm run test:coverage
+
+      - name: Compilar la PWA para producción (Vite build)
+        run: npm run build
+
+      - name: Auditar dependencias de producción (falla con HIGH o CRITICAL)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Guardar reporte de cobertura y compilación de la PWA
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pwa-resultados
+          retention-days: 7
+          path: |
+            apps/pwa/coverage/lcov.info
+            apps/pwa/dist
+

@@ -33,7 +33,9 @@ jobs:
         run: npm run lint
 
       - name: Ejecutar pruebas unitarias y cobertura con Vitest
-        run: npm run test:coverage
+        run: |
+          npm run test:coverage
+          sed -i 's|^SF:.*/apps/pwa/|SF:apps/pwa/|; s|^SF:src/|SF:apps/pwa/src/|' coverage/lcov.info
 
       - name: Compilar la PWA para producción (Vite build)
         run: npm run build
@@ -50,4 +52,3 @@ jobs:
           path: |
             apps/pwa/coverage/lcov.info
             apps/pwa/dist
-

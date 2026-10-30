@@ -76,14 +76,14 @@ async function consultarSaludServicio(ruta: string): Promise<EstadoSalud> {
 export default function App() {
   const [servicios, setServicios] =
     useState<ServicioMonitorizado[]>(SERVICIOS_INICIALES);
-  const [enLinea, setEnLinea] = useState<boolean>(
-    typeof navigator !== 'undefined' ? navigator.onLine : true,
-  );
+  const [enLinea, setEnLinea] = useState<boolean>(navigator.onLine);
   const [rolActivo, setRolActivo] = useState<string>(ROLES_PLATAFORMA[0]);
 
   const verificarServicios = useCallback(async () => {
     setServicios((previos) =>
-      previos.map((s) => ({ ...s, estado: 'CHECKING' })),
+      previos.every((s) => s.estado === 'CHECKING')
+        ? previos
+        : previos.map((s) => ({ ...s, estado: 'CHECKING' })),
     );
 
     const actualizados = await Promise.all(
@@ -97,7 +97,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    void verificarServicios();
+    verificarServicios();
 
     const manejarOnline = () => setEnLinea(true);
     const manejarOffline = () => setEnLinea(false);
@@ -176,7 +176,9 @@ export default function App() {
 
           <button
             type="button"
-            onClick={() => void verificarServicios()}
+            onClick={() => {
+              verificarServicios();
+            }}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-dark text-white font-semibold text-sm shadow-sm transition-colors cursor-pointer"
           >
             <RefreshCw className="w-4 h-4" aria-hidden="true" />
@@ -308,7 +310,7 @@ export default function App() {
   );
 }
 
-function InsigniaEstado({ estado }: { estado: EstadoSalud }) {
+function InsigniaEstado({ estado }: Readonly<{ estado: EstadoSalud }>) {
   if (estado === 'UP') {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -331,4 +333,3 @@ function InsigniaEstado({ estado }: { estado: EstadoSalud }) {
     </span>
   );
 }
-

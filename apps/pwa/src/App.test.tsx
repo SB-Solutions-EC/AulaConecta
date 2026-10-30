@@ -8,7 +8,7 @@ describe('Esqueleto de la PWA de AulaConecta', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ status: 'UP' }),
+        json: () => Promise.resolve({ status: 'UP' }),
       }),
     );
   });
@@ -20,17 +20,17 @@ describe('Esqueleto de la PWA de AulaConecta', () => {
   it('muestra la identidad de la Unidad Educativa Andoas y los 3 microservicios en estado UP', async () => {
     render(<App />);
 
-    expect(
-      screen.getByRole('heading', { name: /AulaConecta/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Unidad Educativa “Andoas”/i),
-    ).toBeInTheDocument();
-
     await waitFor(() => {
       const estadosUp = screen.getAllByText('UP');
       expect(estadosUp).toHaveLength(3);
     });
+
+    expect(
+      screen.getByRole('heading', { name: 'AulaConecta', level: 1 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Unidad Educativa “Andoas”/i),
+    ).toBeInTheDocument();
 
     expect(screen.getByTestId('tarjeta-ms-identidad')).toHaveTextContent(
       '/api/identidad/health',
@@ -50,9 +50,13 @@ describe('Esqueleto de la PWA de AulaConecta', () => {
         .fn()
         .mockResolvedValueOnce({
           ok: false,
-          json: async () => ({ status: 'DOWN' }),
+          json: () => Promise.resolve({ status: 'DOWN' }),
         })
-        .mockRejectedValue(new Error('Error de red')),
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve({ status: 'DOWN' }),
+        })
+        .mockRejectedValueOnce(new Error('Error de red')),
     );
 
     render(<App />);

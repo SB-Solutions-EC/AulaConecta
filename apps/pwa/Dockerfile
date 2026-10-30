@@ -3,7 +3,9 @@ FROM node:22-alpine3.21 AS compilacion
 WORKDIR /app
 COPY package.json ./
 RUN npm install --no-audit --no-fund
-COPY . .
+COPY tsconfig.json vite.config.ts tailwind.config.js postcss.config.js index.html ./
+COPY public ./public
+COPY src ./src
 RUN npm run build
 
 # Etapa de ejecución con Nginx sin privilegios
@@ -12,4 +14,3 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=compilacion /app/dist /usr/share/nginx/html
 USER 101
 EXPOSE 8080
-

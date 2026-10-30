@@ -33,6 +33,9 @@
           },
           {
             "context": "identidad / ms-identidad"
+          },
+          {
+            "context": "imagen-identidad / escanear"
           }
         ],
         "strict_required_status_checks_policy": false

@@ -1,0 +1,643 @@
+openapi: 3.1.0
+info:
+  title: AulaConecta — ms-notificaciones API
+  version: 0.1.0
+  description: |
+    Contrato OpenAPI inicial (v0) del microservicio de notificaciones (`ms-notificaciones`) para la **Unidad Educativa "Andoas"**.
+
+    **Responsabilidad:** Gestión de contactos de representantes en formato E.164, consentimiento expreso y baja de avisos (RF-29, RNF-05), suscripciones Web Push (claves VAPID), plantillas de mensajes (`CONFIRMACION_AUTORIZACION`, `PROMEDIO_BAJO`, `FALTA_SIN_JUSTIFICAR`), procesamiento idempotente de eventos provenientes de RabbitMQ (`EVENTO_RECIBIDO`), clave antiduplicado (RF-34), historial de envíos (RF-33) y webhook de WhatsApp Cloud API.
+
+    **Esquema de canales por niveles (CR-01, decisión del 26/10/2026):**
+    1. **Nivel 1 — `PUSH` (gratis, automático):** Notificación en el navegador o celular del representante mediante Web Push.
+    2. **Nivel 2 — `WHATSAPP_ASISTIDO` (gratis):** El aviso queda en estado `PREPARADA` con el enlace `https://wa.me/<numero>?text=<mensaje>` listo para que el docente o la secretaría lo envíe con un clic y se registre como `ENVIADA_MANUAL` indicando `enviadaPorUsuarioId`.
+    3. **Nivel 3 — `WHATSAPP_API` (opcional de pago):** Envío automático con plantillas aprobadas por Meta en WhatsApp Cloud API.
+
+    **Privacidad de menores (RNF-04, RNF-05):** Los teléfonos viven únicamente en `db_notificaciones`. Los mensajes nunca incluyen notas numéricas exactas ni datos de otros estudiantes.
+  contact:
+    name: Equipo SB Solutions — AulaConecta
+    url: https://github.com/SB-Solutions-EC/AulaConecta
+
+servers:
+  - url: https://localhost/api/notificaciones
+    description: Gateway local (Traefik con TLS)
+  - url: http://localhost:8000
+    description: Puerto directo del contenedor en la red interna (solo desarrollo)
+
+tags:
+  - name: Salud
+    description: Verificación de disponibilidad del microservicio
+  - name: Contactos y Consentimiento
+    description: Registro de números de WhatsApp (E.164), autorización expresa y baja de avisos (RF-29, RNF-05)
+  - name: Suscripciones Web Push
+    description: Clave pública VAPID y registro de dispositivos para avisos nivel 1
+  - name: Plantillas
+    description: Las 3 plantillas oficiales de avisos sin detalle sensible (RNF-05)
+  - name: Notificaciones e Historial
+    description: Consulta del historial de avisos (RF-33), antiduplicados (RF-34) y confirmación de WhatsApp asistido (CR-01)
+  - name: Webhooks WhatsApp
+    description: Verificación y recepción de estados de entrega desde WhatsApp Cloud API
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Salud]
+      summary: Estado de salud del servicio
+      security: []
+      operationId: obtenerSaludNotificaciones
+      responses:
+        "200":
+          description: Servicio operativo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaSalud"
+              example:
+                status: UP
+
+  /contactos:
+    get:
+      tags: [Contactos y Consentimiento]
+      summary: Listar contactos de representantes por estudiante o representante (RF-29)
+      operationId: listarContactos
+      parameters:
+        - name: representanteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estudianteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de contactos registrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contacto"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+
+    post:
+      tags: [Contactos y Consentimiento]
+      summary: Registrar contacto de WhatsApp y estado de autorización del representante (RF-29, RNF-05)
+      description: |
+        Registra el teléfono en formato E.164 (`+5939...`) vinculado al `representanteId` y `estudianteId` de `ms-academico`.
+        Si `autorizaAvisos = true`, registra `fechaAutorizacion` y genera el aviso inicial con la plantilla `CONFIRMACION_AUTORIZACION`.
+      operationId: crearContacto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudContacto"
+      responses:
+        "201":
+          description: Contacto registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contacto"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+
+  /contactos/{id}/consentimiento:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    patch:
+      tags: [Contactos y Consentimiento]
+      summary: Otorgar o revocar consentimiento para recibir avisos ("No recibir avisos", RF-29, RNF-05)
+      description: |
+        Actualiza `autorizaAvisos` verificando `version`.
+        - Al revocar (`autorizaAvisos = false`), registra `fechaBaja` y detiene inmediatamente el envío de nuevos avisos a ese contacto.
+        - Al autorizar (`autorizaAvisos = true`), registra `fechaAutorizacion` y dispara el mensaje de confirmación.
+      operationId: actualizarConsentimientoContacto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudConsentimiento"
+      responses:
+        "200":
+          description: Consentimiento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contacto"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /push/vapid-public-key:
+    get:
+      tags: [Suscripciones Web Push]
+      summary: Obtener clave pública VAPID para suscribir el navegador a Web Push
+      operationId: obtenerClavePublicaVapid
+      responses:
+        "200":
+          description: Clave pública VAPID en Base64 URL-safe
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [publicKey]
+                properties:
+                  publicKey:
+                    type: string
+
+  /push/suscripciones:
+    post:
+      tags: [Suscripciones Web Push]
+      summary: Registrar suscripción Web Push del dispositivo del representante (Nivel 1)
+      operationId: registrarSuscripcionPush
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudSuscripcionPush"
+      responses:
+        "201":
+          description: Suscripción Push activa registrada en `SUSCRIPCION_PUSH`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuscripcionPush"
+
+  /push/suscripciones/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    delete:
+      tags: [Suscripciones Web Push]
+      summary: Desactivar suscripción Web Push de un dispositivo
+      operationId: eliminarSuscripcionPush
+      responses:
+        "204":
+          description: Suscripción desactivada
+
+  /plantillas:
+    get:
+      tags: [Plantillas]
+      summary: Listar plantillas de avisos activas (`CONFIRMACION_AUTORIZACION`, `PROMEDIO_BAJO`, `FALTA_SIN_JUSTIFICAR`)
+      description: Las 3 plantillas usan el mismo texto libre de notas detalladas en los tres canales (`docs/arquitectura/plantillas_whatsapp.md`).
+      operationId: listarPlantillas
+      responses:
+        "200":
+          description: Lista de plantillas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Plantilla"
+
+  /notificaciones:
+    get:
+      tags: [Notificaciones e Historial]
+      summary: Consultar historial de notificaciones con filtros por estudiante, motivo, canal y estado (RF-33)
+      description: |
+        Permite auditar los avisos generados y su estado de entrega.
+        Incluye el enlace `enlaceWaMe` cuando una notificación de canal `WHATSAPP_ASISTIDO` está en estado `PREPARADA`.
+      operationId: listarNotificaciones
+      parameters:
+        - name: estudianteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: contactoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: canal
+          in: query
+          schema:
+            $ref: "#/components/schemas/CanalNotificacion"
+        - name: motivo
+          in: query
+          schema:
+            $ref: "#/components/schemas/MotivoNotificacion"
+        - name: estado
+          in: query
+          schema:
+            $ref: "#/components/schemas/EstadoNotificacion"
+      responses:
+        "200":
+          description: Historial de notificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notificacion"
+
+  /notificaciones/{id}/marcar-enviada-manual:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Notificaciones e Historial]
+      summary: Confirmar envío de WhatsApp asistido por docente o secretaría (Nivel 2, CR-01)
+      description: |
+        Cuando el docente o la secretaría presiona "Avisar por WhatsApp" (`https://wa.me/<numero>?text=<mensaje>`) y confirma el envío, la notificación pasa de `PREPARADA` a `ENVIADA_MANUAL`, registrando el `usuario_id` del remitente en `enviada_por_usuario_id` y la marca de tiempo `enviada_en` (amenaza R-02).
+      operationId: marcarNotificacionEnviadaManual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudEnvioManual"
+      responses:
+        "200":
+          description: Notificación marcada como `ENVIADA_MANUAL`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notificacion"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /webhooks/whatsapp:
+    get:
+      tags: [Webhooks WhatsApp]
+      summary: Verificación del webhook de WhatsApp Cloud API (Meta)
+      security: []
+      operationId: verificarWebhookWhatsapp
+      parameters:
+        - name: hub.mode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Retorno del challenge de verificación
+          content:
+            text/plain:
+              schema:
+                type: string
+        "403":
+          description: Token de verificación inválido
+
+    post:
+      tags: [Webhooks WhatsApp]
+      summary: Recibir actualizaciones de entrega y respuestas rápidas ("No recibir avisos") desde WhatsApp Cloud API
+      description: Valida la firma HMAC (`X-Hub-Signature-256`, amenaza S-04), actualiza el estado (`ENVIADA`, `ENTREGADA`, `FALLIDA`) por `id_mensaje_proveedor` o procesa la baja del representante si presionó el botón "No recibir avisos".
+      security: []
+      operationId: recibirWebhookWhatsapp
+      parameters:
+        - name: X-Hub-Signature-256
+          in: header
+          required: true
+          description: Firma HMAC-SHA256 del cuerpo enviada por Meta
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "200":
+          description: Evento de webhook procesado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT RS256 emitido por `ms-identidad` y validado con su JWKS.
+
+  parameters:
+    IdRecurso:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    SolicitudInvalida:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoAutorizado:
+      description: Token JWT ausente, inválido o expirado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    Prohibido:
+      description: Sin permisos para consultar o modificar este recurso
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoEncontrado:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    ConflictoVersion:
+      description: Conflicto de versión (`version` desactualizada)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+
+  schemas:
+    RespuestaSalud:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+
+    CanalNotificacion:
+      type: string
+      enum: [PUSH, WHATSAPP_ASISTIDO, WHATSAPP_API]
+      description: Canales de aviso por niveles (CR-01)
+
+    MotivoNotificacion:
+      type: string
+      enum:
+        - CONFIRMACION_AUTORIZACION
+        - PROMEDIO_BAJO
+        - FALTA_SIN_JUSTIFICAR
+      description: Únicos tres motivos permitidos para avisos externos (CR-01, RNF-05)
+
+    EstadoNotificacion:
+      type: string
+      enum:
+        - EN_COLA
+        - ENVIADA
+        - ENTREGADA
+        - FALLIDA
+        - PREPARADA
+        - ENVIADA_MANUAL
+
+    Contacto:
+      type: object
+      required:
+        - id
+        - representanteId
+        - estudianteId
+        - whatsapp
+        - autorizaAvisos
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        representanteId:
+          type: string
+          format: uuid
+          description: Referencia UUID a `PERSONA` en `ms-academico`
+        estudianteId:
+          type: string
+          format: uuid
+          description: Referencia UUID a `PERSONA` en `ms-academico`
+        whatsapp:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          description: Número de teléfono en formato E.164 verificado
+          example: "+593000000000"
+        autorizaAvisos:
+          type: boolean
+          description: Consentimiento activo del representante (RF-29, RNF-05)
+        fechaAutorizacion:
+          type: [string, "null"]
+          format: date-time
+        fechaBaja:
+          type: [string, "null"]
+          format: date-time
+        version:
+          type: integer
+          minimum: 0
+
+    SolicitudContacto:
+      type: object
+      required: [representanteId, estudianteId, whatsapp, autorizaAvisos]
+      properties:
+        id:
+          type: string
+          format: uuid
+        representanteId:
+          type: string
+          format: uuid
+        estudianteId:
+          type: string
+          format: uuid
+        whatsapp:
+          type: string
+          pattern: '^\+[1-9]\d{7,14}$'
+          example: "+593000000000"
+        autorizaAvisos:
+          type: boolean
+
+    SolicitudConsentimiento:
+      type: object
+      required: [autorizaAvisos, version]
+      properties:
+        autorizaAvisos:
+          type: boolean
+        version:
+          type: integer
+          minimum: 0
+
+    SuscripcionPush:
+      type: object
+      required: [id, contactoId, endpoint, dispositivo, activa, creadaEn]
+      properties:
+        id:
+          type: string
+          format: uuid
+        contactoId:
+          type: string
+          format: uuid
+        endpoint:
+          type: string
+          format: uri
+        dispositivo:
+          type: string
+          example: Android Chrome
+        activa:
+          type: boolean
+        creadaEn:
+          type: string
+          format: date-time
+
+    SolicitudSuscripcionPush:
+      type: object
+      required: [contactoId, endpoint, claveP256dh, claveAuth]
+      properties:
+        id:
+          type: string
+          format: uuid
+        contactoId:
+          type: string
+          format: uuid
+        endpoint:
+          type: string
+          format: uri
+        claveP256dh:
+          type: string
+        claveAuth:
+          type: string
+        dispositivo:
+          type: string
+          example: Android Chrome
+
+    Plantilla:
+      type: object
+      required: [id, codigo, texto, activa, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        codigo:
+          $ref: "#/components/schemas/MotivoNotificacion"
+        texto:
+          type: string
+          description: Texto con marcadores `{{1}}`, `{{2}}` sin notas detalladas
+        nombreMeta:
+          type: [string, "null"]
+          description: Nombre de la plantilla en WhatsApp Cloud API
+        activa:
+          type: boolean
+        version:
+          type: integer
+
+    EventoRecibido:
+      type: object
+      required: [id, tipo, datos, recibidoEn, procesado]
+      description: Registro idempotente del evento publicado por `ms-academico` en RabbitMQ (`aulaconecta.eventos`)
+      properties:
+        id:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          enum: [academico.promedio_bajo, academico.falta_registrada]
+        datos:
+          type: object
+          description: Identificadores y nombres necesarios para llenar la plantilla, sin notas exactas
+          additionalProperties: true
+        recibidoEn:
+          type: string
+          format: date-time
+        procesado:
+          type: boolean
+
+    Notificacion:
+      type: object
+      required:
+        - id
+        - contactoId
+        - plantillaId
+        - canal
+        - motivo
+        - claveAntiduplicado
+        - estado
+        - intentos
+        - creadaEn
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        contactoId:
+          type: string
+          format: uuid
+        plantillaId:
+          type: string
+          format: uuid
+        eventoId:
+          type: [string, "null"]
+          format: uuid
+        canal:
+          $ref: "#/components/schemas/CanalNotificacion"
+        motivo:
+          $ref: "#/components/schemas/MotivoNotificacion"
+        claveAntiduplicado:
+          type: string
+          description: "`contacto + motivo + canal + periodo` para evitar envíos repetidos (RF-34)"
+        estado:
+          $ref: "#/components/schemas/EstadoNotificacion"
+        enlaceWaMe:
+          type: [string, "null"]
+          format: uri
+          description: URL `https://wa.me/...` prellenada cuando `canal = WHATSAPP_ASISTIDO` y `estado = PREPARADA`
+        enviadaPorUsuarioId:
+          type: [string, "null"]
+          format: uuid
+          description: Usuario (`DOCENTE` o `SECRETARIA`) que confirmó el envío manual en WhatsApp asistido
+        intentos:
+          type: integer
+          minimum: 0
+        idMensajeProveedor:
+          type: [string, "null"]
+        creadaEn:
+          type: string
+          format: date-time
+        enviadaEn:
+          type: [string, "null"]
+          format: date-time
+        version:
+          type: integer
+
+    SolicitudEnvioManual:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          minimum: 0
+
+    ErrorApi:
+      type: object
+      required: [codigo, mensaje, timestamp]
+      properties:
+        codigo:
+          type: string
+          example: CONSENTIMIENTO_REQUERIDO
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: string
+          format: date-time

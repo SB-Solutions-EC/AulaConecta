@@ -114,28 +114,42 @@ Se programa con un **adaptador**: una interfaz común con dos implementaciones, 
 
 | Capa | Tecnología |
 |---|---|
-| Backend | NestJS · TypeScript · Prisma |
-| Base de datos | PostgreSQL |
+| Microservicios | `ms-identidad` (Spring Boot · Java 21) · `ms-academico` (NestJS · TypeScript · Prisma) · `ms-notificaciones` (FastAPI · Python · SQLAlchemy) |
+| Base de datos y eventos | PostgreSQL (3 bases: `db_identidad`, `db_academico`, `db_notificaciones`) · RabbitMQ |
+| Gateway | Traefik (TLS y límite de peticiones) |
 | Frontend | React · Vite · TypeScript · Tailwind · Workbox · Dexie |
 | Interfaz y gráficos | Framer Motion (animaciones) · Recharts (gráficos) · lucide-react (íconos); ver [guia_visual.md](guia_visual.md) |
 | Código compartido | `packages/calculo` (TypeScript) |
+| Contratos API | OpenAPI 3.1 (`openapi/`) |
 | Contenedores | Docker · docker-compose · Nginx |
 | CI/CD | GitHub Actions · Telegram |
-| Seguridad | Gitleaks · npm audit · Trivy · SonarQube Cloud · OWASP ZAP |
-| Pruebas | Jest · Vitest · Playwright · k6 |
-| Notificaciones | WhatsApp Cloud API |
+| Seguridad | Gitleaks · Dependency-Check · npm audit · pip-audit · Trivy · SonarQube · OWASP ZAP |
+| Pruebas | JUnit 5 · Jest · Vitest · pytest · Playwright · k6 |
+| Notificaciones | Web Push · WhatsApp asistido (`wa.me`) · WhatsApp Cloud API (opcional) |
 
-## 5. Estructura del monorepo
+## 5. Estructura del monorepo (T1026-C)
 
-Un **monorepo** es un solo repositorio con varias partes del sistema. Se eligió porque backend, frontend y cálculo comparten código y versiones, y un solo pipeline los revisa a todos.
+Un **monorepo** es un solo repositorio que agrupa las aplicaciones, microservicios, paquetes compartidos, contratos, infraestructura y pruebas del sistema. Se eligió porque `ms-academico`, la PWA y `packages/calculo` comparten tipos y lógica, los contratos OpenAPI se versionan junto con los servicios y el pipeline de CI/CD verifica todo en conjunto.
 
 ```
-backend/            API NestJS
-frontend/           PWA React + Vite
-packages/calculo/   Cálculo de notas compartido
-infra/              docker-compose, Nginx y despliegue
-prototipo/          Prototipo navegable con datos ficticios
-docs/               Documentación del proyecto
-scripts/            Scripts de apoyo (backlog y tareas en GitHub)
-.github/            CODEOWNERS, plantilla de PR, rulesets y workflows
+apps/
+  pwa/                   PWA en React + Vite + TypeScript (interfaz por rol y modo sin conexión)
+services/
+  ms-identidad/          Microservicio de identidad (Spring Boot 4 + Java 21 + Flyway)
+  ms-academico/          Microservicio académico (NestJS + TypeScript + Prisma)
+  ms-notificaciones/     Microservicio de notificaciones (FastAPI + Python + Alembic)
+packages/
+  calculo/               Motor de cálculo de notas compartido en TypeScript
+openapi/
+  ms-identidad.yaml      Contrato OpenAPI 3.1 v0 de ms-identidad
+  ms-academico.yaml      Contrato OpenAPI 3.1 v0 de ms-academico
+  ms-notificaciones.yaml Contrato OpenAPI 3.1 v0 de ms-notificaciones
+infra/                   docker-compose, Traefik, PostgreSQL y despliegue
+tests/
+  e2e/                   Pruebas extremo a extremo con Playwright
+  carga/                 Pruebas de carga y rendimiento con k6
+prototipo/               Prototipo navegable con datos ficticios
+docs/                    Documentación del proyecto
+scripts/                 Scripts de apoyo (backlog y tareas en GitHub)
+.github/                 CODEOWNERS, plantilla de PR, rulesets y workflows
 ```

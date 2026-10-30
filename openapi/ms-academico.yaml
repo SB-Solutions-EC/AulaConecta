@@ -1,0 +1,2134 @@
+openapi: 3.1.0
+info:
+  title: AulaConecta — ms-academico API
+  version: 0.1.0
+  description: |
+    Contrato OpenAPI inicial (v0) del microservicio académico (`ms-academico`) para la **Unidad Educativa "Andoas"**.
+
+    **Responsabilidad:** Gestión del año lectivo, cursos y paralelos, materias, docentes y estudiantes (`PERSONA`), representación familiar (`REPRESENTACION`), asignaciones y horarios, matrícula individual e importación/exportación Excel, planificación curricular ERCA con estados y observaciones por campo, calificaciones recalculadas en el servidor con `packages/calculo`, tareas y entregas, asistencia y comportamiento, reportes (estándares DA/AA/PA/NA, valoración de logros, tableros), parámetros configurables, auditoría académica y sincronización offline (`/sync/pull` y `/sync/push`).
+
+    **Reglas de modelo y sincronización (RNF-01, RNF-09):**
+    - Todas las entidades usan `id` UUID (generable por la PWA sin conexión) y campo entero `version` que se incrementa en cada cambio.
+    - Las referencias a cuentas de usuario de `ms-identidad` se guardan como `usuarioId` (UUID sin llave foránea entre bases).
+    - Los cambios que disparan avisos (`promedio_bajo`, `falta_registrada`) se escriben en la tabla `OUTBOX` dentro de la misma transacción SQL y se publican hacia RabbitMQ (`aulaconecta.eventos`).
+  contact:
+    name: Equipo SB Solutions — AulaConecta
+    url: https://github.com/SB-Solutions-EC/AulaConecta
+
+servers:
+  - url: https://localhost/api/academico
+    description: Gateway local (Traefik con TLS)
+  - url: http://localhost:3000
+    description: Puerto directo del contenedor en la red interna (solo desarrollo)
+
+tags:
+  - name: Salud
+    description: Verificación de disponibilidad del microservicio
+  - name: Configuración Académica
+    description: Año lectivo, días no dictados, cursos, paralelos y materias (RF-06, RF-07, RF-08)
+  - name: Personas, Docentes y Asignaciones
+    description: Registro de docentes, estudiantes, representantes, asignaciones y horarios (RF-05)
+  - name: Matrícula y Nóminas
+    description: Matrícula individual e importación de nóminas desde Excel (RF-04, RF-29)
+  - name: Planificación Curricular
+    description: Plantilla ministerial, semanas ERCA, estados de revisión, observaciones por campo, exportación y calendario (RF-09 a RF-16)
+  - name: Calificaciones y Tareas
+    description: Libreta de calificaciones con cálculo oficial, tareas, entregas, asistencia y comportamiento (RF-17 a RF-22, RF-26, RF-27)
+  - name: Reportes y Tableros
+    description: Hoja de estándares DA/AA/PA/NA, valoración de logros y tableros por rol (RF-23 a RF-25, RF-28, RF-37, RF-38)
+  - name: Parámetros y Auditoría
+    description: Ponderaciones/escalas configurables y bitácora de auditoría académica (RNF-09, RNF-10)
+  - name: Sincronización Offline
+    description: Descarga incremental y envío idempotente con detección y resolución de conflictos (RNF-01)
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [Salud]
+      summary: Estado de salud del servicio
+      security: []
+      operationId: obtenerSaludAcademico
+      responses:
+        "200":
+          description: Servicio operativo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaSalud"
+              example:
+                status: UP
+
+  /anios-lectivos:
+    get:
+      tags: [Configuración Académica]
+      summary: Listar años lectivos
+      operationId: listarAniosLectivos
+      responses:
+        "200":
+          description: Lista de años lectivos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AnioLectivo"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+    post:
+      tags: [Configuración Académica]
+      summary: Crear año lectivo (ADMIN)
+      operationId: crearAnioLectivo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudAnioLectivo"
+      responses:
+        "201":
+          description: Año lectivo creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnioLectivo"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+
+  /anios-lectivos/{id}/dias-no-dictados:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    get:
+      tags: [Configuración Académica]
+      summary: Listar días no dictados del año lectivo (RF-08)
+      operationId: listarDiasNoDictados
+      responses:
+        "200":
+          description: Lista de días no dictados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiaNoDictado"
+    post:
+      tags: [Configuración Académica]
+      summary: Registrar día no dictado (ADMIN)
+      operationId: crearDiaNoDictado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudDiaNoDictado"
+      responses:
+        "201":
+          description: Día no dictado registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiaNoDictado"
+
+  /cursos:
+    get:
+      tags: [Configuración Académica]
+      summary: Listar cursos y paralelos (RF-06)
+      operationId: listarCursos
+      parameters:
+        - name: anioLectivoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de cursos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Curso"
+    post:
+      tags: [Configuración Académica]
+      summary: Crear curso y paralelo (ADMIN)
+      operationId: crearCurso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudCurso"
+      responses:
+        "201":
+          description: Curso creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Curso"
+
+  /materias:
+    get:
+      tags: [Configuración Académica]
+      summary: Listar materias (RF-07)
+      operationId: listarMaterias
+      responses:
+        "200":
+          description: Lista de materias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Materia"
+    post:
+      tags: [Configuración Académica]
+      summary: Crear materia (ADMIN)
+      operationId: crearMateria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudMateria"
+      responses:
+        "201":
+          description: Materia creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Materia"
+
+  /personas:
+    get:
+      tags: [Personas, Docentes y Asignaciones]
+      summary: Listar personas por tipo (DOCENTE, ESTUDIANTE, REPRESENTANTE)
+      operationId: listarPersonas
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            $ref: "#/components/schemas/TipoPersona"
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de personas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Persona"
+    post:
+      tags: [Personas, Docentes y Asignaciones]
+      summary: Registrar docente, estudiante o representante y crear su usuario en ms-identidad (RF-02, RF-05)
+      description: Crea el registro en `PERSONA` y solicita a `ms-identidad` (con token de servicio) la creación de la cuenta con clave inicial igual a la cédula.
+      operationId: crearPersona
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudPersona"
+      responses:
+        "201":
+          description: Persona registrada y vinculada con `usuarioId`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Persona"
+
+  /representaciones:
+    post:
+      tags: [Personas, Docentes y Asignaciones]
+      summary: Vincular representante con estudiante (REPRESENTACION)
+      operationId: crearRepresentacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudRepresentacion"
+      responses:
+        "201":
+          description: Relación de representación registrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Representacion"
+
+  /asignaciones:
+    get:
+      tags: [Personas, Docentes y Asignaciones]
+      summary: Listar asignaciones docente–materia–curso y sus horarios (RF-05)
+      operationId: listarAsignaciones
+      parameters:
+        - name: docenteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: cursoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de asignaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asignacion"
+    post:
+      tags: [Personas, Docentes y Asignaciones]
+      summary: Asignar docente a materia y curso con bloques horarios (ADMIN)
+      operationId: crearAsignacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudAsignacion"
+      responses:
+        "201":
+          description: Asignación creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asignacion"
+
+  /matriculas:
+    get:
+      tags: [Matrícula y Nóminas]
+      summary: Listar matrículas por curso o estudiante (RF-04)
+      operationId: listarMatriculas
+      parameters:
+        - name: cursoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estudianteId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de matrículas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Matricula"
+    post:
+      tags: [Matrícula y Nóminas]
+      summary: Matricular estudiante individualmente (SECRETARIA, ADMIN)
+      operationId: crearMatricula
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudMatricula"
+      responses:
+        "201":
+          description: Matrícula creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Matricula"
+
+  /matriculas/importar:
+    post:
+      tags: [Matrícula y Nóminas]
+      summary: Importar nómina de estudiantes desde archivo Excel (.xlsx) (RF-04)
+      description: Valida tipo, tamaño máximo, número de filas, formato de cédula y duplicados, devolviendo el resumen de altas y errores por fila.
+      operationId: importarNominaExcel
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [cursoId, archivo]
+              properties:
+                cursoId:
+                  type: string
+                  format: uuid
+                archivo:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Resultado del procesamiento de la nómina
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultadoImportacionExcel"
+
+  /planificaciones:
+    get:
+      tags: [Planificación Curricular]
+      summary: Listar planificaciones curriculares por asignación o estado (RF-09 a RF-14)
+      operationId: listarPlanificaciones
+      parameters:
+        - name: asignacionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: estado
+          in: query
+          schema:
+            $ref: "#/components/schemas/EstadoPlanificacion"
+      responses:
+        "200":
+          description: Lista de planificaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Planificacion"
+    post:
+      tags: [Planificación Curricular]
+      summary: Crear planificación curricular en la plantilla oficial (DOCENTE)
+      operationId: crearPlanificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudPlanificacion"
+      responses:
+        "201":
+          description: Planificación creada en estado `BORRADOR`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planificacion"
+
+  /planificaciones/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    get:
+      tags: [Planificación Curricular]
+      summary: Obtener planificación con sus semanas ERCA y observaciones
+      operationId: obtenerPlanificacion
+      responses:
+        "200":
+          description: Detalle completo de la planificación
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planificacion"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+    put:
+      tags: [Planificación Curricular]
+      summary: Actualizar datos informativos y semanas ERCA de una planificación (RF-09, RF-14)
+      description: Solo editable en `BORRADOR` o `CON_OBSERVACIONES` por el docente titular. Verifica `version` para evitar pérdida de cambios.
+      operationId: actualizarPlanificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudActualizarPlanificacion"
+      responses:
+        "200":
+          description: Planificación actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planificacion"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /planificaciones/{id}/estado:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Planificación Curricular]
+      summary: Cambiar estado de la planificación (enviar a revisión, aprobar o devolver con observaciones)
+      description: |
+        Máquina de estados (RF-10, RF-11, RF-12):
+        - `DOCENTE`: `BORRADOR` / `CON_OBSERVACIONES` → `EN_REVISION`
+        - `ADMIN` (vicerrector): `EN_REVISION` → `APROBADA` o `CON_OBSERVACIONES`
+      operationId: cambiarEstadoPlanificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudEstadoPlanificacion"
+      responses:
+        "200":
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Planificacion"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /planificaciones/{id}/observaciones:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Planificación Curricular]
+      summary: Registrar observación asociada a un campo o semana (ADMIN, RF-13)
+      operationId: crearObservacionPlanificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudObservacion"
+      responses:
+        "201":
+          description: Observación creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Observacion"
+
+  /planificaciones/{id}/exportar:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+      - name: formato
+        in: query
+        required: true
+        schema:
+          type: string
+          enum: [docx, pdf]
+    get:
+      tags: [Planificación Curricular]
+      summary: Exportar planificación aprobada a Word (.docx) o PDF con formato oficial (RF-15)
+      operationId: exportarPlanificacion
+      responses:
+        "200":
+          description: Archivo generado con el formato del Ministerio y bloque de firmas
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /calificaciones:
+    get:
+      tags: [Calificaciones y Tareas]
+      summary: Consultar libreta de calificaciones por asignación o matrícula (RF-17, RF-18, RF-28)
+      description: Filtra según el rol (`DOCENTE` de la materia, `ESTUDIANTE` dueño o `REPRESENTANTE` autorizado). La `SECRETARIA` recibe `403 Forbidden`.
+      operationId: listarCalificaciones
+      parameters:
+        - name: asignacionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: matriculaId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: trimestre
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+      responses:
+        "200":
+          description: Lista de calificaciones con nota final y cualitativo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Calificacion"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+    put:
+      tags: [Calificaciones y Tareas]
+      summary: Registrar o actualizar aportes y recalcular nota final con packages/calculo (RF-17, RF-18)
+      description: |
+        Recalcula `notaFinal` (70 % bloques con refuerzo, 15 % proyecto, 15 % examen, truncado a 2 decimales) y `cualitativo` (`A+` a `E-`) usando `packages/calculo`.
+        - Registra el cambio en `AUDITORIA` (valor anterior y nuevo, RNF-09).
+        - Si `notaFinal < 7.00`, inserta en la misma transacción un evento `academico.promedio_bajo` en `OUTBOX` para `ms-notificaciones` (RF-30).
+      operationId: guardarCalificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudCalificacion"
+      responses:
+        "200":
+          description: Calificación guardada y calculada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Calificacion"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /tareas:
+    get:
+      tags: [Calificaciones y Tareas]
+      summary: Listar tareas, pruebas y proyectos por asignación (RF-19)
+      operationId: listarTareas
+      parameters:
+        - name: asignacionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Lista de tareas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Tarea"
+    post:
+      tags: [Calificaciones y Tareas]
+      summary: Crear tarea, prueba o proyecto con fecha de entrega (DOCENTE, RF-19)
+      operationId: crearTarea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudTarea"
+      responses:
+        "201":
+          description: Tarea creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tarea"
+
+  /tareas/{id}/entregas:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    put:
+      tags: [Calificaciones y Tareas]
+      summary: Registrar nota y retroalimentación de una entrega (DOCENTE, RF-20)
+      operationId: calificarEntregaTarea
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudEntrega"
+      responses:
+        "200":
+          description: Entrega calificada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entrega"
+
+  /asistencias:
+    get:
+      tags: [Calificaciones y Tareas]
+      summary: Consultar registros de asistencia por asignación, matrícula o fecha (RF-21)
+      operationId: listarAsistencias
+      parameters:
+        - name: asignacionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: matriculaId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: fecha
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Lista de asistencias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Asistencia"
+    put:
+      tags: [Calificaciones y Tareas]
+      summary: Registrar asistencia o justificación (RF-21, RF-31)
+      description: Si el estado es `FALTA` (sin justificar), inserta en la misma transacción un evento `academico.falta_registrada` en `OUTBOX` para `ms-notificaciones`.
+      operationId: guardarAsistencia
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudAsistencia"
+      responses:
+        "200":
+          description: Asistencia guardada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asistencia"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /comportamientos:
+    get:
+      tags: [Calificaciones y Tareas]
+      summary: Consultar comportamiento por matrícula y trimestre (RF-22)
+      operationId: listarComportamientos
+      parameters:
+        - name: matriculaId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: trimestre
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+      responses:
+        "200":
+          description: Lista de evaluaciones de comportamiento
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comportamiento"
+    put:
+      tags: [Calificaciones y Tareas]
+      summary: Registrar los 9 indicadores de comportamiento y calcular su cualitativo (RF-22)
+      operationId: guardarComportamiento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudComportamiento"
+      responses:
+        "200":
+          description: Comportamiento registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comportamiento"
+
+  /reportes/estandares:
+    get:
+      tags: [Reportes y Tableros]
+      summary: Obtener hoja de estándares DA/AA/PA/NA por asignación y trimestre (RF-23)
+      operationId: obtenerReporteEstandares
+      parameters:
+        - name: asignacionId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: trimestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+      responses:
+        "200":
+          description: Distribución de estándares DA, AA, PA y NA
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReporteEstandares"
+
+  /reportes/valoracion-logros:
+    get:
+      tags: [Reportes y Tableros]
+      summary: Obtener valoración de logros por curso o asignación (RF-24)
+      operationId: obtenerValoracionLogros
+      parameters:
+        - name: asignacionId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: trimestre
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+      responses:
+        "200":
+          description: Resumen de valoración de logros
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReporteValoracionLogros"
+
+  /reportes/tablero-institucional:
+    get:
+      tags: [Reportes y Tableros]
+      summary: Tablero de rendimiento de todos los cursos para el Administrador (RF-25)
+      operationId: obtenerTableroInstitucional
+      parameters:
+        - name: anioLectivoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Indicadores institucionales agregados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableroInstitucional"
+
+  /reportes/mi-tablero:
+    get:
+      tags: [Reportes y Tableros]
+      summary: Tablero, horario, calendario y alertas para Estudiante o Representante (RF-16, RF-28, RF-37, RF-38)
+      description: Devuelve notas, asistencia, horario semanal, actividades del calendario y alertas de promedio menor a 7 del estudiante autenticado o del representado seleccionado.
+      operationId: obtenerTableroEstudiante
+      parameters:
+        - name: estudianteId
+          in: query
+          description: Requerido cuando consulta un `REPRESENTANTE` con uno o varios representados
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Tablero del estudiante
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableroEstudiante"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+
+  /parametros:
+    get:
+      tags: [Parámetros y Auditoría]
+      summary: Consultar parámetros configurables del colegio (ponderaciones, escalas, textos, RNF-10)
+      operationId: listarParametros
+      responses:
+        "200":
+          description: Lista de parámetros vigentes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Parametro"
+    put:
+      tags: [Parámetros y Auditoría]
+      summary: Actualizar parámetro configurable (ADMIN, RNF-10)
+      operationId: actualizarParametro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudParametro"
+      responses:
+        "200":
+          description: Parámetro actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Parametro"
+
+  /auditoria:
+    get:
+      tags: [Parámetros y Auditoría]
+      summary: Consultar historial de cambios académicos (quién cambió qué, valor anterior y nuevo, RNF-09)
+      operationId: listarAuditoriaAcademica
+      parameters:
+        - name: entidad
+          in: query
+          schema:
+            type: string
+        - name: entidadId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Registros de auditoría académica
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegistroAuditoriaAcademica"
+
+  /sync/pull:
+    get:
+      tags: [Sincronización Offline]
+      summary: Descargar cambios incrementales desde el servidor a partir de un cursor (RNF-01)
+      description: Permite a la PWA obtener los recursos creados, actualizados o dados de baja lógicamente desde el último cursor sincronizado (`docs/arquitectura/Diagramas/trabajo_sin_conexion.md`).
+      operationId: sincronizarPull
+      parameters:
+        - name: cursor
+          in: query
+          description: Cursor opaco de la última sincronización exitosa
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Lote de cambios y nuevo cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaSyncPull"
+
+  /sync/push:
+    post:
+      tags: [Sincronización Offline]
+      summary: Enviar lote de operaciones registradas sin conexión con idempotencia y control de conflictos (RNF-01)
+      description: |
+        Procesa operaciones de la cola local (`sync_queue`) de la PWA:
+        - Registra cada `operationId` en `CAMBIO_SINCRONIZADO`: si se envía dos veces, devuelve el resultado original sin duplicar el cambio.
+        - Compara `baseVersion` con la `version` actual del servidor: si difieren y la política por campo exige revisión, devuelve estado `CONFLICT` (o HTTP `409` en operación individual) con los datos del servidor (`serverData`, `conflictingFields`) sin sobrescribir silenciosamente.
+      operationId: sincronizarPush
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Clave UUID de idempotencia del lote u operación
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudSyncPush"
+      responses:
+        "200":
+          description: Resultado por cada operación del lote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaSyncPush"
+        "409":
+          description: Conflicto de versión detectado en la sincronización
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictoSincronizacion"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT RS256 emitido por `ms-identidad` y validado localmente mediante su JWKS.
+
+  parameters:
+    IdRecurso:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    SolicitudInvalida:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoAutorizado:
+      description: Token JWT ausente, inválido o expirado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    Prohibido:
+      description: El rol o la asignación del usuario no autoriza el acceso a este recurso
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoEncontrado:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    ConflictoVersion:
+      description: La versión (`baseVersion` / `version`) enviada no coincide con la versión actual en el servidor
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ConflictoSincronizacion"
+
+  schemas:
+    RespuestaSalud:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+
+    TipoPersona:
+      type: string
+      enum: [DOCENTE, ESTUDIANTE, REPRESENTANTE]
+
+    EstadoMatricula:
+      type: string
+      enum: [ACTIVA, RETIRADA]
+
+    EstadoPlanificacion:
+      type: string
+      enum: [BORRADOR, EN_REVISION, APROBADA, CON_OBSERVACIONES]
+
+    TipoTarea:
+      type: string
+      enum: [TAREA, PRUEBA, PROYECTO]
+
+    EstadoAsistencia:
+      type: string
+      enum: [PRESENTE, FALTA, ATRASO, JUSTIFICADA]
+
+    AnioLectivo:
+      type: object
+      required: [id, nombre, inicio, fin, activo, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: "2026-2027"
+        inicio:
+          type: string
+          format: date
+        fin:
+          type: string
+          format: date
+        activo:
+          type: boolean
+        version:
+          type: integer
+          minimum: 0
+
+    SolicitudAnioLectivo:
+      type: object
+      required: [nombre, inicio, fin]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: "2026-2027"
+        inicio:
+          type: string
+          format: date
+        fin:
+          type: string
+          format: date
+        activo:
+          type: boolean
+          default: true
+
+    DiaNoDictado:
+      type: object
+      required: [id, anioLectivoId, fecha, motivo, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        anioLectivoId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        motivo:
+          type: string
+        version:
+          type: integer
+
+    SolicitudDiaNoDictado:
+      type: object
+      required: [fecha, motivo]
+      properties:
+        id:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        motivo:
+          type: string
+
+    Curso:
+      type: object
+      required: [id, anioLectivoId, nivel, paralelo, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        anioLectivoId:
+          type: string
+          format: uuid
+        nivel:
+          type: string
+          example: 9no EGB
+        paralelo:
+          type: string
+          example: A
+        version:
+          type: integer
+
+    SolicitudCurso:
+      type: object
+      required: [anioLectivoId, nivel, paralelo]
+      properties:
+        id:
+          type: string
+          format: uuid
+        anioLectivoId:
+          type: string
+          format: uuid
+        nivel:
+          type: string
+        paralelo:
+          type: string
+
+    Materia:
+      type: object
+      required: [id, nombre, area, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+          example: Matemática
+        area:
+          type: string
+          example: Matemática
+        version:
+          type: integer
+
+    SolicitudMateria:
+      type: object
+      required: [nombre, area]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombre:
+          type: string
+        area:
+          type: string
+
+    Persona:
+      type: object
+      required: [id, usuarioId, tipo, nombres, apellidos, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        usuarioId:
+          type: string
+          format: uuid
+          description: Referencia UUID al usuario en `ms-identidad`
+        tipo:
+          $ref: "#/components/schemas/TipoPersona"
+        nombres:
+          type: string
+        apellidos:
+          type: string
+        area:
+          type: [string, "null"]
+          description: Área académica (solo para docentes)
+        version:
+          type: integer
+
+    SolicitudPersona:
+      type: object
+      required: [tipo, nombres, apellidos, cedula]
+      properties:
+        id:
+          type: string
+          format: uuid
+        tipo:
+          $ref: "#/components/schemas/TipoPersona"
+        nombres:
+          type: string
+        apellidos:
+          type: string
+        cedula:
+          type: string
+          description: Cédula validada para el registro académico y clave inicial en `ms-identidad`
+        area:
+          type: [string, "null"]
+
+    Representacion:
+      type: object
+      required: [id, estudianteId, representanteId, parentesco, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        estudianteId:
+          type: string
+          format: uuid
+        representanteId:
+          type: string
+          format: uuid
+        parentesco:
+          type: string
+          example: Madre
+        version:
+          type: integer
+
+    SolicitudRepresentacion:
+      type: object
+      required: [estudianteId, representanteId, parentesco]
+      properties:
+        id:
+          type: string
+          format: uuid
+        estudianteId:
+          type: string
+          format: uuid
+        representanteId:
+          type: string
+          format: uuid
+        parentesco:
+          type: string
+
+    BloqueHorario:
+      type: object
+      required: [dia, hora]
+      properties:
+        id:
+          type: string
+          format: uuid
+        dia:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: 1 (lunes) a 5 (viernes)
+        hora:
+          type: string
+          enum: [h1, h2, h3, h4, h5]
+        version:
+          type: integer
+
+    Asignacion:
+      type: object
+      required: [id, docenteId, materiaId, cursoId, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        docenteId:
+          type: string
+          format: uuid
+        materiaId:
+          type: string
+          format: uuid
+        cursoId:
+          type: string
+          format: uuid
+        horarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/BloqueHorario"
+        version:
+          type: integer
+
+    SolicitudAsignacion:
+      type: object
+      required: [docenteId, materiaId, cursoId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        docenteId:
+          type: string
+          format: uuid
+        materiaId:
+          type: string
+          format: uuid
+        cursoId:
+          type: string
+          format: uuid
+        horarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/BloqueHorario"
+
+    Matricula:
+      type: object
+      required: [id, estudianteId, cursoId, estado, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        estudianteId:
+          type: string
+          format: uuid
+        cursoId:
+          type: string
+          format: uuid
+        estado:
+          $ref: "#/components/schemas/EstadoMatricula"
+        version:
+          type: integer
+
+    SolicitudMatricula:
+      type: object
+      required: [estudianteId, cursoId]
+      properties:
+        id:
+          type: string
+          format: uuid
+        estudianteId:
+          type: string
+          format: uuid
+        cursoId:
+          type: string
+          format: uuid
+
+    ResultadoImportacionExcel:
+      type: object
+      required: [totalFilas, importados, errores]
+      properties:
+        totalFilas:
+          type: integer
+        importados:
+          type: integer
+        errores:
+          type: array
+          items:
+            type: object
+            required: [fila, mensaje]
+            properties:
+              fila:
+                type: integer
+              mensaje:
+                type: string
+
+    SemanaPlanificacion:
+      type: object
+      required: [id, planificacionId, numero, inicio, fin, contenido, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        planificacionId:
+          type: string
+          format: uuid
+        numero:
+          type: integer
+          minimum: 1
+        inicio:
+          type: string
+          format: date
+        fin:
+          type: string
+          format: date
+        contenido:
+          type: object
+          description: Destrezas, actividades ERCA (Experiencia, Reflexión, Conceptualización, Aplicación), recursos, DUA e indicadores
+          additionalProperties: true
+        version:
+          type: integer
+
+    Observacion:
+      type: object
+      required: [id, planificacionId, autorUsuarioId, campo, texto, resuelta, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        planificacionId:
+          type: string
+          format: uuid
+        autorUsuarioId:
+          type: string
+          format: uuid
+        campo:
+          type: string
+          example: semana_2.conceptualizacion
+        texto:
+          type: string
+        resuelta:
+          type: boolean
+        version:
+          type: integer
+
+    SolicitudObservacion:
+      type: object
+      required: [campo, texto]
+      properties:
+        id:
+          type: string
+          format: uuid
+        campo:
+          type: string
+        texto:
+          type: string
+
+    Planificacion:
+      type: object
+      required: [id, asignacionId, unidad, titulo, estado, datosInformativos, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        unidad:
+          type: integer
+          minimum: 1
+        titulo:
+          type: string
+        estado:
+          $ref: "#/components/schemas/EstadoPlanificacion"
+        datosInformativos:
+          type: object
+          description: Objetivos, ejes transversales, estándar de aprendizaje y adaptaciones DUA
+          additionalProperties: true
+        semanas:
+          type: array
+          items:
+            $ref: "#/components/schemas/SemanaPlanificacion"
+        observaciones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Observacion"
+        enviadaEn:
+          type: [string, "null"]
+          format: date-time
+        revisadaEn:
+          type: [string, "null"]
+          format: date-time
+        version:
+          type: integer
+
+    SolicitudPlanificacion:
+      type: object
+      required: [asignacionId, unidad, titulo, datosInformativos]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        unidad:
+          type: integer
+          minimum: 1
+        titulo:
+          type: string
+        datosInformativos:
+          type: object
+          additionalProperties: true
+
+    SolicitudActualizarPlanificacion:
+      type: object
+      required: [titulo, datosInformativos, version]
+      properties:
+        titulo:
+          type: string
+        datosInformativos:
+          type: object
+          additionalProperties: true
+        semanas:
+          type: array
+          items:
+            $ref: "#/components/schemas/SemanaPlanificacion"
+        version:
+          type: integer
+          minimum: 0
+
+    SolicitudEstadoPlanificacion:
+      type: object
+      required: [estado, version]
+      properties:
+        estado:
+          $ref: "#/components/schemas/EstadoPlanificacion"
+        version:
+          type: integer
+          minimum: 0
+
+    Calificacion:
+      type: object
+      required:
+        - id
+        - asignacionId
+        - matriculaId
+        - trimestre
+        - aportesBloque1
+        - aportesBloque2
+        - notaProyecto
+        - notaExamen
+        - notaFinal
+        - cualitativo
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+          minimum: 1
+          maximum: 3
+        aportesBloque1:
+          type: array
+          items:
+            type: number
+            minimum: 0
+            maximum: 10
+        aportesBloque2:
+          type: array
+          items:
+            type: number
+            minimum: 0
+            maximum: 10
+        refuerzo:
+          type: [number, "null"]
+          minimum: 0
+          maximum: 10
+        notaProyecto:
+          type: number
+          minimum: 0
+          maximum: 10
+        notaExamen:
+          type: number
+          minimum: 0
+          maximum: 10
+        notaFinal:
+          type: number
+          minimum: 0
+          maximum: 10
+          description: Calculada con `packages/calculo` y truncada a 2 decimales
+          example: 8.45
+        cualitativo:
+          type: string
+          description: Escala cualitativa (`A+` a `E-`)
+          example: B+
+        version:
+          type: integer
+
+    SolicitudCalificacion:
+      type: object
+      required:
+        - asignacionId
+        - matriculaId
+        - trimestre
+        - aportesBloque1
+        - aportesBloque2
+        - notaProyecto
+        - notaExamen
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+          minimum: 1
+          maximum: 3
+        aportesBloque1:
+          type: array
+          items:
+            type: number
+            minimum: 0
+            maximum: 10
+        aportesBloque2:
+          type: array
+          items:
+            type: number
+            minimum: 0
+            maximum: 10
+        refuerzo:
+          type: [number, "null"]
+          minimum: 0
+          maximum: 10
+        notaProyecto:
+          type: number
+          minimum: 0
+          maximum: 10
+        notaExamen:
+          type: number
+          minimum: 0
+          maximum: 10
+        version:
+          type: integer
+          minimum: 0
+
+    Tarea:
+      type: object
+      required: [id, asignacionId, tipo, titulo, fechaEntrega, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: "#/components/schemas/TipoTarea"
+        titulo:
+          type: string
+        fechaEntrega:
+          type: string
+          format: date
+        enlaceRecurso:
+          type: [string, "null"]
+        version:
+          type: integer
+
+    SolicitudTarea:
+      type: object
+      required: [asignacionId, tipo, titulo, fechaEntrega]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        tipo:
+          $ref: "#/components/schemas/TipoTarea"
+        titulo:
+          type: string
+        fechaEntrega:
+          type: string
+          format: date
+        enlaceRecurso:
+          type: [string, "null"]
+
+    Entrega:
+      type: object
+      required: [id, tareaId, matriculaId, nota, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        tareaId:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        nota:
+          type: number
+          minimum: 0
+          maximum: 10
+        retroalimentacion:
+          type: [string, "null"]
+        version:
+          type: integer
+
+    SolicitudEntrega:
+      type: object
+      required: [matriculaId, nota, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        nota:
+          type: number
+          minimum: 0
+          maximum: 10
+        retroalimentacion:
+          type: [string, "null"]
+        version:
+          type: integer
+          minimum: 0
+
+    Asistencia:
+      type: object
+      required: [id, asignacionId, matriculaId, fecha, estado, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        estado:
+          $ref: "#/components/schemas/EstadoAsistencia"
+        justificacion:
+          type: [string, "null"]
+        version:
+          type: integer
+
+    SolicitudAsistencia:
+      type: object
+      required: [asignacionId, matriculaId, fecha, estado, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        asignacionId:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        fecha:
+          type: string
+          format: date
+        estado:
+          $ref: "#/components/schemas/EstadoAsistencia"
+        justificacion:
+          type: [string, "null"]
+        version:
+          type: integer
+          minimum: 0
+
+    Comportamiento:
+      type: object
+      required: [id, matriculaId, trimestre, indicadores, nota, cualitativo, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+          minimum: 1
+          maximum: 3
+        indicadores:
+          type: object
+          description: Evaluación de los 9 indicadores de comportamiento
+          additionalProperties: true
+        nota:
+          type: number
+          minimum: 0
+          maximum: 10
+        cualitativo:
+          type: string
+        version:
+          type: integer
+
+    SolicitudComportamiento:
+      type: object
+      required: [matriculaId, trimestre, indicadores, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        matriculaId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+          minimum: 1
+          maximum: 3
+        indicadores:
+          type: object
+          additionalProperties: true
+        version:
+          type: integer
+          minimum: 0
+
+    ReporteEstandares:
+      type: object
+      required: [asignacionId, trimestre, totalEstudiantes, distribucion]
+      properties:
+        asignacionId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+        totalEstudiantes:
+          type: integer
+        distribucion:
+          type: object
+          required: [DA, AA, PA, NA]
+          properties:
+            DA:
+              type: integer
+              description: Domina los aprendizajes (9.00 – 10.00)
+            AA:
+              type: integer
+              description: Alcanza los aprendizajes (7.00 – 8.99)
+            PA:
+              type: integer
+              description: Está próximo a alcanzar (4.01 – 6.99)
+            NA:
+              type: integer
+              description: No alcanza los aprendizajes (<= 4.00)
+
+    ReporteValoracionLogros:
+      type: object
+      required: [asignacionId, trimestre, promedioCurso, conRefuerzo, aprobados, enRiesgo]
+      properties:
+        asignacionId:
+          type: string
+          format: uuid
+        trimestre:
+          type: integer
+        promedioCurso:
+          type: number
+        conRefuerzo:
+          type: integer
+        aprobados:
+          type: integer
+        enRiesgo:
+          type: integer
+
+    TableroInstitucional:
+      type: object
+      required: [totalEstudiantes, promedioGeneral, porcentajeAsistencia, planificacionesPendientes, cursos]
+      properties:
+        totalEstudiantes:
+          type: integer
+        promedioGeneral:
+          type: number
+        porcentajeAsistencia:
+          type: number
+        planificacionesPendientes:
+          type: integer
+        cursos:
+          type: array
+          items:
+            type: object
+            required: [cursoId, nombre, promedio, enRiesgo]
+            properties:
+              cursoId:
+                type: string
+                format: uuid
+              nombre:
+                type: string
+              promedio:
+                type: number
+              enRiesgo:
+                type: integer
+
+    TableroEstudiante:
+      type: object
+      required: [estudianteId, promedioGeneral, porcentajeAsistencia, alertasPromedioBajo, calificaciones, horario]
+      properties:
+        estudianteId:
+          type: string
+          format: uuid
+        promedioGeneral:
+          type: number
+        porcentajeAsistencia:
+          type: number
+        alertasPromedioBajo:
+          type: array
+          description: Materias con nota menor a 7.00 (RF-28)
+          items:
+            type: object
+            required: [materia, notaFinal]
+            properties:
+              materia:
+                type: string
+              notaFinal:
+                type: number
+        calificaciones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Calificacion"
+        horario:
+          type: array
+          items:
+            $ref: "#/components/schemas/BloqueHorario"
+
+    Parametro:
+      type: object
+      required: [id, clave, valor, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        clave:
+          type: string
+          example: ponderacion_aportes
+        valor:
+          type: object
+          additionalProperties: true
+        version:
+          type: integer
+
+    SolicitudParametro:
+      type: object
+      required: [clave, valor, version]
+      properties:
+        clave:
+          type: string
+        valor:
+          type: object
+          additionalProperties: true
+        version:
+          type: integer
+          minimum: 0
+
+    RegistroAuditoriaAcademica:
+      type: object
+      required: [id, entidad, entidadId, accion, usuarioId, ocurridoEn]
+      properties:
+        id:
+          type: string
+          format: uuid
+        entidad:
+          type: string
+          example: CALIFICACION
+        entidadId:
+          type: string
+          format: uuid
+        accion:
+          type: string
+          enum: [CREATE, UPDATE, DELETE_LOGICAL]
+        valorAnterior:
+          type: [object, "null"]
+          additionalProperties: true
+        valorNuevo:
+          type: [object, "null"]
+          additionalProperties: true
+        usuarioId:
+          type: string
+          format: uuid
+        ocurridoEn:
+          type: string
+          format: date-time
+
+    CambioPull:
+      type: object
+      required: [entity, entityId, operation, serverVersion, serverUpdatedAt, data]
+      properties:
+        entity:
+          type: string
+          enum: [curso, materia, asignacion, matricula, planificacion, calificacion, tarea, entrega, asistencia, comportamiento]
+        entityId:
+          type: string
+          format: uuid
+        operation:
+          type: string
+          enum: [CREATE, UPDATE, DELETE_LOGICAL]
+        serverVersion:
+          type: integer
+        serverUpdatedAt:
+          type: string
+          format: date-time
+        serverUpdatedBy:
+          type: [string, "null"]
+          format: uuid
+        data:
+          type: object
+          additionalProperties: true
+
+    RespuestaSyncPull:
+      type: object
+      required: [changes, nextCursor, schemaVersion]
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: "#/components/schemas/CambioPull"
+        nextCursor:
+          type: string
+        schemaVersion:
+          type: integer
+          example: 1
+
+    OperacionSyncPush:
+      type: object
+      required: [operationId, entity, entityId, operation, baseVersion, changedFields, payload]
+      properties:
+        operationId:
+          type: string
+          format: uuid
+        entity:
+          type: string
+          enum: [asistencia, calificacion, planificacion, tarea, entrega, comportamiento]
+        entityId:
+          type: string
+          format: uuid
+        operation:
+          type: string
+          enum: [CREATE, UPDATE, DELETE_LOGICAL]
+        baseVersion:
+          type: integer
+          minimum: 0
+        changedFields:
+          type: array
+          items:
+            type: string
+        payload:
+          type: object
+          additionalProperties: true
+
+    SolicitudSyncPush:
+      type: object
+      required: [operations]
+      properties:
+        deviceId:
+          type: string
+          format: uuid
+        operations:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/OperacionSyncPush"
+
+    ResultadoOperacionSync:
+      type: object
+      required: [operationId, status, entityId]
+      properties:
+        operationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [SYNCED, CONFLICT, FAILED]
+        entityId:
+          type: string
+          format: uuid
+        serverVersion:
+          type: [integer, "null"]
+        conflict:
+          $ref: "#/components/schemas/ConflictoSincronizacion"
+
+    RespuestaSyncPush:
+      type: object
+      required: [results, nextCursor]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultadoOperacionSync"
+        nextCursor:
+          type: string
+
+    ConflictoSincronizacion:
+      type: object
+      required:
+        - status
+        - entityId
+        - baseVersion
+        - serverVersion
+        - serverData
+        - serverUpdatedBy
+        - serverUpdatedAt
+        - conflictingFields
+      properties:
+        status:
+          type: string
+          enum: [CONFLICT]
+        entityId:
+          type: string
+          format: uuid
+        baseVersion:
+          type: integer
+        serverVersion:
+          type: integer
+        serverData:
+          type: object
+          additionalProperties: true
+        serverUpdatedBy:
+          type: string
+          format: uuid
+        serverUpdatedAt:
+          type: string
+          format: date-time
+        conflictingFields:
+          type: array
+          items:
+            type: string
+
+    ErrorApi:
+      type: object
+      required: [codigo, mensaje, timestamp]
+      properties:
+        codigo:
+          type: string
+          example: ACCESO_DENEGADO
+        mensaje:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: string
+          format: date-time
+

@@ -10,7 +10,7 @@ Plataforma de gestión académica para la **Unidad Educativa "Andoas"** (Puyo, P
 |---|---|
 | Planificaciones en papel o Word que se revisan una y otra vez | Plantilla digital del Ministerio con estados de revisión y observaciones por campo |
 | Notas y reportes calculados a mano en archivos separados | Cálculo automático idéntico a las hojas oficiales: nota final, cualitativo, estándares y valoración de logros |
-| Padres que se enteran tarde del bajo rendimiento o las faltas | Avisos automáticos por WhatsApp, con consentimiento y registro de cada envío |
+| Padres que se enteran tarde del bajo rendimiento o las faltas | Avisos automáticos por Web Push y WhatsApp, con consentimiento y registro de cada envío |
 | Internet inestable en la zona | Aplicación web instalable (PWA) que registra sin conexión y sincroniza después |
 
 ## Roles
@@ -21,13 +21,16 @@ Administrador (vicerrector) · Secretaría · Docente · Estudiante · Represent
 
 | Área | Herramientas |
 |---|---|
-| Backend | NestJS, TypeScript, Prisma, PostgreSQL |
-| Frontend | React + Vite (PWA), Tailwind, IndexedDB para el trabajo sin conexión |
+| Microservicios | `ms-identidad` (Spring Boot 4 + Java 21), `ms-academico` (NestJS + TypeScript + Prisma), `ms-notificaciones` (FastAPI + Python + SQLAlchemy) |
+| Base de datos y mensajería | PostgreSQL 16 (una base por servicio: `db_identidad`, `db_academico`, `db_notificaciones`) y RabbitMQ |
+| Gateway | Traefik (TLS, cabeceras de seguridad y límite de peticiones) |
+| Frontend (PWA) | React + Vite + TypeScript, Tailwind CSS, Workbox e IndexedDB (Dexie) para el trabajo sin conexión |
 | Cálculo de notas | Paquete compartido en TypeScript (`packages/calculo`) |
-| Seguridad en CI | Gitleaks, npm audit, Trivy, SonarQube Cloud, OWASP ZAP |
-| Pruebas | Jest, Vitest, Playwright, k6 |
-| CI/CD | GitHub Actions, Docker, avisos de progreso en Telegram |
-| Notificaciones | WhatsApp Cloud API |
+| Contratos API | OpenAPI 3.1 (`openapi/`) |
+| Seguridad en CI | Gitleaks, Dependency-Check, npm audit, pip-audit, Trivy, SonarQube, OWASP ZAP |
+| Pruebas | JUnit 5, Jest/Vitest, pytest, Playwright, k6 |
+| CI/CD | GitHub Actions, Docker, GHCR, avisos de progreso en Telegram |
+| Notificaciones | Web Push (nivel 1), WhatsApp asistido `wa.me` (nivel 2) y WhatsApp Cloud API opcional (nivel 3) |
 
 ## Flujo de ramas
 
@@ -39,14 +42,15 @@ Administrador (vicerrector) · Secretaría · Docente · Estudiante · Represent
 
 Ninguna de las tres ramas permite force push ni borrado.
 
-## Estructura del repositorio
+## Estructura del repositorio (monorepo)
 
 ```
-services/            Microservicios (ms-identidad, desde el sprint 3)
-backend/             API NestJS + PostgreSQL (desde el sprint 3)
-frontend/            PWA React + Vite (desde el sprint 3)
-packages/calculo/    Motor de cálculo de notas compartido (sprint 5)
-infra/               docker-compose, Nginx y despliegue
+apps/                Aplicaciones cliente (apps/pwa: PWA React + Vite + TypeScript)
+services/            Microservicios (ms-identidad, ms-academico, ms-notificaciones)
+packages/calculo/    Motor de cálculo de notas compartido en TypeScript (sprint 5)
+openapi/             Contratos OpenAPI 3.1 v0 de los 3 microservicios
+infra/               docker-compose, Traefik, PostgreSQL y despliegue
+tests/               Pruebas transversales: extremo a extremo (e2e) y de carga (k6)
 prototipo/           Prototipo navegable con datos ficticios
 docs/                Planificación, requisitos, análisis, modelos, arquitectura, seguridad, sprints y entregables
 scripts/github/      Creación del Product Backlog y de las tareas del cronograma

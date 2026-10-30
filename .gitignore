@@ -8,6 +8,7 @@ coverage/
 __pycache__/
 *.py[cod]
 .scannerwork/
+target/
 
 # Variables de entorno y secretos (nunca se suben)
 .env

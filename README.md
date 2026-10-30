@@ -42,6 +42,7 @@ Ninguna de las tres ramas permite force push ni borrado.
 ## Estructura del repositorio
 
 ```
+services/            Microservicios (ms-identidad, desde el sprint 3)
 backend/             API NestJS + PostgreSQL (desde el sprint 3)
 frontend/            PWA React + Vite (desde el sprint 3)
 packages/calculo/    Motor de cálculo de notas compartido (sprint 5)

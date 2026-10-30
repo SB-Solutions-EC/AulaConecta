@@ -1,0 +1,56 @@
+# Configuración dinámica de Traefik: rutas hacia los servicios, middlewares y TLS.
+
+http:
+  routers:
+    identidad:
+      entryPoints:
+        - websecure
+      rule: "Path(`/api/identidad`) || PathPrefix(`/api/identidad/`)"
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - quitar-prefijo-identidad
+      service: ms-identidad
+      tls: {}
+
+  middlewares:
+    # Por IP de origen. Todo el colegio puede salir por una misma IP (60 docentes y 400 estudiantes,
+    # RNF-06), así que el límite es alto; se ajusta con las pruebas de carga con k6.
+    limite-peticiones:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 200
+
+    cabeceras-seguridad:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: no-referrer
+
+    quitar-prefijo-identidad:
+      stripPrefix:
+        prefixes:
+          - /api/identidad
+
+  services:
+    ms-identidad:
+      loadBalancer:
+        servers:
+          - url: http://ms-identidad:8080
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certificados/gateway.pem
+        keyFile: /certificados/gateway.key

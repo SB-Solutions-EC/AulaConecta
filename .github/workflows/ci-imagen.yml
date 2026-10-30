@@ -1,0 +1,125 @@
+name: CI imagen
+
+# Lo llama ci.yml por cada servicio. El código del PR solo se ejecuta en "escanear", sin permisos de
+# escritura. "publicar" no hace checkout: sube a GHCR la misma imagen que se escaneó.
+on:
+  workflow_call:
+    inputs:
+      servicio:
+        description: Nombre de la imagen en GHCR
+        required: true
+        type: string
+      contexto:
+        description: Carpeta con el Dockerfile
+        required: true
+        type: string
+      publicar:
+        description: Subir la imagen a GHCR después de escanearla
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  SERVICIO: ${{ inputs.servicio }}
+  CONTEXTO: ${{ inputs.contexto }}
+  # Binario con checksum y no trivy-action, cuyas etiquetas fueron comprometidas en 2026 (GHSA-69fq-xp46-6x23)
+  TRIVY_VERSION: 0.76.1
+  TRIVY_SHA256: c7cbe3137fb8a48a17574bede3dd6beb16742d1e9772929940fc90082c39d9c0
+
+jobs:
+  escanear:
+    name: escanear
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Construir la imagen
+        run: |
+          docker build \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            -t "${SERVICIO}:ci" "$CONTEXTO"
+          docker save "${SERVICIO}:ci" -o "$RUNNER_TEMP/imagen.tar"
+
+      - name: Instalar Trivy
+        run: |
+          archivo="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archivo" "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${archivo}"
+          echo "${TRIVY_SHA256}  $RUNNER_TEMP/$archivo" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archivo" -C "$RUNNER_TEMP" trivy
+
+      - name: Fecha para la caché de Trivy
+        id: fecha
+        run: echo "hoy=$(date +%F)" >> "$GITHUB_OUTPUT"
+
+      - name: Restaurar la base de vulnerabilidades
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ steps.fecha.outputs.hoy }}
+          restore-keys: trivy-db-
+
+      - name: Generar SBOM (CycloneDX)
+        run: |
+          "$RUNNER_TEMP/trivy" image --input "$RUNNER_TEMP/imagen.tar" \
+            --format cyclonedx --output "$RUNNER_TEMP/sbom-${SERVICIO}.json" --quiet
+
+      - name: Guardar el SBOM
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom-${{ inputs.servicio }}
+          path: ${{ runner.temp }}/sbom-${{ inputs.servicio }}.json
+          retention-days: 30
+
+      - name: Escanear (falla con vulnerabilidades HIGH o CRITICAL)
+        run: |
+          "$RUNNER_TEMP/trivy" image --input "$RUNNER_TEMP/imagen.tar" --scanners vuln \
+            --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress --format table
+
+      - name: Guardar la imagen escaneada
+        if: ${{ inputs.publicar }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: imagen-${{ inputs.servicio }}
+          path: ${{ runner.temp }}/imagen.tar
+          retention-days: 1
+
+  publicar:
+    name: publicar
+    needs: escanear
+    if: ${{ inputs.publicar }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Descargar la imagen escaneada
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: imagen-${{ inputs.servicio }}
+          path: ${{ runner.temp }}
+
+      - name: Iniciar sesión en GHCR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Publicar en GHCR
+        run: |
+          docker load -i "$RUNNER_TEMP/imagen.tar"
+          imagen="ghcr.io/${GITHUB_REPOSITORY,,}/${SERVICIO}"
+          for etiqueta in "sha-${GITHUB_SHA::7}" "$GITHUB_REF_NAME"; do
+            docker tag "${SERVICIO}:ci" "${imagen}:${etiqueta}"
+            docker push "${imagen}:${etiqueta}"
+          done
+          echo "Imagen publicada: \`$(docker inspect --format '{{index .RepoDigests 0}}' "${imagen}:sha-${GITHUB_SHA::7}")\`" >> "$GITHUB_STEP_SUMMARY"

@@ -20,6 +20,34 @@ env:
   GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
 
 jobs:
+  # Crea el mensaje de Telegram; los avisos siguientes lo editan con el resultado de cada etapa.
+  notificar-inicio:
+    name: telegram-inicio
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      mensaje-id: ${{ steps.aviso.outputs.mensaje-id }}
+      inicio: ${{ steps.aviso.outputs.inicio }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Avisar en Telegram
+        id: aviso
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RAMA: ${{ github.head_ref || github.ref_name }}
+          COMMIT: ${{ github.sha }}
+          URL_EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          bash .github/scripts/notificar_telegram.sh iniciar \
+            "Secretos (Gitleaks)=pendiente" \
+            "ms-identidad (JUnit, JaCoCo, Dependency-Check)=pendiente" \
+            "Imagen ms-identidad (Trivy, SBOM, GHCR)=pendiente" \
+            "SonarQube (quality gate)=pendiente"
+
   # Los trabajos que ejecutan código del PR corren en GitHub y no en el runner propio
   # (modelo de amenazas E-03). Solo SonarQube lo necesita, porque el servidor es local.
   gitleaks:
@@ -47,9 +75,21 @@ jobs:
     name: identidad
     uses: ./.github/workflows/ci-identidad.yml
 
+  imagen-identidad:
+    name: imagen-identidad
+    needs: [gitleaks, identidad]
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/ci-imagen.yml
+    with:
+      servicio: ms-identidad
+      contexto: services/ms-identidad
+      publicar: ${{ github.event_name == 'push' }}
+
   notificar-pruebas:
     name: telegram-pruebas
-    needs: [gitleaks, identidad]
+    needs: [notificar-inicio, gitleaks, identidad, imagen-identidad]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -65,16 +105,21 @@ jobs:
           RAMA: ${{ github.head_ref || github.ref_name }}
           COMMIT: ${{ github.sha }}
           URL_EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MENSAJE_ID: ${{ needs.notificar-inicio.outputs.mensaje-id }}
+          INICIO: ${{ needs.notificar-inicio.outputs.inicio }}
           GITLEAKS: ${{ needs.gitleaks.result }}
           IDENTIDAD: ${{ needs.identidad.result }}
+          IMAGEN: ${{ needs.imagen-identidad.result }}
         run: |
-          bash .github/scripts/notificar_telegram.sh "Pruebas y seguridad" \
+          bash .github/scripts/notificar_telegram.sh actualizar \
             "Secretos (Gitleaks)=$GITLEAKS" \
-            "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD"
+            "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD" \
+            "Imagen ms-identidad (Trivy, SBOM, GHCR)=$IMAGEN" \
+            "SonarQube (quality gate)=pendiente"
 
   quality:
     name: quality-pr
-    needs: [gitleaks, identidad]
+    needs: [gitleaks, identidad, imagen-identidad]
     # Corre aunque falle una etapa previa: un job omitido cuenta como exitoso en los checks requeridos.
     # Los PR desde forks no llegan al runner propio.
     if: ${{ !cancelled() && (github.event_name == 'push' || !github.event.pull_request.head.repo.fork) }}
@@ -87,9 +132,10 @@ jobs:
         env:
           GITLEAKS: ${{ needs.gitleaks.result }}
           IDENTIDAD: ${{ needs.identidad.result }}
+          IMAGEN: ${{ needs.imagen-identidad.result }}
         run: |
-          if ($env:GITLEAKS -ne "success" -or $env:IDENTIDAD -ne "success") {
-            throw "Etapas previas sin aprobar: gitleaks=$env:GITLEAKS, identidad=$env:IDENTIDAD"
+          if ($env:GITLEAKS -ne "success" -or $env:IDENTIDAD -ne "success" -or $env:IMAGEN -ne "success") {
+            throw "Etapas previas sin aprobar: gitleaks=$env:GITLEAKS, identidad=$env:IDENTIDAD, imagen=$env:IMAGEN"
           }
 
       - name: Checkout
@@ -169,7 +215,7 @@ jobs:
 
   notificar-calidad:
     name: telegram-calidad
-    needs: [quality]
+    needs: [notificar-inicio, gitleaks, identidad, imagen-identidad, notificar-pruebas, quality]
     if: ${{ !cancelled() && needs.quality.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -185,5 +231,15 @@ jobs:
           RAMA: ${{ github.head_ref || github.ref_name }}
           COMMIT: ${{ github.sha }}
           URL_EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          MENSAJE_ID: ${{ needs.notificar-inicio.outputs.mensaje-id }}
+          INICIO: ${{ needs.notificar-inicio.outputs.inicio }}
+          GITLEAKS: ${{ needs.gitleaks.result }}
+          IDENTIDAD: ${{ needs.identidad.result }}
+          IMAGEN: ${{ needs.imagen-identidad.result }}
           CALIDAD: ${{ needs.quality.result }}
-        run: bash .github/scripts/notificar_telegram.sh "Calidad" "SonarQube (quality gate)=$CALIDAD"
+        run: |
+          bash .github/scripts/notificar_telegram.sh actualizar \
+            "Secretos (Gitleaks)=$GITLEAKS" \
+            "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD" \
+            "Imagen ms-identidad (Trivy, SBOM, GHCR)=$IMAGEN" \
+            "SonarQube (quality gate)=$CALIDAD"

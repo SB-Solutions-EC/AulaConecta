@@ -151,6 +151,7 @@ jobs:
       - name: SonarQube analysis
         shell: powershell
         env:
+          # El scanner los lee del entorno: como argumentos serían visibles en la lista de procesos
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
@@ -161,8 +162,6 @@ jobs:
           }
           & $scanner `
             "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY" `
-            "-Dsonar.host.url=$env:SONAR_HOST_URL" `
-            "-Dsonar.token=$env:SONAR_TOKEN" `
             "-Dsonar.qualitygate.wait=true"
           if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE

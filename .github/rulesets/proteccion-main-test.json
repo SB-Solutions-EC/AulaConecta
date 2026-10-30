@@ -26,11 +26,19 @@
       "parameters": {
         "required_status_checks": [
           {
-            "context": "CI / quality-pr",
+            "context": "quality-pr",
+            "integration_id": null
+          },
+          {
+            "context": "gitleaks",
+            "integration_id": null
+          },
+          {
+            "context": "identidad / ms-identidad",
             "integration_id": null
           }
         ],
-        "strict_required_status_checks_policy": true
+        "strict_required_status_checks_policy": false
       }
     }
   ]

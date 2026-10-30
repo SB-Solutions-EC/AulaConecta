@@ -26,6 +26,12 @@ Pruebas, con Java 21 instalado:
 
 Las pruebas de la migración usan un PostgreSQL real con Testcontainers. Si no hay Docker, se omiten y las demás siguen corriendo.
 
+El CI ([ci-identidad.yml](../../.github/workflows/ci-identidad.yml)) ejecuta además JaCoCo y Dependency-Check. Para revisar las dependencias en local:
+
+```bash
+./mvnw org.owasp:dependency-check-maven:check   # la primera vez descarga la base de la NVD (unos 7 minutos)
+```
+
 Sin Java 21, con Docker:
 
 ```bash

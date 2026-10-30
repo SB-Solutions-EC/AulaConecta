@@ -15,14 +15,85 @@ on:
 permissions:
   contents: read
 
+env:
+  GITLEAKS_VERSION: 8.30.1
+  GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+
 jobs:
-  quality:
-    name: quality-pr
-    runs-on: [self-hosted, windows, x64]
+  # Los trabajos que ejecutan código del PR corren en GitHub y no en el runner propio
+  # (modelo de amenazas E-03). Solo SonarQube lo necesita, porque el servidor es local.
+  gitleaks:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Instalar Gitleaks
+        run: |
+          archivo="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$archivo" "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archivo}"
+          echo "${GITLEAKS_SHA256}  ${archivo}" | sha256sum -c -
+          tar -xzf "$archivo" -C "$RUNNER_TEMP" gitleaks
+
+      - name: Buscar secretos y datos personales en el historial
+        run: '"$RUNNER_TEMP/gitleaks" detect --source . --config .gitleaks.toml --redact --no-banner -v'
+
+  identidad:
+    name: identidad
+    uses: ./.github/workflows/ci-identidad.yml
+
+  notificar-pruebas:
+    name: telegram-pruebas
+    needs: [gitleaks, identidad]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Avisar en Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RAMA: ${{ github.head_ref || github.ref_name }}
+          COMMIT: ${{ github.sha }}
+          URL_EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GITLEAKS: ${{ needs.gitleaks.result }}
+          IDENTIDAD: ${{ needs.identidad.result }}
+        run: |
+          bash .github/scripts/notificar_telegram.sh "Pruebas y seguridad" \
+            "Secretos (Gitleaks)=$GITLEAKS" \
+            "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD"
+
+  quality:
+    name: quality-pr
+    needs: [gitleaks, identidad]
+    # Corre aunque falle una etapa previa: un job omitido cuenta como exitoso en los checks requeridos.
+    # Los PR desde forks no llegan al runner propio.
+    if: ${{ !cancelled() && (github.event_name == 'push' || !github.event.pull_request.head.repo.fork) }}
+    runs-on: [self-hosted, windows, x64]
+    timeout-minutes: 30
+
+    steps:
+      - name: Verificar etapas previas
+        shell: powershell
+        env:
+          GITLEAKS: ${{ needs.gitleaks.result }}
+          IDENTIDAD: ${{ needs.identidad.result }}
+        run: |
+          if ($env:GITLEAKS -ne "success" -or $env:IDENTIDAD -ne "success") {
+            throw "Etapas previas sin aprobar: gitleaks=$env:GITLEAKS, identidad=$env:IDENTIDAD"
+          }
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -56,15 +127,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           $required = @(
             "SONAR_TOKEN",
             "SONAR_PROJECT_KEY",
-            "SONAR_HOST_URL",
-            "TELEGRAM_BOT_TOKEN",
-            "TELEGRAM_CHAT_ID"
+            "SONAR_HOST_URL"
           )
           $missing = @(
             $required | Where-Object {
@@ -75,18 +142,25 @@ jobs:
             throw "Missing GitHub Secrets: $($missing -join ', ')"
           }
 
+      - name: Descargar clases y cobertura de ms-identidad
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: identidad-resultados
+          path: services/ms-identidad/target
+
       - name: SonarQube analysis
         shell: powershell
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: |
           $scanner = "C:\sonar-scanner\bin\sonar-scanner.bat"
           if (-not (Test-Path -LiteralPath $scanner -PathType Leaf)) {
             throw "SonarScanner no encontrado en $scanner. Instálalo en el runner autoalojado."
           }
           & $scanner `
-            "-Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}" `
+            "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY" `
             "-Dsonar.host.url=$env:SONAR_HOST_URL" `
             "-Dsonar.token=$env:SONAR_TOKEN" `
             "-Dsonar.qualitygate.wait=true"
@@ -94,36 +168,23 @@ jobs:
             exit $LASTEXITCODE
           }
 
-      - name: Notify Telegram
-        if: always()
-        continue-on-error: true
-        shell: powershell
+  notificar-calidad:
+    name: telegram-calidad
+    needs: [quality]
+    if: ${{ !cancelled() && needs.quality.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Avisar en Telegram
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          JOB_STATUS: ${{ job.status }}
-          BRANCH_NAME: ${{ github.ref_name }}
-          COMMIT_SHA: ${{ github.sha }}
-        run: |
-          $message = "AulaConecta CI: $env:JOB_STATUS`nBranch: $env:BRANCH_NAME`nCommit: $env:COMMIT_SHA"
-          $payload = @{
-            chat_id = $env:TELEGRAM_CHAT_ID
-            text = $message
-          } | ConvertTo-Json -Compress
-          $bytes = [System.Text.Encoding]::UTF8.GetBytes($payload)
-          $uri = "https://api.telegram.org/bot$env:TELEGRAM_BOT_TOKEN/sendMessage"
-          try {
-            $response = Invoke-WebRequest `
-              -Method Post `
-              -Uri $uri `
-              -Body $bytes `
-              -ContentType "application/json; charset=utf-8" `
-              -UseBasicParsing
-            $result = $response.Content | ConvertFrom-Json
-            if (-not $result.ok) {
-              throw "Telegram API rejected the message: $($response.Content)"
-            }
-            Write-Output "Telegram notification sent."
-          } catch {
-            Write-Warning "Telegram notification failed: $($_.Exception.Message)"
-          }
+          RAMA: ${{ github.head_ref || github.ref_name }}
+          COMMIT: ${{ github.sha }}
+          URL_EJECUCION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CALIDAD: ${{ needs.quality.result }}
+        run: bash .github/scripts/notificar_telegram.sh "Calidad" "SonarQube (quality gate)=$CALIDAD"

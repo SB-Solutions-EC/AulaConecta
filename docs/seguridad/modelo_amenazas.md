@@ -120,7 +120,7 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 |---|---|---|---|---|---|
 | E-01 | Servicios | Un usuario obtiene permisos de otro rol ocultando o cambiando opciones en la PWA | A | La autorización se decide en el servidor con los roles del JWT firmado; la PWA solo oculta opciones | T1105-M, T1109-A |
 | E-02 | Bases de datos | Inyección SQL en filtros o búsquedas | M | Consultas parametrizadas (Prisma, JPA, SQLAlchemy); pruebas de inyección | T1109-A |
-| E-03 | Runner autoalojado | Código de un pull request ejecuta comandos en la máquina del runner, que hoy corre con una cuenta de administrador de Windows | A | Ejecutar el servicio del runner con una cuenta sin privilegios; no usar `pull_request_target`; PR de forks con aprobación manual | T1030-A |
+| E-03 | Runner autoalojado | Código de un pull request ejecuta comandos en la máquina del runner, que corre con una cuenta de administrador de Windows | A | Compilación y pruebas en runners de GitHub; el runner propio solo corre SonarQube y no recibe PR de forks; no usar `pull_request_target`; falta ejecutar el servicio con una cuenta sin privilegios | T1029-A, T1030-A |
 
 ## 4. Controles por rol
 
@@ -161,6 +161,6 @@ Este modelo agrega amenazas que el taller no cubría porque aparecieron con la a
 
 ## 7. Seguimiento
 
-- **Riesgo que requiere acción ya:** E-03. El runner autoalojado ejecuta el pipeline con una cuenta de administrador de Windows (se ve en la ruta `C:\Users\Administrador\` del registro del CI). Conviene cambiar la cuenta del servicio antes de aceptar pull requests de forks.
+- **Riesgo que requiere acción ya:** E-03. Desde T1029-A el código de los PR se compila y prueba en runners de GitHub, pero SonarQube aún corre en el runner autoalojado con una cuenta de administrador de Windows (se ve en la ruta `C:\Users\Administrador\` del registro del CI). Conviene cambiar la cuenta del servicio.
 - Cada amenaza se cierra cuando su tarea está terminada y tiene evidencia (prueba en el CI o captura).
 - El modelo se revisa en el informe de seguridad del sprint 7 (T1218-A) y en el informe final (T0111-A), y se actualiza si cambia la arquitectura.

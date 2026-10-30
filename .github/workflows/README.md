@@ -20,4 +20,4 @@ El workflow no fusiona ramas automáticamente. El flujo manual es:
 2. Cierre del sprint: `dev` → `test` mediante PR aprobado.
 3. Control o versión estable: `test` → `main` mediante PR aprobado.
 
-`test` y `main` deben exigir el check `CI / quality-pr` y una aprobación humana en sus rulesets. Los tokens van en GitHub Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_HOST_URL`), nunca en el código.
+`test` y `main` exigen los checks `quality-pr`, `gitleaks` e `identidad / ms-identidad`, y una aprobación humana ([proteccion-main-test.json](../rulesets/proteccion-main-test.json)). El nombre del check es el del job, sin el prefijo `CI /` que muestra la interfaz. Los tokens van en GitHub Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `SONAR_TOKEN`, `SONAR_PROJECT_KEY`, `SONAR_HOST_URL`), nunca en el código.

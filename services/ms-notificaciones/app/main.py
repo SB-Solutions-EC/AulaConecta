@@ -4,10 +4,9 @@ Expone únicamente /health sin detalles internos, alineado con el contrato OpenA
 (openapi/ms-notificaciones.yaml) y las reglas del gateway Traefik (/api/notificaciones/health).
 """
 
-from contextlib import asynccontextmanager
 import os
 from pathlib import Path
-from typing import AsyncIterator, Literal
+from typing import Literal
 
 from alembic import command
 from alembic.config import Config
@@ -34,15 +33,9 @@ def ejecutar_migraciones_al_arrancar() -> None:
     command.upgrade(cfg, "head")
 
 
-@asynccontextmanager
-async def ciclo_vida(_aplicacion: FastAPI) -> AsyncIterator[None]:
-    """Ejecuta las migraciones de db_notificaciones al iniciar el servicio."""
-    ejecutar_migraciones_al_arrancar()
-    yield
-
-
 def crear_aplicacion() -> FastAPI:
     """Crea y configura la instancia de FastAPI de ms-notificaciones."""
+    ejecutar_migraciones_al_arrancar()
     aplicacion = FastAPI(
         title="AulaConecta — ms-notificaciones API",
         version="0.1.0",
@@ -53,7 +46,6 @@ def crear_aplicacion() -> FastAPI:
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
-        lifespan=ciclo_vida,
     )
 
     @aplicacion.get(

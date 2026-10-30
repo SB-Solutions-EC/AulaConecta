@@ -18,6 +18,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+FK_CONTACTO_ID = "contacto.id"
+
 
 class Base(DeclarativeBase):
     """Clase base declarativa de SQLAlchemy para ms-notificaciones."""
@@ -68,7 +70,7 @@ class SuscripcionPush(Base):
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     contacto_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("contacto.id"), nullable=False, index=True
+        Uuid(as_uuid=True), ForeignKey(FK_CONTACTO_ID), nullable=False, index=True
     )
     endpoint: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     clave_p256dh: Mapped[str] = mapped_column(Text, nullable=False)
@@ -138,7 +140,7 @@ class Notificacion(Base):
         Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     contacto_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid(as_uuid=True), ForeignKey("contacto.id"), nullable=False, index=True
+        Uuid(as_uuid=True), ForeignKey(FK_CONTACTO_ID), nullable=False, index=True
     )
     plantilla_id: Mapped[uuid.UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("plantilla.id"), nullable=False
@@ -168,4 +170,3 @@ class Notificacion(Base):
         DateTime(timezone=True), nullable=True
     )
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-

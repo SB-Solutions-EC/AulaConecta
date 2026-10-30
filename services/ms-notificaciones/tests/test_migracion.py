@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 RUTA_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+TABLA_ALEMBIC = "alembic_version"
 
 
 def test_migracion_alembic_crea_tablas_y_plantillas_oficiales(tmp_path: Path) -> None:
@@ -24,7 +25,7 @@ def test_migracion_alembic_crea_tablas_y_plantillas_oficiales(tmp_path: Path) ->
         command.upgrade(cfg, "head")
 
     inspector = inspect(engine)
-    tablas = set(inspector.get_table_names()) - {"alembic_version"}
+    tablas = set(inspector.get_table_names()) - {TABLA_ALEMBIC}
     assert tablas == {
         "contacto",
         "suscripcion_push",
@@ -51,7 +52,7 @@ def test_migracion_alembic_crea_tablas_y_plantillas_oficiales(tmp_path: Path) ->
         command.downgrade(cfg, "base")
 
     inspector_post = inspect(engine)
-    assert set(inspector_post.get_table_names()) - {"alembic_version"} == set()
+    assert set(inspector_post.get_table_names()) - {TABLA_ALEMBIC} == set()
 
 
 def test_restricciones_check_rechazan_valores_invalidos(tmp_path: Path) -> None:
@@ -66,12 +67,10 @@ def test_restricciones_check_rechazan_valores_invalidos(tmp_path: Path) -> None:
         cfg.attributes["connection"] = conn
         command.upgrade(cfg, "head")
 
-    with pytest.raises(IntegrityError):
-        with engine.begin() as conn:
-            conn.execute(
-                text(
-                    "INSERT INTO plantilla (id, codigo, texto, activa, version) "
-                    "VALUES ('22222222-2222-4222-8222-222222222222', 'CODIGO_INVALIDO', 'texto', 1, 0)"
-                )
-            )
-
+    sentencia_invalida = text(
+        "INSERT INTO plantilla (id, codigo, texto, activa, version) "
+        "VALUES ('22222222-2222-4222-8222-222222222222', 'CODIGO_INVALIDO', 'texto', 1, 0)"
+    )
+    with engine.connect() as conn:
+        with pytest.raises(IntegrityError):
+            conn.execute(sentencia_invalida)

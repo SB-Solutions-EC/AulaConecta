@@ -18,11 +18,13 @@ La prueba se ejecuta con [scripts/github/prueba_negativa_ci.sh](../../scripts/gi
 
 **Verificado en local (30/10):** con una copia del repositorio, Gitleaks detecta el secreto y sale con código 1; Dependency-Check falla por CVE-2021-44228; `mvn verify` pasa con `log4j-core`, de modo que el rechazo viene del análisis de dependencias y no de otra causa. El script no activa Gitleaks estando en `dev` porque arma el valor falso por partes.
 
-**Verificado en GitHub:** pendiente de ejecutar. Completar con el enlace del PR y la captura:
+**Verificado en GitHub (30/10):** el pipeline bloqueó el PR y cada check falló en el paso que corresponde.
 
-| PR | `gitleaks` | `identidad / ms-identidad` | Fusión bloqueada |
+| PR | `gitleaks` | `identidad / ms-identidad` | Fusión |
 |---|---|---|---|
-| Pendiente | Pendiente | Pendiente | Pendiente |
+| [#257](https://github.com/SB-Solutions-EC/AulaConecta/pull/257), cerrado sin fusionar | ❌ Paso "Buscar secretos y datos personales en el historial" | ❌ Paso "Analizar dependencias (falla con CVSS 7 o mayor)" | Bloqueada (`BLOCKED`) |
+
+El PR también tenía pendiente la aprobación humana, que es otro requisito de `test`. El check `quality-pr` quedó en cola porque el runner propio estaba apagado; no influyó en el resultado, ya que los dos checks fallidos corren en GitHub.
 
 ## 2. Checklist
 
@@ -68,8 +70,8 @@ La prueba se ejecuta con [scripts/github/prueba_negativa_ci.sh](../../scripts/gi
 | ✅ | Un fallo previo no se puede saltar | `quality-pr` corre siempre y falla si una etapa previa falló; un job omitido contaría como exitoso |
 | ✅ | `main` y `test` solo por PR con una aprobación | [proteccion-main-test.json](../../.github/rulesets/proteccion-main-test.json) |
 | ✅ | Sin force push ni borrado en `dev`, `test` y `main` | Rulesets activos |
-| ⚠️ | `main` y `test` exigen los tres checks | Corregido en el archivo; falta aplicarlo en GitHub (acción 4) |
-| ⚠️ | `dev` exige el CI | Hoy no lo exige (acción 5) |
+| ✅ | `main` y `test` exigen los tres checks | `quality-pr`, `gitleaks` e `identidad / ms-identidad`, aplicados en GitHub el 30/10 y comprobados con el PR #257 |
+| ⚠️ | `dev` exige el CI | Hoy no lo exige (acción 4) |
 
 ## 3. Pendientes
 
@@ -78,14 +80,13 @@ La prueba se ejecuta con [scripts/github/prueba_negativa_ci.sh](../../scripts/gi
 | 1 | Activar secret scanning y push protection | Abner | Son gratuitos en repositorios públicos y bloquean el secreto antes de que llegue a GitHub |
 | 2 | Ejecutar el servicio del runner con una cuenta sin privilegios | Dueño del equipo | Amenaza E-03: SonarQube todavía corre en esa máquina |
 | 3 | Activar `sha_pinning_required` | Abner | Convierte la práctica actual en una regla; conviene hacerlo cuando todos los workflows de servicio ya estén fijados |
-| 4 | Aplicar el ruleset corregido en GitHub | Abner | El ruleset exigía `CI / quality-pr`, pero el check se llama `quality-pr`: nunca se cumplía y bloquearía todo PR a `test` y `main` |
-| 5 | Decidir si `dev` exige el CI | Equipo | Bloquearía también los push directos que hoy permite el README; hasta decidirlo, el bloqueo efectivo está en `test` y `main` |
+| 4 | Decidir si `dev` exige el CI | Equipo | Bloquearía también los push directos que hoy permite el README; hasta decidirlo, el bloqueo efectivo está en `test` y `main` |
 
 ## 4. Hallazgos de la revisión
 
 | Hallazgo | Estado |
 |---|---|
-| El ruleset de `main` y `test` exigía un check con un nombre que no existe. Se creó después del último PR a esas ramas, así que nunca se había puesto a prueba | Corregido en el archivo; falta aplicarlo |
-| `gitleaks` y `ms-identidad` detectaban problemas, pero no eran obligatorios: el pipeline avisaba sin bloquear | Corregido en el archivo; falta aplicarlo |
+| El ruleset de `main` y `test` exigía un check con un nombre que no existe (`CI / quality-pr`). Se creó después del último PR a esas ramas, así que nunca se había puesto a prueba | Corregido y aplicado |
+| `gitleaks` y `ms-identidad` detectaban problemas, pero no eran obligatorios: el pipeline avisaba sin bloquear | Corregido y aplicado |
 | El token de SonarQube se pasaba como argumento, visible en la lista de procesos del runner | Corregido |
 | La API de la NVD ya no funciona sin clave y Dependency-Check fallaba por completo | Corregido en T1029-A con los archivos públicos de la NVD |

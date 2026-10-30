@@ -6,11 +6,35 @@ http:
       entryPoints:
         - websecure
       rule: "Path(`/api/identidad`) || PathPrefix(`/api/identidad/`)"
+      priority: 20
       middlewares:
         - limite-peticiones
         - cabeceras-seguridad
         - quitar-prefijo-identidad
       service: ms-identidad
+      tls: {}
+
+    notificaciones:
+      entryPoints:
+        - websecure
+      rule: "Path(`/api/notificaciones`) || PathPrefix(`/api/notificaciones/`)"
+      priority: 20
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - quitar-prefijo-notificaciones
+      service: ms-notificaciones
+      tls: {}
+
+    pwa:
+      entryPoints:
+        - websecure
+      rule: "PathPrefix(`/`)"
+      priority: 1
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+      service: pwa
       tls: {}
 
   middlewares:
@@ -35,11 +59,34 @@ http:
         prefixes:
           - /api/identidad
 
+    quitar-prefijo-notificaciones:
+      stripPrefix:
+        prefixes:
+          - /api/notificaciones
+
   services:
     ms-identidad:
       loadBalancer:
         servers:
           - url: http://ms-identidad:8080
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+    ms-notificaciones:
+      loadBalancer:
+        servers:
+          - url: http://ms-notificaciones:8000
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+    pwa:
+      loadBalancer:
+        servers:
+          - url: http://pwa:8080
         healthCheck:
           path: /health
           interval: 10s

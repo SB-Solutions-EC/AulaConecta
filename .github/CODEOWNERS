@@ -1,12 +1,17 @@
 # Revisores sugeridos por carpeta. La aprobación de los PR la da el CI;
 # CODEOWNERS sirve para que GitHub avise automáticamente al responsable del área.
 
-*               @cmacuna7 @adarboleda @cmbonifaz
+*                               @cmacuna7 @adarboleda @cmbonifaz
 
-/backend/       @cmacuna7
-/packages/      @cmacuna7
-/frontend/      @cmbonifaz
-/.github/       @adarboleda
-/infra/         @adarboleda
-/services/ms-identidad/ @adarboleda
-/docs/          @cmacuna7 @adarboleda @cmbonifaz
+/apps/                          @cmbonifaz
+/frontend/                      @cmbonifaz
+/services/ms-identidad/         @adarboleda
+/services/ms-academico/         @cmacuna7
+/services/ms-notificaciones/    @cmbonifaz @cmacuna7
+/backend/                       @cmacuna7
+/packages/                      @cmacuna7
+/openapi/                       @cmbonifaz @cmacuna7 @adarboleda
+/infra/                         @adarboleda
+/tests/                         @adarboleda @cmbonifaz @cmacuna7
+/.github/                       @adarboleda
+/docs/                          @cmacuna7 @adarboleda @cmbonifaz

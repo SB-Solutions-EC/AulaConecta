@@ -1,0 +1,791 @@
+openapi: 3.1.0
+info:
+  title: AulaConecta — ms-identidad API
+  version: 0.1.0
+  description: |
+    Contrato OpenAPI inicial (v0) del microservicio de identidad (`ms-identidad`) para la **Unidad Educativa "Andoas"**.
+
+    **Responsabilidad:** Gestión de credenciales, roles (`ADMIN`, `SECRETARIA`, `DOCENTE`, `ESTUDIANTE`, `REPRESENTANTE`), autenticación mediante JWT RS256, rotación de sesiones (`refresh token` en cookie `HttpOnly`), publicación de claves públicas (`JWKS`), tokens de servicio (`client_credentials`), bloqueo temporal tras intentos fallidos y auditoría inmutable de accesos.
+
+    **Límite de datos (RNF-04):** Este servicio no almacena nombres, cédulas en claro ni datos académicos; únicamente el hash Argon2id de la clave (cuya clave inicial proviene de la cédula en el alta, con `debeCambiarClave = true` según RF-03) y el identificador `usuario_id` compartido como referencia UUID con los demás microservicios.
+  contact:
+    name: Equipo SB Solutions — AulaConecta
+    url: https://github.com/SB-Solutions-EC/AulaConecta
+
+servers:
+  - url: https://localhost/api/identidad
+    description: Gateway local (Traefik con TLS)
+  - url: http://localhost:8080
+    description: Puerto directo del contenedor en la red interna (solo desarrollo)
+
+tags:
+  - name: Salud
+    description: Verificación de disponibilidad del microservicio
+  - name: Autenticación
+    description: Inicio de sesión, renovación de tokens, cierre de sesión y cambio de clave (RF-01, RF-03, RNF-04)
+  - name: Claves Públicas (JWKS)
+    description: Claves públicas RSA para validación local de firmas JWT en otros microservicios
+  - name: Servicio a Servicio
+    description: Emisión de tokens internos (client_credentials) para comunicación entre microservicios
+  - name: Usuarios y Roles
+    description: Creación de cuentas (RF-02), gestión de roles, estado y desbloqueo de cuentas
+  - name: Auditoría
+    description: Registro inmutable de eventos de acceso y seguridad (RNF-09, RNF-12)
+
+paths:
+  /health:
+    get:
+      tags: [Salud]
+      summary: Estado de salud del servicio
+      description: Endpoint público utilizado por Traefik y Docker healthcheck para verificar que `ms-identidad` está activo.
+      operationId: obtenerSaludIdentidad
+      responses:
+        "200":
+          description: Servicio operativo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaSalud"
+              example:
+                status: UP
+
+  /.well-known/jwks.json:
+    get:
+      tags: [Claves Públicas (JWKS)]
+      summary: Obtener conjunto de claves públicas JSON Web Key Set (JWKS)
+      description: Publica las claves públicas activas (`RS256`) para que `ms-academico` y `ms-notificaciones` verifiquen localmente los tokens JWT sin consultar cada petición.
+      operationId: obtenerJwks
+      responses:
+        "200":
+          description: Conjunto de claves públicas JWK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConjuntoJwks"
+
+  /auth/login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión con usuario y contraseña
+      description: |
+        Autentica al usuario verificando su hash Argon2id y el estado de la cuenta (RF-01).
+        - Si acumula **3 intentos fallidos consecutivos**, la cuenta pasa a `BLOQUEADO` temporalmente y registra el evento en `AUDITORIA_ACCESO` (RNF-12).
+        - Si ingresa con su clave inicial (cédula), devuelve `debeCambiarClave: true` en el token para obligar el cambio antes de acceder a otros módulos (RF-03).
+        - Emite el `accessToken` JWT (15 min) en el cuerpo y el `refreshToken` (8 h) en una cookie `HttpOnly; Secure; SameSite=Strict`.
+      operationId: iniciarSesion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudLogin"
+      responses:
+        "200":
+          description: Autenticación exitosa
+          headers:
+            Set-Cookie:
+              description: Cookie `HttpOnly` con el `refresh_token` de la sesión
+              schema:
+                type: string
+                example: refresh_token=eyJhb...; Path=/api/identidad/auth; HttpOnly; Secure; SameSite=Strict; Max-Age=28800
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaTokenAcceso"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "423":
+          description: Cuenta bloqueada temporalmente tras 3 intentos fallidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+        "429":
+          $ref: "#/components/responses/DemasiadasPeticiones"
+
+  /auth/refresh:
+    post:
+      tags: [Autenticación]
+      summary: Renovar token de acceso rotando el refresh token
+      description: Valida el `refresh_token` enviado por cookie `HttpOnly`, revoca la sesión anterior, emite un nuevo par de tokens (rotación) y devuelve un nuevo `accessToken`.
+      operationId: renovarToken
+      responses:
+        "200":
+          description: Token renovado exitosamente
+          headers:
+            Set-Cookie:
+              description: Nueva cookie `HttpOnly` con el `refresh_token` rotado
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaTokenAcceso"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+
+  /auth/logout:
+    post:
+      tags: [Autenticación]
+      summary: Cerrar sesión actual
+      description: Revoca la sesión activa en `SESION`, limpia la cookie `refresh_token` y registra el evento `LOGOUT` en `AUDITORIA_ACCESO`.
+      operationId: cerrarSesion
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Sesión cerrada correctamente
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+
+  /auth/cambiar-clave:
+    post:
+      tags: [Autenticación]
+      summary: Cambiar contraseña del usuario autenticado (incluye cambio obligatorio inicial RF-03)
+      description: Permite actualizar la contraseña actualizando `debe_cambiar_clave = false`, incrementando `version` y registrando `CAMBIO_CLAVE` en `AUDITORIA_ACCESO`.
+      operationId: cambiarClavePropia
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudCambioClave"
+      responses:
+        "200":
+          description: Contraseña actualizada y nuevo token emitido con `debeCambiarClave = false`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaTokenAcceso"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+
+  /auth/me:
+    get:
+      tags: [Autenticación]
+      summary: Obtener identidad y roles de la sesión actual
+      operationId: obtenerPerfilIdentidad
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Información de identidad del usuario autenticado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+
+  /oauth/token:
+    post:
+      tags: [Servicio a Servicio]
+      summary: Emitir token de servicio interno (Client Credentials)
+      description: Autentica un microservicio interno (`ms-academico` o `ms-notificaciones`) mediante `client_id` y `client_secret` contra la tabla `CLIENTE_SERVICIO` y devuelve un JWT de corta duración (5 minutos) con los alcances autorizados (ej. `usuarios:crear`).
+      operationId: emitirTokenServicio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudTokenServicio"
+      responses:
+        "200":
+          description: Token de servicio emitido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaTokenServicio"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+
+  /usuarios:
+    get:
+      tags: [Usuarios y Roles]
+      summary: Listar cuentas de usuario con filtros
+      description: Exclusivo para el rol `ADMIN` o `SECRETARIA`. Permite buscar por nombre de usuario, rol o estado de cuenta.
+      operationId: listarUsuarios
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: rol
+          in: query
+          schema:
+            $ref: "#/components/schemas/CodigoRol"
+        - name: estado
+          in: query
+          schema:
+            $ref: "#/components/schemas/EstadoUsuario"
+        - name: q
+          in: query
+          description: Búsqueda parcial por `nombreUsuario`
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de usuarios encontrados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+
+    post:
+      tags: [Usuarios y Roles]
+      summary: Crear cuenta de usuario con generación automática de nombre de usuario y clave inicial
+      description: |
+        Invocado por `ms-academico` (con token de servicio `usuarios:crear`) o por un `ADMIN` al registrar personal/estudiantes:
+        1. Genera `nombre_usuario` a partir de `nombre.apellido` (agregando sufijo numérico si ya existe, RF-02).
+        2. Toma la `cedulaInicial` únicamente para derivar el hash Argon2id de la clave inicial con `debe_cambiar_clave = true` (RF-03); **no almacena la cédula en `db_identidad`**.
+        3. Asigna los roles indicados y devuelve el `id` (`usuario_id`) para enlazarlo con `PERSONA` en `ms-academico`.
+      operationId: crearUsuario
+      security:
+        - bearerAuth: []
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudCrearUsuario"
+      responses:
+        "201":
+          description: Cuenta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          description: Conflicto al crear el usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+
+  /usuarios/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    get:
+      tags: [Usuarios y Roles]
+      summary: Obtener detalle de una cuenta de usuario por ID
+      operationId: obtenerUsuarioPorId
+      security:
+        - bearerAuth: []
+        - serviceToken: []
+      responses:
+        "200":
+          description: Cuenta de usuario encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+
+    patch:
+      tags: [Usuarios y Roles]
+      summary: Actualizar estado de la cuenta (activar, inactivar)
+      description: Realiza borrado lógico (`INACTIVO`) o reactivación (`ACTIVO`) de una cuenta verificando el campo `version`.
+      operationId: actualizarEstadoUsuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudActualizarEstadoUsuario"
+      responses:
+        "200":
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
+
+  /usuarios/{id}/roles:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    put:
+      tags: [Usuarios y Roles]
+      summary: Actualizar roles asignados a un usuario
+      description: Permite que una misma persona tenga uno o más roles (ej. `DOCENTE` y `REPRESENTANTE`, RF-01). Registra `ROL_ASIGNADO` / `ROL_RETIRADO` en `AUDITORIA_ACCESO`.
+      operationId: actualizarRolesUsuario
+      security:
+        - bearerAuth: []
+        - serviceToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudActualizarRoles"
+      responses:
+        "200":
+          description: Roles actualizados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+
+  /usuarios/{id}/desbloquear:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Usuarios y Roles]
+      summary: Desbloquear cuenta y/o restablecer clave inicial
+      description: Reinicia `intentos_fallidos = 0`, limpia `bloqueado_hasta`, pasa el estado a `ACTIVO` y registra `DESBLOQUEO` en `AUDITORIA_ACCESO`. Opcionalmente restablece la clave inicial con `debe_cambiar_clave = true`.
+      operationId: desbloquearUsuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudDesbloqueo"
+      responses:
+        "200":
+          description: Cuenta desbloqueada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsuarioIdentidad"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+
+  /auditoria-accesos:
+    get:
+      tags: [Auditoría]
+      summary: Consultar bitácora inmutable de accesos y eventos de seguridad
+      description: Exclusivo para `ADMIN`. Consulta registros de `AUDITORIA_ACCESO` (`LOGIN_OK`, `LOGIN_FALLIDO`, `BLOQUEO`, `DESBLOQUEO`, `CAMBIO_CLAVE`, `LOGOUT`, `ROL_ASIGNADO`, `ROL_RETIRADO`).
+      operationId: listarAuditoriaAccesos
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: usuarioId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: evento
+          in: query
+          schema:
+            $ref: "#/components/schemas/TipoEventoAuditoriaAcceso"
+        - name: desde
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: hasta
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: limite
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        "200":
+          description: Lista de eventos de auditoría de acceso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RegistroAuditoriaAcceso"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de acceso JWT firmado con RS256 (`sub`, `roles`, `debe_cambiar_clave`, `kid`).
+    serviceToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT de servicio emitido por `/oauth/token` (`client_credentials`) con alcances internos (`usuarios:crear`, `usuarios:leer`).
+
+  parameters:
+    IdRecurso:
+      name: id
+      in: path
+      required: true
+      description: Identificador UUID del recurso
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    SolicitudInvalida:
+      description: Datos de entrada inválidos
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoAutorizado:
+      description: Credenciales inválidas o token ausente/expirado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    Prohibido:
+      description: El rol actual no tiene permiso para realizar esta operación
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    NoEncontrado:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    ConflictoVersion:
+      description: Conflicto de versión (`version` desactualizada)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+    DemasiadasPeticiones:
+      description: Límite de peticiones excedido (rate limit)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorApi"
+
+  schemas:
+    RespuestaSalud:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [UP, DOWN]
+
+    CodigoRol:
+      type: string
+      enum: [ADMIN, SECRETARIA, DOCENTE, ESTUDIANTE, REPRESENTANTE]
+      description: Roles oficiales de AulaConecta (RF-01, RF-38)
+
+    EstadoUsuario:
+      type: string
+      enum: [ACTIVO, BLOQUEADO, INACTIVO]
+
+    TipoEventoAuditoriaAcceso:
+      type: string
+      enum:
+        - LOGIN_OK
+        - LOGIN_FALLIDO
+        - BLOQUEO
+        - DESBLOQUEO
+        - CAMBIO_CLAVE
+        - LOGOUT
+        - ROL_ASIGNADO
+        - ROL_RETIRADO
+
+    SolicitudLogin:
+      type: object
+      required: [nombreUsuario, clave]
+      properties:
+        nombreUsuario:
+          type: string
+          minLength: 3
+          maxLength: 100
+          example: maria.grefa
+        clave:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+
+    RespuestaTokenAcceso:
+      type: object
+      required: [accessToken, tokenType, expiresIn, usuario]
+      properties:
+        accessToken:
+          type: string
+          description: JWT RS256 de corta duración (15 minutos)
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: Tiempo de vida en segundos
+          example: 900
+        usuario:
+          $ref: "#/components/schemas/UsuarioIdentidad"
+
+    SolicitudCambioClave:
+      type: object
+      required: [claveActual, claveNueva]
+      properties:
+        claveActual:
+          type: string
+          format: password
+        claveNueva:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+          description: Nueva contraseña definida por el usuario (distinta de su clave inicial)
+
+    SolicitudTokenServicio:
+      type: object
+      required: [clientId, clientSecret, grantType]
+      properties:
+        grantType:
+          type: string
+          enum: [client_credentials]
+        clientId:
+          type: string
+          example: ms-academico
+        clientSecret:
+          type: string
+          format: password
+        scope:
+          type: string
+          example: usuarios:crear usuarios:leer
+
+    RespuestaTokenServicio:
+      type: object
+      required: [accessToken, tokenType, expiresIn, scope]
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          example: 300
+        scope:
+          type: string
+          example: usuarios:crear usuarios:leer
+
+    SolicitudCrearUsuario:
+      type: object
+      required: [nombres, apellidos, cedulaInicial, roles]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID opcional generado por el cliente; si se omite, el servicio lo genera
+        nombres:
+          type: string
+          description: Se usa solo para construir el `nombreUsuario` (`nombre.apellido`, RF-02); no se persiste en `db_identidad`
+          example: María Fernanda
+        apellidos:
+          type: string
+          description: Se usa solo para construir el `nombreUsuario`; no se persiste en `db_identidad`
+          example: Grefa Tanguila
+        cedulaInicial:
+          type: string
+          description: Se usa una única vez para generar el hash Argon2id de la clave inicial (RF-03) y se descarta
+          example: "0000000000"
+        roles:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CodigoRol"
+
+    SolicitudActualizarEstadoUsuario:
+      type: object
+      required: [estado, version]
+      properties:
+        estado:
+          type: string
+          enum: [ACTIVO, INACTIVO]
+        version:
+          type: integer
+          minimum: 0
+
+    SolicitudActualizarRoles:
+      type: object
+      required: [roles, version]
+      properties:
+        roles:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/CodigoRol"
+        version:
+          type: integer
+          minimum: 0
+
+    SolicitudDesbloqueo:
+      type: object
+      properties:
+        restablecerClaveInicial:
+          type: boolean
+          default: false
+        cedulaInicial:
+          type: string
+          description: Requerida únicamente si `restablecerClaveInicial` es `true`
+
+    UsuarioIdentidad:
+      type: object
+      required:
+        - id
+        - nombreUsuario
+        - roles
+        - debeCambiarClave
+        - estado
+        - intentosFallidos
+        - version
+        - creadoEn
+        - actualizadoEn
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único (`usuario_id` referenciado en `ms-academico` y `ms-notificaciones`)
+        nombreUsuario:
+          type: string
+          example: maria.grefa
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/CodigoRol"
+        debeCambiarClave:
+          type: boolean
+          description: "`true` cuando la cuenta aún conserva la clave inicial (RF-03)"
+        estado:
+          $ref: "#/components/schemas/EstadoUsuario"
+        intentosFallidos:
+          type: integer
+          minimum: 0
+        bloqueadoHasta:
+          type: [string, "null"]
+          format: date-time
+        ultimoAcceso:
+          type: [string, "null"]
+          format: date-time
+        creadoEn:
+          type: string
+          format: date-time
+        actualizadoEn:
+          type: string
+          format: date-time
+        actualizadoPor:
+          type: [string, "null"]
+          format: uuid
+        version:
+          type: integer
+          minimum: 0
+
+    RegistroAuditoriaAcceso:
+      type: object
+      required: [id, evento, ocurridoEn]
+      properties:
+        id:
+          type: string
+          format: uuid
+        usuarioId:
+          type: [string, "null"]
+          format: uuid
+        nombreUsuarioIntentado:
+          type: [string, "null"]
+        evento:
+          $ref: "#/components/schemas/TipoEventoAuditoriaAcceso"
+        ip:
+          type: [string, "null"]
+        ocurridoEn:
+          type: string
+          format: date-time
+
+    ClavePublicaJwk:
+      type: object
+      required: [kty, use, alg, kid, n, e]
+      properties:
+        kty:
+          type: string
+          example: RSA
+        use:
+          type: string
+          example: sig
+        alg:
+          type: string
+          example: RS256
+        kid:
+          type: string
+          example: aulaconecta-2026-10
+        n:
+          type: string
+        e:
+          type: string
+          example: AQAB
+
+    ConjuntoJwks:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClavePublicaJwk"
+
+    ErrorApi:
+      type: object
+      required: [codigo, mensaje, timestamp]
+      properties:
+        codigo:
+          type: string
+          example: CREDENCIALES_INVALIDAS
+        mensaje:
+          type: string
+          example: Usuario o contraseña incorrectos
+        detalles:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: string
+          format: date-time

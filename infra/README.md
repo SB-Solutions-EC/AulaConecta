@@ -2,12 +2,12 @@
 
 Archivos para levantar y desplegar AulaConecta.
 
-| Archivo (cuando exista) | Para qué |
+| Archivo | Para qué |
 |---|---|
-| `docker-compose.yml` | Levanta en local el gateway, los 3 microservicios, la PWA, RabbitMQ y PostgreSQL (sprint 3) |
+| `docker-compose.yml` | Levanta en local el gateway, los microservicios, la PWA, RabbitMQ y PostgreSQL (sprint 3) |
 | `traefik/` | Configuración del gateway: TLS, rutas y límite de peticiones (sprint 3) |
 | `postgres/init.sql` | Crea las tres bases y un usuario por servicio |
-| `nginx/` | Servidor de la PWA con cabeceras de seguridad |
+| `rabbitmq/` | Configuración e inicialización de RabbitMQ (`aulaconecta.eventos`, `notificaciones.avisos` y DLQ) |
 | `despliegue/` | Ambiente de pruebas con despliegue continuo desde `test` (sprint 5) |
 
 ## Levantar el stack local
@@ -15,9 +15,11 @@ Archivos para levantar y desplegar AulaConecta.
 Solo se necesita Docker. Desde la raíz del repositorio:
 
 ```bash
-cp infra/.env.example infra/.env                   # solo la primera vez; cambia las claves
+cp infra/.env.example infra/.env                         # solo la primera vez; cambia las claves
 docker compose -f infra/docker-compose.yml up --build -d
-curl -k https://localhost/api/identidad/health     # {"status":"UP"}
+curl -k https://localhost/api/identidad/health           # {"status":"UP"}
+curl -k https://localhost/api/notificaciones/health      # {"status":"UP"}
+curl -k https://localhost/health                         # {"status":"UP"}
 docker compose -f infra/docker-compose.yml down
 ```
 
@@ -40,6 +42,15 @@ Para abrir una consola en una base:
 ```bash
 docker compose -f infra/docker-compose.yml exec postgres sh -c 'PGPASSWORD=$POSTGRES_PASSWORD psql -U postgres -d db_identidad'
 ```
+
+## RabbitMQ
+
+El broker de eventos corre en la red `interna` (`rabbitmq:5672`) y carga automáticamente `infra/rabbitmq/definitions.json` al iniciar:
+
+- **Exchange:** `aulaconecta.eventos` (tipo `topic`, durable).
+- **Cola principal:** `notificaciones.avisos` (enlazada a `academico.promedio_bajo` y `academico.falta_registrada`).
+- **Cola de mensajes fallidos (DLQ):** `notificaciones.avisos.dlq`.
+- **Panel de administración local:** `http://127.0.0.1:15672` (ligado únicamente a `127.0.0.1`, con las credenciales `RABBITMQ_USER` y `RABBITMQ_PASSWORD` de `infra/.env`).
 
 ## Gateway
 

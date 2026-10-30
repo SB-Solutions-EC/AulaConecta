@@ -5,13 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ms-notificaciones"
 version = "0.1.0"
-description = "Microservicio de notificaciones y consentimiento de AulaConecta (FastAPI + Python)"
+description = "Microservicio de notificaciones y consentimiento de AulaConecta (FastAPI + Python + SQLAlchemy + Alembic)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115.0,<1.0.0",
     "uvicorn[standard]>=0.32.0,<1.0.0",
     "pydantic>=2.9.0,<3.0.0",
+    "sqlalchemy>=2.0.36,<3.0.0",
+    "alembic>=1.14.0,<2.0.0",
+    "psycopg[binary]>=3.2.3,<4.0.0",
 ]
 
 [project.optional-dependencies]
@@ -29,4 +32,3 @@ addopts = "-q"
 [tool.coverage.run]
 source = ["app"]
 branch = true
-

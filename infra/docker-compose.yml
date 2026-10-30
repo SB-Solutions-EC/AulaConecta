@@ -1,5 +1,5 @@
 # Stack local de AulaConecta. Uso: docker compose -f infra/docker-compose.yml up --build
-# Solo el gateway publica puertos; los servicios quedan en la red interna (docs/arquitectura/c4.md).
+# Solo el gateway publica puertos hacia el exterior; el panel de RabbitMQ se liga a 127.0.0.1 para inspección local (docs/arquitectura/c4.md).
 
 name: aulaconecta
 
@@ -73,6 +73,35 @@ services:
     networks:
       - interna
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    user: "100:101"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      # Panel de administración solo en loopback local (T1028-C, docs/arquitectura/c4.md)
+      - "127.0.0.1:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-aulaconecta}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Copia infra/.env.example a infra/.env}
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - datos-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    networks:
+      - interna
+
   ms-identidad:
     build: ../services/ms-identidad
     read_only: true
@@ -107,6 +136,14 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    environment:
+      DATABASE_URL: postgresql+psycopg://usr_notificaciones:${POSTGRES_NOTIFICACIONES_PASSWORD:?Copia infra/.env.example a infra/.env}@postgres:5432/db_notificaciones
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-aulaconecta}:${RABBITMQ_PASSWORD:?Copia infra/.env.example a infra/.env}@rabbitmq:5672/%2F
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -118,7 +155,7 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
-      start_period: 10s
+      start_period: 15s
     networks:
       - interna
 
@@ -145,6 +182,7 @@ services:
 volumes:
   certificados:
   datos-postgres:
+  datos-rabbitmq:
 
 networks:
   publica:

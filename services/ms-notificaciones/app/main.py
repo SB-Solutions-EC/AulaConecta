@@ -4,16 +4,41 @@ Expone únicamente /health sin detalles internos, alineado con el contrato OpenA
 (openapi/ms-notificaciones.yaml) y las reglas del gateway Traefik (/api/notificaciones/health).
 """
 
-from typing import Literal
+from contextlib import asynccontextmanager
+import os
+from pathlib import Path
+from typing import AsyncIterator, Literal
 
+from alembic import command
+from alembic.config import Config
 from fastapi import FastAPI
 from pydantic import BaseModel
+
+RUTA_ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
 
 
 class RespuestaSalud(BaseModel):
     """Estado de disponibilidad del microservicio."""
 
     status: Literal["UP", "DOWN"]
+
+
+def ejecutar_migraciones_al_arrancar() -> None:
+    """Aplica las migraciones de Alembic cuando DATABASE_URL está configurada."""
+    if not os.getenv("DATABASE_URL") or os.getenv("SALTAR_MIGRACIONES") == "1":
+        return
+    cfg = Config(str(RUTA_ALEMBIC_INI))
+    cfg.set_main_option(
+        "script_location", str(RUTA_ALEMBIC_INI.parent / "alembic")
+    )
+    command.upgrade(cfg, "head")
+
+
+@asynccontextmanager
+async def ciclo_vida(_aplicacion: FastAPI) -> AsyncIterator[None]:
+    """Ejecuta las migraciones de db_notificaciones al iniciar el servicio."""
+    ejecutar_migraciones_al_arrancar()
+    yield
 
 
 def crear_aplicacion() -> FastAPI:
@@ -28,6 +53,7 @@ def crear_aplicacion() -> FastAPI:
         docs_url=None,
         redoc_url=None,
         openapi_url=None,
+        lifespan=ciclo_vida,
     )
 
     @aplicacion.get(
@@ -43,4 +69,3 @@ def crear_aplicacion() -> FastAPI:
 
 
 app = crear_aplicacion()
-

@@ -40,6 +40,35 @@ services:
       - publica
       - interna
 
+  postgres:
+    image: postgres:16.15-alpine3.24
+    user: "70:70"
+    read_only: true
+    tmpfs:
+      - /var/run/postgresql:uid=70,gid=70
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      # Sin esto, las conexiones locales dentro del contenedor entrarían sin contraseña (trust)
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_IDENTIDAD_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_ACADEMICO_PASSWORD: ${POSTGRES_ACADEMICO_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_NOTIFICACIONES_PASSWORD: ${POSTGRES_NOTIFICACIONES_PASSWORD:?Copia infra/.env.example a infra/.env}
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - datos-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - interna
+
   ms-identidad:
     build: ../services/ms-identidad
     read_only: true
@@ -49,6 +78,13 @@ services:
       - ALL
     security_opt:
       - no-new-privileges:true
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_identidad
+      SPRING_DATASOURCE_USERNAME: usr_identidad
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
       interval: 10s
@@ -60,6 +96,7 @@ services:
 
 volumes:
   certificados:
+  datos-postgres:
 
 networks:
   publica:

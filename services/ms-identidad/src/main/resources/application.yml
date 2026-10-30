@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ms-identidad
+
+server:
+  port: 8080
+  shutdown: graceful
+
+# Solo se expone /health, sin detalles internos: el gateway lo publica en /api/identidad/health.
+management:
+  endpoints:
+    web:
+      base-path: /
+      discovery:
+        enabled: false
+      exposure:
+        include: health
+      path-mapping:
+        health: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: false

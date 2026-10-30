@@ -1,0 +1,35 @@
+# Configuración estática de Traefik: puntos de entrada y proveedores.
+# Las rutas, los middlewares y el certificado están en dinamico.yml.
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# Los puertos internos son altos porque el contenedor corre sin root;
+# docker-compose publica 80 y 443 en el equipo.
+entryPoints:
+  web:
+    address: ":8080"
+    http:
+      redirections:
+        entryPoint:
+          to: ":443"
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":8443"
+  salud:
+    address: ":8082"
+
+# Proveedor de archivo y no el de Docker: así el gateway no necesita acceso a docker.sock.
+providers:
+  file:
+    filename: /etc/traefik/dinamico.yml
+
+ping:
+  entryPoint: salud
+
+log:
+  level: INFO
+
+accessLog: {}

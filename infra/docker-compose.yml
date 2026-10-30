@@ -1,0 +1,67 @@
+# Stack local de AulaConecta. Uso: docker compose -f infra/docker-compose.yml up --build
+# Solo el gateway publica puertos; los servicios quedan en la red interna (docs/arquitectura/c4.md).
+
+name: aulaconecta
+
+services:
+  certificados:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_certificado.sh"]
+    volumes:
+      - ./traefik/generar_certificado.sh:/generar_certificado.sh:ro
+      - certificados:/certificados
+
+  gateway:
+    image: traefik:v3.7.16
+    user: "65532:65532"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dinamico.yml:/etc/traefik/dinamico.yml:ro
+      - certificados:/certificados:ro
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      certificados:
+        condition: service_completed_successfully
+      ms-identidad:
+        condition: service_healthy
+    networks:
+      - publica
+      - interna
+
+  ms-identidad:
+    build: ../services/ms-identidad
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    networks:
+      - interna
+
+volumes:
+  certificados:
+
+networks:
+  publica:
+  interna:
+    internal: true

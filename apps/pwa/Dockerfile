@@ -8,9 +8,15 @@ COPY public ./public
 COPY src ./src
 RUN npm run build
 
-# Etapa de ejecución con Nginx sin privilegios
-FROM nginxinc/nginx-unprivileged:1.27-alpine3.21
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=compilacion /app/dist /usr/share/nginx/html
-USER 101
+# Etapa de ejecución con Nginx sin privilegios sobre Alpine 3.24
+FROM alpine:3.24
+RUN apk upgrade --no-cache && \
+    apk add --no-cache nginx && \
+    addgroup -S -g 10001 app && \
+    adduser -S -u 10001 -G app app
+WORKDIR /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=compilacion /app/dist ./
+USER app
 EXPOSE 8080
+ENTRYPOINT ["nginx", "-e", "/dev/stderr", "-g", "daemon off;"]

@@ -9,7 +9,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Imagen final: entorno virtual, código y migraciones de Alembic, con usuario sin privilegios.
 FROM python:3.12-alpine3.21
-RUN addgroup -S -g 10001 app && adduser -S -u 10001 -G app app
+RUN apk upgrade --no-cache && \
+    addgroup -S -g 10001 app && \
+    adduser -S -u 10001 -G app app
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

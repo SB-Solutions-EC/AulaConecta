@@ -29,7 +29,10 @@ describe('Esqueleto de la PWA de AulaConecta', () => {
       screen.getByRole('heading', { name: 'AulaConecta', level: 1 }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Unidad Educativa “Andoas”/i),
+      screen.getByText(/Unidad Educativa “Andoas” · Puyo, Pastaza/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/AulaConecta v0\.1\.0 · SB Solutions/i),
     ).toBeInTheDocument();
 
     expect(screen.getByTestId('tarjeta-ms-identidad')).toHaveTextContent(

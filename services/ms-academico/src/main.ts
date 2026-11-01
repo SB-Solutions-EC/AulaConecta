@@ -1,25 +1,25 @@
-import { createServer, IncomingMessage, ServerResponse } from 'node:http';
+import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { AppModule } from './app.module';
+import { configurarSwagger } from './swagger';
 
-const puerto = Number(process.env.PORT ?? 3000);
+async function iniciar(): Promise<void> {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const config = app.get(ConfigService);
+  const puerto = config.getOrThrow<number>('puerto');
 
-export function manejarPeticion(
-  req: IncomingMessage,
-  res: ServerResponse,
-): void {
-  if (req.method === 'GET' && req.url === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ status: 'UP' }));
-    return;
+  // No revelar la tecnología del servidor en las cabeceras.
+  app.disable('x-powered-by');
+  app.enableShutdownHooks();
+
+  if (config.get<boolean>('swaggerHabilitado')) {
+    configurarSwagger(app);
   }
 
-  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(JSON.stringify({ status: 'NOT_FOUND' }));
+  await app.listen(puerto);
+  Logger.log(`ms-academico escuchando en el puerto ${puerto}`, 'Inicio');
 }
 
-if (require.main === module) {
-  const servidor = createServer(manejarPeticion);
-  servidor.listen(puerto, '0.0.0.0', () => {
-    process.stdout.write(`ms-academico activo en puerto ${puerto}\n`);
-  });
-}
-
+void iniciar();

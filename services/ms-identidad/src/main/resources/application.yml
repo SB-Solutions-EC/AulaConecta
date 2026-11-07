@@ -2,6 +2,14 @@ spring:
   application:
     name: ms-identidad
 
+aulaconecta:
+  jwt:
+    # Archivo PEM (PKCS#8) montado como secreto; en local lo genera infra/identidad/generar_clave_jwt.sh
+    clave-privada: ${AULACONECTA_JWT_CLAVE_PRIVADA}
+    emisor: aulaconecta-identidad
+    audiencia: aulaconecta
+    duracion-acceso: 15m
+
 server:
   port: 8080
   shutdown: graceful

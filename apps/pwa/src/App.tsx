@@ -97,7 +97,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    verificarServicios();
+    // consultarSaludServicio nunca rechaza (devuelve 'DOWN'), así que no hay error que esperar
+    void verificarServicios();
 
     const manejarOnline = () => setEnLinea(true);
     const manejarOffline = () => setEnLinea(false);
@@ -177,7 +178,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => {
-              verificarServicios();
+              void verificarServicios();
             }}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-dark text-white font-semibold text-sm shadow-sm transition-colors cursor-pointer"
           >

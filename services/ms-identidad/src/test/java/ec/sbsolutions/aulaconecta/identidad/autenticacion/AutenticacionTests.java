@@ -184,7 +184,7 @@ class AutenticacionTests extends PruebaIntegracion {
                 .andExpect(jsonPath("$.nombreUsuario").value("solo.cambio"))
                 .andExpect(jsonPath("$.debeCambiarClave").value(true));
         // Cualquier otro recurso protegido queda bloqueado hasta cambiar la clave
-        mvc.perform(get("/auditoria-accesos").header("Authorization", "Bearer " + token))
+        mvc.perform(get("/recurso-de-prueba").header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
     }
 
@@ -199,8 +199,8 @@ class AutenticacionTests extends PruebaIntegracion {
         assertThat(respuesta.get("usuario").get("version").asInt()).isEqualTo(1);
         assertThat(SignedJWT.parse(respuesta.get("accessToken").asString()).getJWTClaimsSet()
                 .getBooleanClaim("debe_cambiar_clave")).isFalse();
-        // Con el token nuevo ya pasa la regla de clave inicial (404 porque ese recurso aún no existe)
-        mvc.perform(get("/auditoria-accesos").header("Authorization", "Bearer " + respuesta.get("accessToken").asString()))
+        // Con el token nuevo ya pasa la regla de clave inicial (404 porque esa ruta no existe)
+        mvc.perform(get("/recurso-de-prueba").header("Authorization", "Bearer " + respuesta.get("accessToken").asString()))
                 .andExpect(status().isNotFound());
         login("cambio.completo", CLAVE_INICIAL, 401);
         login("cambio.completo", CLAVE_NUEVA, 200);

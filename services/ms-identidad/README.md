@@ -20,6 +20,11 @@ Por el gateway llevan el prefijo `/api/identidad`.
 | `POST /auth/login` | Público | Devuelve un token de acceso de 15 minutos |
 | `GET /auth/me` | Token | Datos de la cuenta de la sesión |
 | `POST /auth/cambiar-clave` | Token | Cambia la clave y devuelve un token nuevo |
+| `POST /usuarios` | Administrador | Crea la cuenta: genera el nombre de usuario (RF-02) y usa la cédula como clave inicial (RF-03) |
+| `POST /usuarios/{id}/desbloquear` | Administrador | Levanta el bloqueo; opcionalmente restablece la clave inicial |
+| `GET /auditoria-accesos` | Administrador | Bitácora de accesos, con filtros por usuario, evento, fechas y límite (máximo 200) |
+
+"Administrador" significa el rol `ADMIN` con la clave inicial ya cambiada. La creación de cuentas desde ms-academico con un token de servicio llega en T1110-A.
 
 ## Seguridad
 
@@ -30,6 +35,10 @@ Por el gateway llevan el prefijo `/api/identidad`.
 | Claves de usuario | Argon2id con los parámetros mínimos de OWASP. Un hash BCrypt heredado sigue funcionando y se migra a Argon2id en el siguiente inicio de sesión |
 | Clave inicial (RF-03) | Con `debe_cambiar_clave = true` el token solo sirve para `/auth/me` y `/auth/cambiar-clave`; cualquier otra ruta responde 403 |
 | Errores | Usuario inexistente, clave incorrecta y cuenta inactiva responden igual y tardan lo mismo; una cuenta bloqueada responde 423 con o sin la clave correcta |
+| Nombre de usuario (RF-02) | Primer nombre y primer apellido sin tildes ni símbolos (`ana.perez`); los apellidos compuestos se conservan (`camila.delatorre`). Si ya existe, se agrega un número: `ana.perez2`. Los nombres y la cédula no se guardan en `db_identidad` |
+| Bloqueo | Tras 3 intentos fallidos seguidos, la cuenta se bloquea 15 minutos (`aulaconecta.bloqueo`). El conteo se hace en una sola sentencia SQL: intentos simultáneos no pueden saltarse ni deshacer el bloqueo. Un acceso correcto reinicia el contador |
+| Auditoría | Cada acceso, fallo, bloqueo, desbloqueo, cambio de clave y asignación de rol queda en `auditoria_acceso` con la IP del cliente. Los fallos se registran aunque la respuesta sea un error, porque el inicio de sesión no corre en una transacción que se deshaga. La tabla no admite cambios ni borrados (trigger de V1) |
+| IP del cliente | La pone el gateway: Traefik descarta los `X-Forwarded-For` que manda el cliente, y ms-identidad solo confía en proxies de redes privadas (`server.forward-headers-strategy: native`) |
 
 Los otros servicios deben validar los tokens con el JWKS, comprobar `iss` y `aud`, y **rechazar los que traigan `debe_cambiar_clave = true`**.
 

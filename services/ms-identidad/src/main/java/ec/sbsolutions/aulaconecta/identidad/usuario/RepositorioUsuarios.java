@@ -44,9 +44,103 @@ public class RepositorioUsuarios {
                 .optional();
     }
 
-    /** No cambia la versión: el último acceso no es un cambio de datos que deba sincronizarse. */
-    public void registrarAcceso(UUID id) {
-        jdbc.sql("UPDATE usuario SET ultimo_acceso = now() WHERE id = :id").param("id", id).update();
+    // Condición de "no bloqueada ahora": se evalúa en la base, en la misma sentencia que modifica la fila,
+    // para que dos intentos simultáneos no puedan saltarse ni deshacer un bloqueo. Empieza con espacio porque se
+    // concatena al final de otra sentencia (los bloques de texto quitan los espacios al final de cada línea).
+    private static final String NO_BLOQUEADA = " AND estado <> 'INACTIVO'"
+            + " AND NOT (estado = 'BLOQUEADO' AND (bloqueado_hasta IS NULL OR bloqueado_hasta > now()))";
+
+    /**
+     * Inicio de sesión correcto: reinicia el contador de fallos y levanta un bloqueo ya vencido. Devuelve false
+     * si la cuenta quedó bloqueada mientras tanto. No cambia la versión: no es un cambio que deba sincronizarse.
+     */
+    public boolean registrarAccesoExitoso(UUID id) {
+        return jdbc.sql("""
+                UPDATE usuario
+                SET ultimo_acceso = now(), intentos_fallidos = 0, bloqueado_hasta = NULL,
+                    estado = CASE WHEN estado = 'BLOQUEADO' THEN 'ACTIVO' ELSE estado END
+                WHERE id = :id""" + NO_BLOQUEADA)
+                .param("id", id)
+                .update() == 1;
+    }
+
+    /**
+     * Suma un intento fallido en una sola sentencia y bloquea la cuenta al llegar al máximo. Si el bloqueo
+     * anterior ya venció, el conteo empieza de nuevo. Devuelve el estado resultante, o vacío si la cuenta
+     * ya estaba bloqueada (en ese caso no se cuenta el intento).
+     */
+    public Optional<String> registrarFallo(UUID id, int intentosMaximos, long segundosDeBloqueo) {
+        return jdbc.sql("""
+                UPDATE usuario
+                SET intentos_fallidos = CASE WHEN estado = 'BLOQUEADO' THEN 1 ELSE intentos_fallidos + 1 END,
+                    estado = CASE WHEN (CASE WHEN estado = 'BLOQUEADO' THEN 1 ELSE intentos_fallidos + 1 END) >= :maximo
+                                  THEN 'BLOQUEADO' ELSE 'ACTIVO' END,
+                    bloqueado_hasta = CASE WHEN (CASE WHEN estado = 'BLOQUEADO' THEN 1 ELSE intentos_fallidos + 1 END) >= :maximo
+                                           THEN now() + make_interval(secs => :segundos) ELSE NULL END
+                WHERE id = :id""" + NO_BLOQUEADA + " RETURNING estado")
+                .param("id", id)
+                .param("maximo", intentosMaximos)
+                .param("segundos", segundosDeBloqueo)
+                .query(String.class)
+                .optional();
+    }
+
+    /** Evita que dos altas simultáneas generen el mismo nombre de usuario (se libera al terminar la transacción). */
+    public void reservarNombre(String base) {
+        jdbc.sql("SELECT pg_advisory_xact_lock(hashtext(:base))").param("base", base).query(Object.class).single();
+    }
+
+    public List<String> nombresQueEmpiezanCon(String base) {
+        return jdbc.sql("SELECT nombre_usuario FROM usuario WHERE nombre_usuario LIKE :prefijo")
+                .param("prefijo", base + "%")
+                .query(String.class)
+                .list();
+    }
+
+    public boolean existe(UUID id) {
+        return jdbc.sql("SELECT EXISTS (SELECT 1 FROM usuario WHERE id = :id)").param("id", id)
+                .query(Boolean.class).single();
+    }
+
+    public void insertar(UUID id, String nombreUsuario, String hashClave, UUID creadoPor) {
+        jdbc.sql("""
+                INSERT INTO usuario (id, nombre_usuario, hash_clave, debe_cambiar_clave, actualizado_por)
+                VALUES (:id, :nombre, :hash, TRUE, :creadoPor)
+                """)
+                .param("id", id)
+                .param("nombre", nombreUsuario)
+                .param("hash", hashClave)
+                .param("creadoPor", creadoPor)
+                .update();
+    }
+
+    public void asignarRol(UUID usuarioId, CodigoRol rol, UUID asignadoPor) {
+        jdbc.sql("""
+                INSERT INTO usuario_rol (usuario_id, rol_id, asignado_por)
+                SELECT :usuario, id, :asignadoPor FROM rol WHERE codigo = :rol
+                """)
+                .param("usuario", usuarioId)
+                .param("rol", rol.name())
+                .param("asignadoPor", asignadoPor)
+                .update();
+    }
+
+    /** Levanta el bloqueo; si llega un hash, también restablece la clave inicial. Devuelve si se aplicó. */
+    public boolean desbloquear(UUID id, String hashClaveInicial, UUID administrador) {
+        String restablecer = hashClaveInicial == null ? "" : ", hash_clave = :hash, debe_cambiar_clave = TRUE";
+        JdbcClient.StatementSpec sentencia = jdbc.sql("""
+                UPDATE usuario
+                SET estado = 'ACTIVO', intentos_fallidos = 0, bloqueado_hasta = NULL, version = version + 1,
+                    actualizado_en = now(), actualizado_por = :administrador""" + restablecer + """
+
+                WHERE id = :id AND estado <> 'INACTIVO'
+                """)
+                .param("id", id)
+                .param("administrador", administrador);
+        if (hashClaveInicial != null) {
+            sentencia = sentencia.param("hash", hashClaveInicial);
+        }
+        return sentencia.update() == 1;
     }
 
     /** Guarda un hash recalculado con el algoritmo actual (por ejemplo, de BCrypt a Argon2id). */

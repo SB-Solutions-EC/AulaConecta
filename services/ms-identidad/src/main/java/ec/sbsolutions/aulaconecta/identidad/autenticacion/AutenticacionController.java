@@ -1,6 +1,7 @@
 package ec.sbsolutions.aulaconecta.identidad.autenticacion;
 
 import ec.sbsolutions.aulaconecta.identidad.autenticacion.ServicioAutenticacion.Sesion;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -25,8 +26,9 @@ public class AutenticacionController {
     }
 
     @PostMapping("/login")
-    public RespuestaTokenAcceso iniciarSesion(@Valid @RequestBody SolicitudLogin solicitud) {
-        return respuesta(servicio.iniciarSesion(solicitud.nombreUsuario(), solicitud.clave()));
+    public RespuestaTokenAcceso iniciarSesion(@Valid @RequestBody SolicitudLogin solicitud, HttpServletRequest peticion) {
+        // Detrás del gateway es la IP del cliente: Traefik descarta los X-Forwarded-For que manda el cliente
+        return respuesta(servicio.iniciarSesion(solicitud.nombreUsuario(), solicitud.clave(), peticion.getRemoteAddr()));
     }
 
     @GetMapping("/me")
@@ -36,9 +38,9 @@ public class AutenticacionController {
 
     @PostMapping("/cambiar-clave")
     public RespuestaTokenAcceso cambiarClave(@AuthenticationPrincipal Jwt token,
-            @Valid @RequestBody SolicitudCambioClave solicitud) {
+            @Valid @RequestBody SolicitudCambioClave solicitud, HttpServletRequest peticion) {
         return respuesta(servicio.cambiarClave(UUID.fromString(token.getSubject()),
-                solicitud.claveActual(), solicitud.claveNueva()));
+                solicitud.claveActual(), solicitud.claveNueva(), peticion.getRemoteAddr()));
     }
 
     private static RespuestaTokenAcceso respuesta(Sesion sesion) {

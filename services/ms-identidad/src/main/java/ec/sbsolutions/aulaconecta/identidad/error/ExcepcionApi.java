@@ -28,6 +28,14 @@ public class ExcepcionApi extends RuntimeException {
         return new ExcepcionApi(HttpStatus.BAD_REQUEST, codigo, mensaje);
     }
 
+    public static ExcepcionApi noEncontrado(String codigo, String mensaje) {
+        return new ExcepcionApi(HttpStatus.NOT_FOUND, codigo, mensaje);
+    }
+
+    public static ExcepcionApi conflicto(String codigo, String mensaje) {
+        return new ExcepcionApi(HttpStatus.CONFLICT, codigo, mensaje);
+    }
+
     public static ExcepcionApi conflictoVersion() {
         return new ExcepcionApi(HttpStatus.CONFLICT, "CONFLICTO_VERSION",
                 "La cuenta cambió mientras se procesaba la solicitud; vuelve a intentarlo");

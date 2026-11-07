@@ -9,10 +9,16 @@ aulaconecta:
     emisor: aulaconecta-identidad
     audiencia: aulaconecta
     duracion-acceso: 15m
+  # Tras 3 intentos fallidos seguidos la cuenta se bloquea 15 minutos (taller de riesgos)
+  bloqueo:
+    intentos-maximos: 3
+    duracion: 15m
 
 server:
   port: 8080
   shutdown: graceful
+  # La IP del cliente la pone el gateway; solo se confía en proxies de redes privadas (la red interna)
+  forward-headers-strategy: native
 
 # Solo se expone /health, sin detalles internos: el gateway lo publica en /api/identidad/health.
 management:

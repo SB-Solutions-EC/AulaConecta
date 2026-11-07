@@ -25,6 +25,8 @@ docker compose -f infra/docker-compose.yml down
 
 Usa los puertos 80 y 443 del equipo; si otro programa los ocupa, hay que cerrarlo. El certificado de `localhost` es autofirmado: `curl` necesita `-k` y el navegador muestra una advertencia. Lo genera el servicio `certificados` al arrancar y queda en un volumen de Docker, nunca en el repositorio.
 
+La clave RSA con la que ms-identidad firma los tokens la genera el servicio `clave-jwt` (`identidad/generar_clave_jwt.sh`) del mismo modo: 3072 bits, en un volumen de Docker y legible solo por el usuario de ms-identidad. Se conserva entre reinicios; `down -v` la borra y los tokens anteriores dejan de valer. En los ambientes desplegados llega como secreto.
+
 ## PostgreSQL
 
 Un servidor con tres bases y un usuario por servicio (`usr_identidad`, `usr_academico` y `usr_notificaciones`). Cada usuario solo puede conectarse a su base y ninguno puede crear bases ni usuarios. No publica puertos: solo se llega desde la red interna.

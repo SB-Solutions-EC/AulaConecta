@@ -1,5 +1,6 @@
 package ec.sbsolutions.aulaconecta.identidad;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -12,12 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 
-// Sin base de datos, para que esta prueba corra también donde no hay Docker
-@SpringBootTest(properties = "spring.autoconfigure.exclude="
-        + "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration,"
-        + "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration")
+@SpringBootTest
 @AutoConfigureMockMvc
-class HealthEndpointTests {
+class HealthEndpointTests extends PruebaIntegracion {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,9 +29,16 @@ class HealthEndpointTests {
                 .andExpect(jsonPath("$.groups").doesNotExist());
     }
 
+    // Con un token válido, para comprobar que esos endpoints no existen y no solo que piden autenticación
     @ParameterizedTest
     @ValueSource(strings = {"/", "/env", "/beans", "/actuator", "/actuator/env"})
     void noSeExponenOtrosEndpointsDeGestion(String ruta) throws Exception {
-        mockMvc.perform(get(ruta)).andExpect(status().isNotFound());
+        mockMvc.perform(get(ruta).with(jwt())).andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/env", "/actuator/env"})
+    void sinTokenNiSiquieraSeRevelaSiLaRutaExiste(String ruta) throws Exception {
+        mockMvc.perform(get(ruta)).andExpect(status().isUnauthorized());
     }
 }

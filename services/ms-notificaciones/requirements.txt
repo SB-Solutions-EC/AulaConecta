@@ -1,4 +1,6 @@
-fastapi==0.115.6
+fastapi==0.162.0
+# Fijada aparte: la versión que trae FastAPI tenía vulnerabilidades conocidas (pip-audit)
+starlette==1.10.0
 uvicorn==0.34.0
 pydantic==2.10.4
 sqlalchemy==2.0.36

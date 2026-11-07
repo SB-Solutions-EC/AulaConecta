@@ -7,9 +7,12 @@ COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY src ./src
 RUN npm run build && npm prune --omit=dev
 
-# Imagen final de producción con usuario sin privilegios
+# Imagen final de producción con usuario sin privilegios. Sin npm ni corepack: el servicio solo
+# necesita node, y npm trae dependencias propias con vulnerabilidades que reporta Trivy.
 FROM node:24-alpine
 RUN apk upgrade --no-cache && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack && \
     addgroup -S -g 10001 app && \
     adduser -S -u 10001 -G app app
 WORKDIR /app

@@ -7,25 +7,15 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
-// Contra un PostgreSQL real: la migración usa funciones propias de PostgreSQL.
 @SpringBootTest
-@Testcontainers(disabledWithoutDocker = true)
-class MigracionFlywayTests {
+class MigracionFlywayTests extends PruebaIntegracion {
 
     private static final String INSERTAR_AUDITORIA =
             "INSERT INTO auditoria_acceso (nombre_usuario_intentado, evento) VALUES ('prueba', 'LOGIN_FALLIDO')";
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16.15-alpine3.24");
 
     @Autowired
     private JdbcTemplate jdbc;

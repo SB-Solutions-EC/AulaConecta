@@ -539,7 +539,7 @@ components:
           type: string
           minLength: 3
           maxLength: 100
-          example: maria.grefa
+          example: ana.perez
         clave:
           type: string
           format: password
@@ -621,11 +621,11 @@ components:
         nombres:
           type: string
           description: Se usa solo para construir el `nombreUsuario` (`nombre.apellido`, RF-02); no se persiste en `db_identidad`
-          example: María Fernanda
+          example: Ana Carla
         apellidos:
           type: string
           description: Se usa solo para construir el `nombreUsuario`; no se persiste en `db_identidad`
-          example: Grefa Tanguila
+          example: Pérez Mora
         cedulaInicial:
           type: string
           description: Se usa una única vez para generar el hash Argon2id de la clave inicial (RF-03) y se descarta
@@ -689,7 +689,7 @@ components:
           description: Identificador único (`usuario_id` referenciado en `ms-academico` y `ms-notificaciones`)
         nombreUsuario:
           type: string
-          example: maria.grefa
+          example: ana.perez
         roles:
           type: array
           items:

@@ -11,6 +11,13 @@ services:
       - ./traefik/generar_certificado.sh:/generar_certificado.sh:ro
       - certificados:/certificados
 
+  clave-jwt:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_clave_jwt.sh"]
+    volumes:
+      - ./identidad/generar_clave_jwt.sh:/generar_clave_jwt.sh:ro
+      - clave-jwt:/clave-jwt
+
   gateway:
     image: traefik:v3.7.16
     user: "65532:65532"
@@ -35,6 +42,8 @@ services:
       certificados:
         condition: service_completed_successfully
       ms-identidad:
+        condition: service_healthy
+      ms-academico:
         condition: service_healthy
       ms-notificaciones:
         condition: service_healthy
@@ -115,7 +124,12 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_identidad
       SPRING_DATASOURCE_USERNAME: usr_identidad
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
+      AULACONECTA_JWT_CLAVE_PRIVADA: /run/secrets/jwt/privada.pem
+    volumes:
+      - clave-jwt:/run/secrets/jwt:ro
     depends_on:
+      clave-jwt:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     healthcheck:
@@ -124,6 +138,28 @@ services:
       timeout: 3s
       retries: 6
       start_period: 30s
+    networks:
+      - interna
+
+  ms-academico:
+    build: ../services/ms-academico
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      SWAGGER_HABILITADO: "false"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     networks:
       - interna
 
@@ -181,6 +217,7 @@ services:
 
 volumes:
   certificados:
+  clave-jwt:
   datos-postgres:
   datos-rabbitmq:
 

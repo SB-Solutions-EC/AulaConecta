@@ -218,9 +218,12 @@ jobs:
       - name: Validate repository JSON
         shell: powershell
         run: |
+          Add-Type -AssemblyName System.Web.Extensions
+          $serializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+          $serializer.MaxJsonLength = [int]::MaxValue
           $files = Get-ChildItem -Path . -Filter *.json -File -Recurse
           foreach ($file in $files) {
-            Get-Content -Raw $file.FullName | ConvertFrom-Json | Out-Null
+            $null = $serializer.DeserializeObject((Get-Content -Raw -Encoding UTF8 $file.FullName))
             Write-Output "Valid JSON: $($file.FullName)"
           }
 

@@ -15,11 +15,13 @@ import {
 } from '../api/clienteHttp';
 import {
   servicioAutenticacionApi,
+  type MotivoCierreSesion,
   type SolicitudLogin,
 } from '../api/autenticacionApi';
 
 export interface PropiedadesPantallaInicioSesion {
   nombreUsuarioInicial?: string;
+  motivoCierreSesion?: MotivoCierreSesion;
   alAutenticarExitosamente: (respuesta: RespuestaTokenAcceso) => void;
   alVolverAlPanel?: () => void;
   ejecutarLogin?: (solicitud: SolicitudLogin) => Promise<RespuestaTokenAcceso>;
@@ -29,6 +31,33 @@ interface EstadoErrorAcceso {
   titulo: string;
   mensaje: string;
   esBloqueoTemporal: boolean;
+}
+
+function obtenerAvisoCierreSesion(
+  motivo?: MotivoCierreSesion,
+): { titulo: string; detalle: string } | null {
+  if (motivo === 'INACTIVIDAD') {
+    return {
+      titulo: 'Sesión cerrada por inactividad',
+      detalle:
+        'Su sesión se cerró automáticamente tras permanecer sin actividad para proteger la información académica en el dispositivo.',
+    };
+  }
+  if (motivo === 'TOKEN_EXPIRADO') {
+    return {
+      titulo: 'Sesión expirada',
+      detalle:
+        'El tiempo de vigencia de su token JWT RS256 ha concluido. Vuelva a ingresar sus credenciales.',
+    };
+  }
+  if (motivo === 'MANUAL') {
+    return {
+      titulo: 'Sesión finalizada correctamente',
+      detalle:
+        'Se limpiaron las credenciales en memoria. Ingrese nuevamente cuando desee continuar.',
+    };
+  }
+  return null;
 }
 
 function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
@@ -70,6 +99,7 @@ function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
 
 export function PantallaInicioSesion({
   nombreUsuarioInicial = '',
+  motivoCierreSesion = null,
   alAutenticarExitosamente,
   alVolverAlPanel,
   ejecutarLogin = (solicitud) =>
@@ -83,6 +113,7 @@ export function PantallaInicioSesion({
   const [errorAcceso, setErrorAcceso] = useState<EstadoErrorAcceso | null>(
     null,
   );
+  const avisoCierre = obtenerAvisoCierreSesion(motivoCierreSesion);
 
   const manejarEnvio = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
@@ -139,6 +170,17 @@ export function PantallaInicioSesion({
           </p>
         </div>
       </div>
+
+      {avisoCierre && !errorAcceso && (
+        <div
+          role="status"
+          data-testid="aviso-cierre-sesion"
+          className="rounded-xl p-4 border border-amber-300 bg-amber-50 text-amber-900 text-xs sm:text-sm space-y-1"
+        >
+          <p className="font-bold">{avisoCierre.titulo}</p>
+          <p className="leading-relaxed">{avisoCierre.detalle}</p>
+        </div>
+      )}
 
       {errorAcceso && (
         <div

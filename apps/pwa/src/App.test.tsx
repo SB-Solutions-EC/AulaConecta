@@ -27,7 +27,13 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
             usuario: {
               id: '00000000-0000-0000-0000-000000000001',
               nombreUsuario: 'ana.perez',
-              roles: ['ADMIN'],
+              roles: [
+                'ADMIN',
+                'SECRETARIA',
+                'DOCENTE',
+                'ESTUDIANTE',
+                'REPRESENTANTE',
+              ],
               debeCambiarClave: false,
               estado: 'ACTIVO',
               intentosFallidos: 0,

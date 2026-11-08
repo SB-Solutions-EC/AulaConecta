@@ -7,6 +7,7 @@ import {
   FileSpreadsheet,
   GraduationCap,
   LayoutDashboard,
+  LogOut,
   Menu,
   ShieldCheck,
   UserCheck,
@@ -16,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import type { CodigoRol } from '../api/clienteHttp';
+import { normalizarRolesAsignados } from '../api/autenticacionApi';
 import {
   METADATOS_ROLES,
   ORDEN_ROLES,
@@ -25,12 +27,14 @@ import {
 
 export interface PropiedadesLayoutPwa {
   rolActivo: CodigoRol;
+  rolesAsignados?: readonly CodigoRol[];
   rutaActiva: string;
   enLinea: boolean;
   nombreUsuario: string;
   debeCambiarClave: boolean;
   alCambiarRol: (nuevoRol: CodigoRol) => void;
   alNavegar: (nuevaRuta: string) => void;
+  alCerrarSesion?: () => void;
   children: ReactNode;
 }
 
@@ -60,15 +64,18 @@ function IconoModulo({ idModulo }: Readonly<{ idModulo: string }>) {
 
 export function LayoutPwa({
   rolActivo,
+  rolesAsignados = ORDEN_ROLES,
   rutaActiva,
   enLinea,
   nombreUsuario,
   debeCambiarClave,
   alCambiarRol,
   alNavegar,
+  alCerrarSesion,
   children,
 }: Readonly<PropiedadesLayoutPwa>) {
   const [menuMovilAbierto, setMenuMovilAbierto] = useState<boolean>(false);
+  const rolesDisponibles = normalizarRolesAsignados(rolesAsignados);
   const modulosDelRol = obtenerModulosPorRol(rolActivo);
   const metadatosRol = METADATOS_ROLES[rolActivo];
 
@@ -112,7 +119,7 @@ export function LayoutPwa({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 text-xs text-slate-100">
               <span>Sesión:</span>
               <strong data-testid="usuario-sesion-activa">{nombreUsuario}</strong>
@@ -143,18 +150,33 @@ export function LayoutPwa({
                 </>
               )}
             </span>
+
+            {alCerrarSesion && (
+              <button
+                type="button"
+                data-testid="boton-cerrar-sesion"
+                onClick={alCerrarSesion}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-rose-500/80 text-white text-xs font-semibold border border-white/20 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" aria-hidden="true" />
+                Cerrar sesión
+              </button>
+            )}
           </div>
         </div>
       </header>
 
-      {/* Selector superior de rol tipo píldora (RF-01, Guía Visual) */}
+      {/* Selector superior de rol tipo píldora para usuarios con uno o más roles (RF-01, Guía Visual) */}
       <div className="bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-          <section aria-label="Roles del sistema" className="flex flex-wrap items-center gap-2">
+          <section
+            aria-label="Roles del sistema"
+            className="flex flex-wrap items-center gap-2"
+          >
             <span className="font-display text-xs font-bold uppercase tracking-wider text-slate-500 mr-1">
               Roles (RF-01):
             </span>
-            {ORDEN_ROLES.map((codigo) => {
+            {rolesDisponibles.map((codigo) => {
               const info = METADATOS_ROLES[codigo];
               const activo = codigo === rolActivo;
               return (
@@ -174,13 +196,18 @@ export function LayoutPwa({
             })}
           </section>
 
-          <span className="text-xs text-slate-500">
-            Rol seleccionado: <strong>{metadatosRol.etiqueta}</strong>
-          </span>
+          <div className="flex items-center gap-3 text-xs text-slate-500">
+            <span data-testid="resumen-roles-asignados">
+              Roles en sesión: <strong>{rolesDisponibles.length}</strong>
+            </span>
+            <span>
+              Rol seleccionado: <strong>{metadatosRol.etiqueta}</strong>
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Cuerpo principal con menú lateral responsivo por rol */}
+      {/* Cuerpo principal con menú lateral responsivo según el rol activo */}
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 flex flex-col lg:flex-row gap-6">
         <aside
           aria-label="Menú lateral por rol"
@@ -191,9 +218,17 @@ export function LayoutPwa({
         >
           <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 space-y-4 sticky top-6">
             <div className="px-2 pt-1 pb-3 border-b border-slate-100">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-accent-dark">
-                Menú del rol activo
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-accent-dark">
+                  Menú del rol activo
+                </p>
+                <span
+                  data-testid="contador-modulos-rol"
+                  className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-surface text-primary border border-slate-200"
+                >
+                  {modulosDelRol.length} módulos
+                </span>
+              </div>
               <h2 className="font-display text-base font-bold text-primary mt-0.5">
                 {metadatosRol.etiqueta}
               </h2>
@@ -251,4 +286,3 @@ export function LayoutPwa({
     </div>
   );
 }
-

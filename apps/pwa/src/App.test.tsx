@@ -6,6 +6,11 @@ import {
   tienePermisoRuta,
 } from './rutas/rutasProtegidas';
 
+// Cédula ficticia con provincia 99 (no existe en Ecuador) para no activar la regla cedula-ecuador de Gitleaks
+const CLAVE_INICIAL_FICTICIA = '9900000001';
+const CLAVE_PERSONAL_PRUEBA = 'aaaaaaaa';
+const TOKEN_SIMULADO = 'aaaaaaaa';
+
 describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', () => {
   beforeEach(() => {
     vi.stubGlobal(
@@ -16,7 +21,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
         json: () =>
           Promise.resolve({
             status: 'UP',
-            accessToken: 'jwt-rs256-prueba',
+            accessToken: TOKEN_SIMULADO,
             tokenType: 'Bearer',
             expiresIn: 900,
             usuario: {
@@ -160,13 +165,13 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
 
     // Completar el formulario de cambio de clave inicial
     fireEvent.change(screen.getByLabelText(/Clave actual/i), {
-      target: { value: '1600000000' },
+      target: { value: CLAVE_INICIAL_FICTICIA },
     });
     fireEvent.change(screen.getByLabelText(/Nueva contraseña/i), {
-      target: { value: 'ClaveNuevaSegura2026' },
+      target: { value: CLAVE_PERSONAL_PRUEBA },
     });
     fireEvent.change(screen.getByLabelText(/Confirmar nueva contraseña/i), {
-      target: { value: 'ClaveNuevaSegura2026' },
+      target: { value: CLAVE_PERSONAL_PRUEBA },
     });
     fireEvent.click(screen.getByTestId('boton-guardar-cambio-clave'));
 

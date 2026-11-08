@@ -9,8 +9,15 @@ import { ServicioAutenticacionApi } from '../api/autenticacionApi';
 import { PantallaCambioClaveInicial } from './PantallaCambioClaveInicial';
 import { PantallaInicioSesion } from './PantallaInicioSesion';
 
+// Hace de cédula inicial con provincia 99 (no existe en Ecuador) para no activar cedula-ecuador en Gitleaks
+const CLAVE_INICIAL_FICTICIA = '9900000001';
+const CLAVE_NUEVA_PRUEBA = 'aaaaaaaa';
+const CLAVE_OTRA_PRUEBA = 'bbbbbbbb';
+const TOKEN_SIMULADO = 'aaaaaaaa';
+const TOKEN_RENOVADO_SIMULADO = 'bbbbbbbb';
+
 const RESPUESTA_TOKEN_PRUEBA: RespuestaTokenAcceso = {
-  accessToken: 'jwt-rs256-valido',
+  accessToken: TOKEN_SIMULADO,
   tokenType: 'Bearer',
   expiresIn: 900,
   usuario: {
@@ -47,7 +54,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
         json: () =>
           Promise.resolve({
             ...RESPUESTA_TOKEN_PRUEBA,
-            accessToken: 'jwt-renovado-clave',
+            accessToken: TOKEN_RENOVADO_SIMULADO,
           }),
       })
       .mockResolvedValueOnce({
@@ -62,17 +69,17 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
 
     const sesion = await servicio.iniciarSesion({
       nombreUsuario: '  carlos.mora  ',
-      clave: '1600000000',
+      clave: CLAVE_INICIAL_FICTICIA,
     });
-    expect(sesion.accessToken).toBe('jwt-rs256-valido');
-    expect(cliente.obtenerTokenAcceso()).toBe('jwt-rs256-valido');
+    expect(sesion.accessToken).toBe(TOKEN_SIMULADO);
+    expect(cliente.obtenerTokenAcceso()).toBe(TOKEN_SIMULADO);
 
     const sesionActualizada = await servicio.cambiarClaveInicial({
-      claveActual: '1600000000',
-      claveNueva: 'ClaveSegura2026!',
+      claveActual: CLAVE_INICIAL_FICTICIA,
+      claveNueva: CLAVE_NUEVA_PRUEBA,
     });
-    expect(sesionActualizada.accessToken).toBe('jwt-renovado-clave');
-    expect(cliente.obtenerTokenAcceso()).toBe('jwt-renovado-clave');
+    expect(sesionActualizada.accessToken).toBe(TOKEN_RENOVADO_SIMULADO);
+    expect(cliente.obtenerTokenAcceso()).toBe(TOKEN_RENOVADO_SIMULADO);
 
     const perfil = await servicio.obtenerPerfilActual();
     expect(perfil.nombreUsuario).toBe('carlos.mora');
@@ -99,7 +106,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     const inputClave = screen.getByLabelText(/Contraseña o clave inicial/i);
 
     fireEvent.change(inputUsuario, { target: { value: 'carlos.mora' } });
-    fireEvent.change(inputClave, { target: { value: '1600000000' } });
+    fireEvent.change(inputClave, { target: { value: CLAVE_INICIAL_FICTICIA } });
 
     // Alternar visibilidad de la contraseña
     const botonVisibilidad = screen.getByRole('button', {
@@ -113,7 +120,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     await waitFor(() => {
       expect(ejecutarLogin).toHaveBeenCalledWith({
         nombreUsuario: 'carlos.mora',
-        clave: '1600000000',
+        clave: CLAVE_INICIAL_FICTICIA,
       });
       expect(alAutenticar).toHaveBeenCalledWith(RESPUESTA_TOKEN_PRUEBA);
     });
@@ -147,7 +154,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     );
 
     fireEvent.change(screen.getByLabelText(/Contraseña o clave inicial/i), {
-      target: { value: 'clave-erronea' },
+      target: { value: CLAVE_OTRA_PRUEBA },
     });
 
     // Intento 1: 401 Credenciales inválidas
@@ -209,17 +216,19 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     );
 
     // 2. Menos de 8 caracteres
-    fireEvent.change(campoActual, { target: { value: '1600000000' } });
-    fireEvent.change(campoNueva, { target: { value: 'corta12' } });
-    fireEvent.change(campoConfirmar, { target: { value: 'corta12' } });
+    fireEvent.change(campoActual, { target: { value: CLAVE_INICIAL_FICTICIA } });
+    fireEvent.change(campoNueva, { target: { value: 'aaa' } });
+    fireEvent.change(campoConfirmar, { target: { value: 'aaa' } });
     fireEvent.click(botonGuardar);
     expect(screen.getByTestId('alerta-error-cambio-clave')).toHaveTextContent(
       /al menos 8 caracteres/i,
     );
 
     // 3. Igual a la clave actual
-    fireEvent.change(campoNueva, { target: { value: '1600000000' } });
-    fireEvent.change(campoConfirmar, { target: { value: '1600000000' } });
+    fireEvent.change(campoNueva, { target: { value: CLAVE_INICIAL_FICTICIA } });
+    fireEvent.change(campoConfirmar, {
+      target: { value: CLAVE_INICIAL_FICTICIA },
+    });
     fireEvent.click(botonGuardar);
     expect(screen.getByTestId('alerta-error-cambio-clave')).toHaveTextContent(
       /distinta de su clave inicial/i,
@@ -234,15 +243,15 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     );
 
     // 5. Confirmación distinta
-    fireEvent.change(campoNueva, { target: { value: 'NuevaClaveSegura1' } });
-    fireEvent.change(campoConfirmar, { target: { value: 'OtraClaveDistinta2' } });
+    fireEvent.change(campoNueva, { target: { value: CLAVE_NUEVA_PRUEBA } });
+    fireEvent.change(campoConfirmar, { target: { value: CLAVE_OTRA_PRUEBA } });
     fireEvent.click(botonGuardar);
     expect(screen.getByTestId('alerta-error-cambio-clave')).toHaveTextContent(
       /no coincide/i,
     );
 
     // 6. Error devuelto por la API (400 CLAVE_ACTUAL_INCORRECTA)
-    fireEvent.change(campoConfirmar, { target: { value: 'NuevaClaveSegura1' } });
+    fireEvent.change(campoConfirmar, { target: { value: CLAVE_NUEVA_PRUEBA } });
     fireEvent.click(botonGuardar);
     await waitFor(() => {
       expect(
@@ -254,11 +263,10 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     fireEvent.click(botonGuardar);
     await waitFor(() => {
       expect(ejecutarCambio).toHaveBeenCalledWith({
-        claveActual: '1600000000',
-        claveNueva: 'NuevaClaveSegura1',
+        claveActual: CLAVE_INICIAL_FICTICIA,
+        claveNueva: CLAVE_NUEVA_PRUEBA,
       });
       expect(alCambiar).toHaveBeenCalledWith(RESPUESTA_TOKEN_PRUEBA);
     });
   });
 });
-

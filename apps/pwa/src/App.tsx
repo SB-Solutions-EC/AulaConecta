@@ -9,7 +9,11 @@ import {
   ShieldCheck,
   XCircle,
 } from 'lucide-react';
-import { clienteHttp, type CodigoRol } from './api/clienteHttp';
+import {
+  clienteHttp,
+  type CodigoRol,
+  type RespuestaTokenAcceso,
+} from './api/clienteHttp';
 import { LayoutPwa } from './componentes/LayoutPwa';
 import {
   CATALOGO_MODULOS,
@@ -75,6 +79,7 @@ export default function App() {
   const [rutaActiva, setRutaActiva] = useState<string>('/panel');
   const [autenticado, setAutenticado] = useState<boolean>(true);
   const [debeCambiarClave, setDebeCambiarClave] = useState<boolean>(false);
+  const [nombreUsuario, setNombreUsuario] = useState<string>('ana.perez');
 
   const verificarServicios = useCallback(async () => {
     setServicios((previos) =>
@@ -117,6 +122,16 @@ export default function App() {
     };
   }, [verificarServicios]);
 
+  const manejarAutenticacionExitosa = (respuesta: RespuestaTokenAcceso) => {
+    setAutenticado(true);
+    setNombreUsuario(respuesta.usuario.nombreUsuario);
+    setDebeCambiarClave(Boolean(respuesta.usuario.debeCambiarClave));
+    const primerRol = respuesta.usuario.roles?.[0];
+    if (primerRol) {
+      setRolActivo(primerRol);
+    }
+  };
+
   const moduloActual = buscarModuloPorRuta(rutaActiva) ?? CATALOGO_MODULOS[0];
   const metadatosRol = METADATOS_ROLES[rolActivo];
 
@@ -125,7 +140,7 @@ export default function App() {
       rolActivo={rolActivo}
       rutaActiva={moduloActual.ruta}
       enLinea={enLinea}
-      nombreUsuario="ana.perez"
+      nombreUsuario={nombreUsuario}
       debeCambiarClave={debeCambiarClave}
       alCambiarRol={setRolActivo}
       alNavegar={setRutaActiva}
@@ -159,7 +174,7 @@ export default function App() {
             <KeyRound className="w-3.5 h-3.5" aria-hidden="true" />
             {debeCambiarClave
               ? 'Clave inicial pendiente (RF-03)'
-              : 'Simular clave inicial'}
+              : 'Pantalla cambio de clave inicial'}
           </button>
 
           <button
@@ -168,7 +183,7 @@ export default function App() {
             onClick={() => setAutenticado((previo) => !previo)}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface text-slate-700 border border-slate-200 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
-            {autenticado ? 'Simular expiración 401' : 'Restaurar sesión'}
+            {autenticado ? 'Pantalla de inicio de sesión' : 'Restaurar sesión'}
           </button>
         </div>
       </section>
@@ -179,8 +194,16 @@ export default function App() {
         rolActivo={rolActivo}
         rolesPermitidos={moduloActual.rolesPermitidos}
         tituloModulo={moduloActual.etiqueta}
+        nombreUsuario={nombreUsuario}
+        alAutenticarSesion={manejarAutenticacionExitosa}
         alSolicitarInicioSesion={() => setAutenticado(true)}
-        alCompletarCambioClave={() => setDebeCambiarClave(false)}
+        alCompletarCambioClave={(respuesta) => {
+          if (respuesta) {
+            manejarAutenticacionExitosa(respuesta);
+          } else {
+            setDebeCambiarClave(false);
+          }
+        }}
         alVolverAlPanel={() => setRutaActiva('/panel')}
       >
         {moduloActual.ruta === '/panel' ? (
@@ -248,7 +271,7 @@ function VistaPanelGeneral({
       <section className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-accent-light text-accent-dark">
-            Sprint 4 · Layout por rol, rutas protegidas y cliente HTTP con token
+            Sprint 4 · Autenticación JWT RS256, roles y cambio obligatorio de clave inicial
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-primary">
             Plataforma de Gestión Académica y Avisos Oportunos

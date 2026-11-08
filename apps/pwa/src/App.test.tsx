@@ -167,9 +167,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     fireEvent.change(screen.getByLabelText(/Clave actual/i), {
       target: { value: CLAVE_INICIAL_FICTICIA },
     });
-    fireEvent.change(screen.getByLabelText(/Nueva contraseña/i), {
-      target: { value: CLAVE_PERSONAL_PRUEBA },
-    });
+    fireEvent.change(
+      screen.getByLabelText(/Nueva contraseña \(mín\. 8 caracteres\)/i),
+      {
+        target: { value: CLAVE_PERSONAL_PRUEBA },
+      },
+    );
     fireEvent.change(screen.getByLabelText(/Confirmar nueva contraseña/i), {
       target: { value: CLAVE_PERSONAL_PRUEBA },
     });

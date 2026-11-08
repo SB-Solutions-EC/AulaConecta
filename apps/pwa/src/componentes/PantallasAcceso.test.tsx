@@ -206,7 +206,9 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
 
     const botonGuardar = screen.getByTestId('boton-guardar-cambio-clave');
     const campoActual = screen.getByLabelText(/Clave actual/i);
-    const campoNueva = screen.getByLabelText(/Nueva contraseña/i);
+    const campoNueva = screen.getByLabelText(
+      /Nueva contraseña \(mín\. 8 caracteres\)/i,
+    );
     const campoConfirmar = screen.getByLabelText(/Confirmar nueva contraseña/i);
 
     // 1. Campos vacíos

@@ -14,13 +14,22 @@ import {
   type CodigoRol,
   type RespuestaTokenAcceso,
 } from './api/clienteHttp';
+import {
+  normalizarRolesAsignados,
+  resolverRolActivo,
+  servicioAutenticacionApi,
+  TIEMPO_INACTIVIDAD_POR_DEFECTO_MS,
+  type MotivoCierreSesion,
+} from './api/autenticacionApi';
 import { LayoutPwa } from './componentes/LayoutPwa';
 import {
   CATALOGO_MODULOS,
   METADATOS_ROLES,
+  ORDEN_ROLES,
   RutaProtegida,
   buscarModuloPorRuta,
 } from './rutas/rutasProtegidas';
+import { useCierrePorInactividad } from './sesion/useCierrePorInactividad';
 
 export type EstadoSalud = 'UP' | 'DOWN' | 'CHECKING';
 
@@ -31,6 +40,10 @@ export interface ServicioMonitorizado {
   rutaSalud: string;
   descripcion: string;
   estado: EstadoSalud;
+}
+
+export interface PropiedadesApp {
+  tiempoInactividadMs?: number;
 }
 
 const SERVICIOS_INICIALES: ServicioMonitorizado[] = [
@@ -71,15 +84,36 @@ async function consultarSaludServicio(ruta: string): Promise<EstadoSalud> {
   }
 }
 
-export default function App() {
+export default function App({
+  tiempoInactividadMs = TIEMPO_INACTIVIDAD_POR_DEFECTO_MS,
+}: Readonly<PropiedadesApp> = {}) {
   const [servicios, setServicios] =
     useState<ServicioMonitorizado[]>(SERVICIOS_INICIALES);
   const [enLinea, setEnLinea] = useState<boolean>(navigator.onLine);
+  const [rolesAsignados, setRolesAsignados] =
+    useState<CodigoRol[]>(ORDEN_ROLES);
   const [rolActivo, setRolActivo] = useState<CodigoRol>('ADMIN');
   const [rutaActiva, setRutaActiva] = useState<string>('/panel');
   const [autenticado, setAutenticado] = useState<boolean>(true);
   const [debeCambiarClave, setDebeCambiarClave] = useState<boolean>(false);
   const [nombreUsuario, setNombreUsuario] = useState<string>('ana.perez');
+  const [motivoCierreSesion, setMotivoCierreSesion] =
+    useState<MotivoCierreSesion>(null);
+
+  const finalizarSesion = useCallback((motivo: MotivoCierreSesion) => {
+    setAutenticado(false);
+    setDebeCambiarClave(false);
+    setMotivoCierreSesion(motivo);
+    servicioAutenticacionApi.cerrarSesion().catch(() => undefined);
+  }, []);
+
+  useCierrePorInactividad({
+    activo: autenticado,
+    tiempoLimiteMs: tiempoInactividadMs,
+    alExpirarPorInactividad: () => {
+      finalizarSesion('INACTIVIDAD');
+    },
+  });
 
   const verificarServicios = useCallback(async () => {
     setServicios((previos) =>
@@ -109,6 +143,7 @@ export default function App() {
 
     const cancelarExpiracion = clienteHttp.alExpirarSesion(() => {
       setAutenticado(false);
+      setMotivoCierreSesion('TOKEN_EXPIRADO');
     });
     const cancelarCambioClave = clienteHttp.alRequerirCambioClave(() => {
       setDebeCambiarClave(true);
@@ -123,13 +158,13 @@ export default function App() {
   }, [verificarServicios]);
 
   const manejarAutenticacionExitosa = (respuesta: RespuestaTokenAcceso) => {
+    const rolesCuenta = normalizarRolesAsignados(respuesta.usuario.roles);
     setAutenticado(true);
+    setMotivoCierreSesion(null);
     setNombreUsuario(respuesta.usuario.nombreUsuario);
     setDebeCambiarClave(Boolean(respuesta.usuario.debeCambiarClave));
-    const primerRol = respuesta.usuario.roles?.[0];
-    if (primerRol) {
-      setRolActivo(primerRol);
-    }
+    setRolesAsignados(rolesCuenta);
+    setRolActivo((rolPrevio) => resolverRolActivo(rolesCuenta, rolPrevio));
   };
 
   const moduloActual = buscarModuloPorRuta(rutaActiva) ?? CATALOGO_MODULOS[0];
@@ -138,12 +173,20 @@ export default function App() {
   return (
     <LayoutPwa
       rolActivo={rolActivo}
+      rolesAsignados={rolesAsignados}
       rutaActiva={moduloActual.ruta}
       enLinea={enLinea}
       nombreUsuario={nombreUsuario}
       debeCambiarClave={debeCambiarClave}
       alCambiarRol={setRolActivo}
       alNavegar={setRutaActiva}
+      alCerrarSesion={
+        autenticado
+          ? () => {
+              finalizarSesion('MANUAL');
+            }
+          : undefined
+      }
     >
       {/* Controles de estado de sesión y seguridad para validación de guardas (RF-01, RF-03) */}
       <section
@@ -155,8 +198,8 @@ export default function App() {
             Ruta activa: <code className="font-mono">{moduloActual.ruta}</code>
           </span>
           <p className="text-xs text-slate-600">
-            Módulo: <strong>{moduloActual.etiqueta}</strong> · Guardas de
-            autenticación, rol y clave inicial (`RF-01`, `RF-03`).
+            Módulo: <strong>{moduloActual.etiqueta}</strong> · Sesión, cierre
+            por inactividad y menú según el rol (`RF-01`, `RF-03`).
           </p>
         </div>
 
@@ -180,7 +223,14 @@ export default function App() {
           <button
             type="button"
             data-testid="toggle-sesion"
-            onClick={() => setAutenticado((previo) => !previo)}
+            onClick={() => {
+              if (autenticado) {
+                finalizarSesion('MANUAL');
+              } else {
+                setAutenticado(true);
+                setMotivoCierreSesion(null);
+              }
+            }}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-surface text-slate-700 border border-slate-200 hover:bg-slate-200/60 transition-colors cursor-pointer"
           >
             {autenticado ? 'Pantalla de inicio de sesión' : 'Restaurar sesión'}
@@ -195,8 +245,12 @@ export default function App() {
         rolesPermitidos={moduloActual.rolesPermitidos}
         tituloModulo={moduloActual.etiqueta}
         nombreUsuario={nombreUsuario}
+        motivoCierreSesion={motivoCierreSesion}
         alAutenticarSesion={manejarAutenticacionExitosa}
-        alSolicitarInicioSesion={() => setAutenticado(true)}
+        alSolicitarInicioSesion={() => {
+          setAutenticado(true);
+          setMotivoCierreSesion(null);
+        }}
         alCompletarCambioClave={(respuesta) => {
           if (respuesta) {
             manejarAutenticacionExitosa(respuesta);
@@ -271,7 +325,7 @@ function VistaPanelGeneral({
       <section className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
           <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-accent-light text-accent-dark">
-            Sprint 4 · Autenticación JWT RS256, roles y cambio obligatorio de clave inicial
+            Sprint 4 · Sesión activa, cierre por inactividad y menú según el rol
           </span>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-primary">
             Plataforma de Gestión Académica y Avisos Oportunos
@@ -347,8 +401,8 @@ function VistaPanelGeneral({
               Identidad y Seguridad
             </h4>
             <p className="text-xs text-slate-600 mt-1">
-              JWT RS256 en memoria, rotación de sesión, bloqueo tras 3 intentos
-              y auditoría inmutable.
+              JWT RS256 en memoria, cierre por inactividad, bloqueo tras 3
+              intentos y auditoría inmutable.
             </p>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import type { CodigoRol, RespuestaTokenAcceso } from '../api/clienteHttp';
+import type { MotivoCierreSesion } from '../api/autenticacionApi';
 import { PantallaCambioClaveInicial } from '../componentes/PantallaCambioClaveInicial';
 import { PantallaInicioSesion } from '../componentes/PantallaInicioSesion';
 
@@ -188,6 +189,7 @@ export interface PropiedadesRutaProtegida {
   rolesPermitidos: CodigoRol[];
   tituloModulo: string;
   nombreUsuario?: string;
+  motivoCierreSesion?: MotivoCierreSesion;
   alAutenticarSesion?: (respuesta: RespuestaTokenAcceso) => void;
   alSolicitarInicioSesion?: () => void;
   alCompletarCambioClave?: (respuesta?: RespuestaTokenAcceso) => void;
@@ -202,6 +204,7 @@ export function RutaProtegida({
   rolesPermitidos,
   tituloModulo,
   nombreUsuario = 'ana.perez',
+  motivoCierreSesion = null,
   alAutenticarSesion,
   alSolicitarInicioSesion,
   alCompletarCambioClave,
@@ -213,6 +216,7 @@ export function RutaProtegida({
       <div data-testid="vista-no-autenticado" className="space-y-4">
         <PantallaInicioSesion
           nombreUsuarioInicial={nombreUsuario}
+          motivoCierreSesion={motivoCierreSesion}
           alAutenticarExitosamente={(respuesta) => {
             alAutenticarSesion?.(respuesta);
           }}

@@ -24,5 +24,6 @@ tags = ["datos-personales"]
 # Los documentos binarios (Word, Excel, PDF, imágenes) no se pueden leer como texto;
 # se revisan a mano antes de subirlos (ver docs/seguridad/datos_sensibles.md).
 [[allowlists]]
-description = "Archivos binarios"
+description = "Archivos binarios y valores simulados de pruebas unitarias de la PWA"
 paths = ['''(?i)\.(?:png|jpe?g|gif|pdf|docx|xlsx|pptx|bpm|bpmn)$''']
+commits = ["bed5f55e209aab387a75f4ac497d8a6e30024cc7"]

@@ -37,7 +37,7 @@ function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
       return {
         titulo: 'Cuenta bloqueada temporalmente (RNF-12)',
         mensaje:
-          error.mensaje ||
+          error.message ||
           'Se superó el límite de 3 intentos fallidos consecutivos. Intente más tarde o solicite el desbloqueo al administrador.',
         esBloqueoTemporal: true,
       };
@@ -47,7 +47,7 @@ function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
       return {
         titulo: 'Credenciales inválidas (RF-01)',
         mensaje:
-          error.mensaje ||
+          error.message ||
           'Usuario o contraseña incorrectos. Recuerde que tras 3 intentos fallidos su cuenta se bloqueará temporalmente.',
         esBloqueoTemporal: false,
       };
@@ -55,7 +55,7 @@ function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
 
     return {
       titulo: `Error de acceso (${error.codigo})`,
-      mensaje: error.mensaje,
+      mensaje: error.message,
       esBloqueoTemporal: false,
     };
   }

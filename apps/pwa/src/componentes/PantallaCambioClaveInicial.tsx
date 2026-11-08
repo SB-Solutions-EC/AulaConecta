@@ -52,7 +52,7 @@ function validarSolicitudCambioClave(
 
 function traducirErrorCambioClave(error: unknown): string {
   if (error instanceof ErrorHttpApi) {
-    return error.mensaje || `No se pudo actualizar la clave (${error.codigo}).`;
+    return error.message || `No se pudo actualizar la clave (${error.codigo}).`;
   }
   return 'No fue posible conectarse con el servicio de identidad (/api/identidad/auth/cambiar-clave).';
 }

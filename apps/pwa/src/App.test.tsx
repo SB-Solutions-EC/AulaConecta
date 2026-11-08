@@ -13,7 +13,22 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
       vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ status: 'UP' }),
+        json: () =>
+          Promise.resolve({
+            status: 'UP',
+            accessToken: 'jwt-rs256-prueba',
+            tokenType: 'Bearer',
+            expiresIn: 900,
+            usuario: {
+              id: '00000000-0000-0000-0000-000000000001',
+              nombreUsuario: 'ana.perez',
+              roles: ['ADMIN'],
+              debeCambiarClave: false,
+              estado: 'ACTIVO',
+              intentosFallidos: 0,
+              version: 1,
+            },
+          }),
       }),
     );
   });
@@ -121,7 +136,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     expect(tienePermisoRuta('ADMIN', '/ruta-inexistente')).toBe(false);
   });
 
-  it('protege las rutas ante clave inicial pendiente (RF-03), expiración de sesión, menú móvil y eventos offline/online', async () => {
+  it('integra las pantallas de cambio obligatorio de clave inicial (RF-03) e inicio de sesión dentro de RutaProtegida', async () => {
     render(<App />);
 
     await waitFor(() => {
@@ -137,29 +152,39 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
       screen.getByRole('button', { name: /Cerrar menú lateral/i }),
     ).toBeInTheDocument();
 
-    // Simular clave inicial pendiente (debeCambiarClave = true)
+    // Activar vista de cambio obligatorio de clave inicial (debeCambiarClave = true)
     fireEvent.click(screen.getByTestId('toggle-cambio-clave'));
     expect(
       screen.getByTestId('vista-cambio-clave-obligatorio'),
     ).toBeInTheDocument();
 
-    // Confirmar cambio de clave desde la guarda
-    fireEvent.click(
-      screen.getByRole('button', { name: /Confirmar cambio de clave/i }),
-    );
-    expect(
-      screen.queryByTestId('vista-cambio-clave-obligatorio'),
-    ).not.toBeInTheDocument();
+    // Completar el formulario de cambio de clave inicial
+    fireEvent.change(screen.getByLabelText(/Clave actual/i), {
+      target: { value: '1600000000' },
+    });
+    fireEvent.change(screen.getByLabelText(/Nueva contraseña/i), {
+      target: { value: 'ClaveNuevaSegura2026' },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirmar nueva contraseña/i), {
+      target: { value: 'ClaveNuevaSegura2026' },
+    });
+    fireEvent.click(screen.getByTestId('boton-guardar-cambio-clave'));
 
-    // Simular expiración de sesión (no autenticado)
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('vista-cambio-clave-obligatorio'),
+      ).not.toBeInTheDocument();
+    });
+
+    // Activar pantalla de inicio de sesión (no autenticado)
     fireEvent.click(screen.getByTestId('toggle-sesion'));
     expect(screen.getByTestId('vista-no-autenticado')).toBeInTheDocument();
+    expect(screen.getByTestId('pantalla-inicio-sesion')).toBeInTheDocument();
 
-    // Restaurar sesión desde la guarda
-    const botonesRestaurar = screen.getAllByRole('button', {
-      name: /Restaurar sesión/i,
-    });
-    fireEvent.click(botonesRestaurar[botonesRestaurar.length - 1]);
+    // Volver al panel desde la pantalla de inicio de sesión
+    fireEvent.click(
+      screen.getByRole('button', { name: /Volver al panel demostrativo/i }),
+    );
     expect(
       screen.queryByTestId('vista-no-autenticado'),
     ).not.toBeInTheDocument();

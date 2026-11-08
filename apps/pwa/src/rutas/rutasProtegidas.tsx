@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
-import { Lock, KeyRound, ShieldAlert } from 'lucide-react';
-import type { CodigoRol } from '../api/clienteHttp';
+import { ShieldAlert } from 'lucide-react';
+import type { CodigoRol, RespuestaTokenAcceso } from '../api/clienteHttp';
+import { PantallaCambioClaveInicial } from '../componentes/PantallaCambioClaveInicial';
+import { PantallaInicioSesion } from '../componentes/PantallaInicioSesion';
 
 export interface DefinicionModuloNavegacion {
   id: string;
@@ -185,8 +187,10 @@ export interface PropiedadesRutaProtegida {
   rolActivo: CodigoRol;
   rolesPermitidos: CodigoRol[];
   tituloModulo: string;
+  nombreUsuario?: string;
+  alAutenticarSesion?: (respuesta: RespuestaTokenAcceso) => void;
   alSolicitarInicioSesion?: () => void;
-  alCompletarCambioClave?: () => void;
+  alCompletarCambioClave?: (respuesta?: RespuestaTokenAcceso) => void;
   alVolverAlPanel?: () => void;
   children: ReactNode;
 }
@@ -197,6 +201,8 @@ export function RutaProtegida({
   rolActivo,
   rolesPermitidos,
   tituloModulo,
+  nombreUsuario = 'ana.perez',
+  alAutenticarSesion,
   alSolicitarInicioSesion,
   alCompletarCambioClave,
   alVolverAlPanel,
@@ -204,73 +210,27 @@ export function RutaProtegida({
 }: Readonly<PropiedadesRutaProtegida>) {
   if (!autenticado) {
     return (
-      <section
-        aria-label="Sesión requerida"
-        data-testid="vista-no-autenticado"
-        className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/80 max-w-xl mx-auto text-center space-y-4"
-      >
-        <div className="w-12 h-12 rounded-2xl bg-accent-light text-accent-dark flex items-center justify-center mx-auto">
-          <Lock className="w-6 h-6" aria-hidden="true" />
-        </div>
-        <h2 className="font-display text-xl font-bold text-primary">
-          Autenticación requerida
-        </h2>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Su sesión ha finalizado o aún no ha iniciado sesión. Para acceder al
-          módulo <strong>{tituloModulo}</strong>, ingrese con sus credenciales
-          institucionales.
-        </p>
-        {alSolicitarInicioSesion && (
-          <button
-            type="button"
-            onClick={alSolicitarInicioSesion}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-white text-sm font-semibold transition-colors cursor-pointer"
-          >
-            Restaurar sesión
-          </button>
-        )}
-      </section>
+      <div data-testid="vista-no-autenticado" className="space-y-4">
+        <PantallaInicioSesion
+          nombreUsuarioInicial={nombreUsuario}
+          alAutenticarExitosamente={(respuesta) => {
+            alAutenticarSesion?.(respuesta);
+          }}
+          alVolverAlPanel={alSolicitarInicioSesion}
+        />
+      </div>
     );
   }
 
   if (debeCambiarClave) {
     return (
-      <section
-        aria-label="Cambio obligatorio de clave inicial"
-        data-testid="vista-cambio-clave-obligatorio"
-        className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-amber-200 max-w-xl mx-auto space-y-4"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-            <KeyRound className="w-5 h-5" aria-hidden="true" />
-          </div>
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
-              Seguridad · RF-03
-            </span>
-            <h2 className="font-display text-lg sm:text-xl font-bold text-primary">
-              Cambio obligatorio de clave inicial
-            </h2>
-          </div>
-        </div>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          Su cuenta aún utiliza la contraseña inicial generada con su número de
-          cédula. Por seguridad (`debeCambiarClave = true`), el acceso a{' '}
-          <strong>{tituloModulo}</strong> permanece bloqueado hasta que defina
-          una clave personal.
-        </p>
-        {alCompletarCambioClave && (
-          <div className="pt-2">
-            <button
-              type="button"
-              onClick={alCompletarCambioClave}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-dark text-white text-sm font-semibold transition-colors cursor-pointer"
-            >
-              Confirmar cambio de clave
-            </button>
-          </div>
-        )}
-      </section>
+      <PantallaCambioClaveInicial
+        nombreUsuario={nombreUsuario}
+        tituloModuloBloqueado={tituloModulo}
+        alCambiarClaveExitosamente={(respuesta) => {
+          alCompletarCambioClave?.(respuesta);
+        }}
+      />
     );
   }
 
@@ -321,4 +281,3 @@ export function RutaProtegida({
 
   return <>{children}</>;
 }
-

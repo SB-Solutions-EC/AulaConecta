@@ -803,6 +803,18 @@ function renderSidebar() {
     { id: 'docentes', label: 'Docentes', icon: '🧑‍🏫' },
     { id: 'estudiantes', label: 'Estudiantes', icon: '🎓' },
     { id: 'reprogramaciones', label: 'Reprogramaciones', icon: '🔁' },
+    { id: 'avisos', label: 'Historial de Avisos', icon: '🔔' },
+    { id: 'cuentas', label: 'Cuentas y Accesos', icon: '🔑' },
+  ];
+  const navSecretaria = [
+    { id: 'estudiantes', label: 'Matrícula', icon: '🎓' },
+    { id: 'contactos', label: 'Representantes', icon: '📱' },
+    { id: 'cuentas', label: 'Cuentas y Accesos', icon: '🔑' },
+  ];
+  const navRep = [
+    { id: 'resumen', label: 'Mi Representado', icon: '🏠' },
+    { id: 'avisos', label: 'Avisos Recibidos', icon: '🔔' },
+    { id: 'consentimiento', label: 'Consentimiento', icon: '✅' },
   ];
   const navStudent = [
     { id: 'dashboard', label: 'Mi Dashboard', icon: '🏠' },
@@ -819,10 +831,16 @@ function renderSidebar() {
     { id: 'calificaciones', label: 'Calificar Tareas', icon: '📝' },
     { id: 'recursos', label: 'Recursos de Estudio', icon: '📎' },
     { id: 'mensajeria', label: 'Mensajería', icon: '💬' },
+    { id: 'avisos', label: 'Avisos a Representantes', icon: '🔔' },
   ];
-  const items = ui.role === 'admin' ? navAdmin : ui.role === 'docente' ? navTeacher : navStudent;
-  const activeScreen = ui.role === 'admin' ? ui.adminScreen : ui.role === 'docente' ? ui.teacherScreen : ui.studentScreen;
-  const setter = ui.role === 'admin' ? 'setAdminScreen' : ui.role === 'docente' ? 'setTeacherScreen' : 'setStudentScreen';
+  const porRol = {
+    admin: [navAdmin, ui.adminScreen, 'setAdminScreen'],
+    secretaria: [navSecretaria, ui.secretariaScreen, 'setSecretariaScreen'],
+    docente: [navTeacher, ui.teacherScreen, 'setTeacherScreen'],
+    estudiante: [navStudent, ui.studentScreen, 'setStudentScreen'],
+    representante: [navRep, ui.repScreen, 'setRepScreen'],
+  };
+  const [items, activeScreen, setter] = porRol[ui.role];
 
   el.className = `fixed inset-y-0 left-0 z-40 w-72 bg-primary flex flex-col transform transition-transform duration-200 lg:static lg:translate-x-0 lg:w-64 lg:flex-shrink-0 print:hidden ${ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`;
   el.innerHTML = `
@@ -850,34 +868,24 @@ function renderSidebar() {
 function renderTopbar() {
   const el = document.getElementById('topbar');
   el.className = 'h-16 flex-shrink-0 bg-white border-b border-slate-200 flex items-center gap-3 px-4 sm:px-6 print:hidden';
-  const title = ui.role === 'admin' ? ADMIN_TITLES[ui.adminScreen] : ui.role === 'docente' ? TEACHER_TITLES[ui.teacherScreen] : STUDENT_TITLES[ui.studentScreen];
+  const titulos = { admin: ADMIN_TITLES[ui.adminScreen], secretaria: SECRETARIA_TITLES[ui.secretariaScreen], docente: TEACHER_TITLES[ui.teacherScreen], estudiante: STUDENT_TITLES[ui.studentScreen], representante: REP_TITLES[ui.repScreen] };
+  const title = titulos[ui.role] || '';
+  const pendientes = db.colaSync.filter(c => c.estado === 'pendiente').length;
+  // v3: la persona la define la sesión; ya no hay selector de «Vista»
   el.innerHTML = `
     <button onclick="window.toggleSidebar(true)" class="lg:hidden text-slate-500 hover:text-primary flex-shrink-0">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <div class="font-display font-bold text-primary-dark text-lg truncate">${title}</div>
     <div class="ml-auto flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-      ${ui.role === 'estudiante' && db.students.length ? `
-        <select onchange="window.selectStudent(this.value)" class="text-xs sm:text-sm font-semibold text-primary-dark border border-slate-300 rounded-lg px-2.5 py-2 bg-white max-w-[160px] sm:max-w-none">
-          ${db.students.map(s => `<option value="${s.id}" ${s.id === ui.studentId ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
-        </select>
-      ` : ''}
-      ${ui.role === 'docente' && db.teachers.length ? `
-        <select onchange="window.selectTeacher(this.value)" class="text-xs sm:text-sm font-semibold text-primary-dark border border-slate-300 rounded-lg px-2.5 py-2 bg-white max-w-[160px] sm:max-w-none">
-          ${db.teachers.map(t => `<option value="${t.id}" ${t.id === ui.teacherId ? 'selected' : ''}>${escapeHtml(t.name)}</option>`).join('')}
-        </select>
-      ` : ''}
-      <div class="flex items-center gap-1.5">
-        <span class="text-[11px] font-bold text-slate-500 hidden sm:inline">Vista:</span>
-        <select onchange="window.setRole(this.value)" class="text-xs sm:text-sm font-bold text-primary-dark border border-slate-300 rounded-lg px-2.5 py-2 bg-white">
-          <option value="admin" ${ui.role === 'admin' ? 'selected' : ''}>Administrador</option>
-          <option value="docente" ${ui.role === 'docente' ? 'selected' : ''}>Docente</option>
-          <option value="estudiante" ${ui.role === 'estudiante' ? 'selected' : ''}>Estudiante</option>
-        </select>
+      <button onclick="window.toggleConexion()" title="Simula la pérdida de conexión (RNF-01)" class="text-[11px] font-bold px-2.5 py-1.5 rounded-md border ${ui.offline ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}">
+        ${ui.offline ? `📴 Sin conexión${pendientes ? ` · ${pendientes} pendiente(s)` : ''}` : '🌐 En línea'}
+      </button>
+      <div class="text-right leading-tight hidden sm:block">
+        <div class="text-xs font-bold text-primary-dark">${escapeHtml(ui.session.nombre)}</div>
+        <div class="text-[11px] text-slate-500">${ROLES[ui.role]} · <code>${ui.session.usuario}</code></div>
       </div>
-      <div class="hidden md:flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold px-2.5 py-1.5 rounded-md">
-        🔒 SSL Activo
-      </div>
+      <button onclick="window.cerrarSesion()" class="${BTN_SECONDARY} px-3 py-2 text-xs">Salir</button>
     </div>
   `;
 }
@@ -889,11 +897,33 @@ function render() {
   if (!db.teachers.length) ui.teacherId = null;
   else if (!ui.teacherId || !getTeacher(ui.teacherId)) ui.teacherId = db.teachers[0].id;
 
+  // v3: sin sesión se muestra el inicio de sesión o la activación de la cuenta (RF-03)
+  if (!ui.session) {
+    document.getElementById('sidebar').className = 'hidden';
+    document.getElementById('topbar').className = 'hidden';
+    document.getElementById('view-root').innerHTML = `<div class="anim-fade max-w-6xl mx-auto">${ui.activando ? screenActivacion() : screenLogin()}</div>`;
+    document.getElementById('sidebar-backdrop').classList.add('hidden');
+    renderModal();
+    return;
+  }
+
   renderSidebar();
   renderTopbar();
 
   let html = '';
-  if (ui.role === 'admin') {
+  if (ui.role === 'secretaria') {
+    switch (ui.secretariaScreen) {
+      case 'contactos': html = screenContactos(); break;
+      case 'cuentas': html = screenCuentas(); break;
+      default: html = screenAdminEstudiantes();
+    }
+  } else if (ui.role === 'representante') {
+    switch (ui.repScreen) {
+      case 'avisos': html = screenRepAvisos(); break;
+      case 'consentimiento': html = screenRepConsentimiento(); break;
+      default: html = screenRepResumen();
+    }
+  } else if (ui.role === 'admin') {
     switch (ui.adminScreen) {
       case 'inicio': html = screenAdminInicio(); break;
       case 'estandares': html = screenAdminEstandares(); break;
@@ -903,6 +933,8 @@ function render() {
       case 'docentes': html = screenAdminDocentes(); break;
       case 'estudiantes': html = screenAdminEstudiantes(); break;
       case 'reprogramaciones': html = screenAdminReprogramaciones(); break;
+      case 'avisos': html = screenAvisos(); break;
+      case 'cuentas': html = screenCuentas(); break;
       default: html = screenAdminInicio();
     }
   } else if (ui.role === 'docente') {
@@ -914,6 +946,7 @@ function render() {
       case 'calificaciones': html = screenTeacherCalificaciones(); break;
       case 'recursos': html = screenTeacherRecursos(); break;
       case 'mensajeria': html = screenTeacherMensajeria(); break;
+      case 'avisos': html = screenAvisos(); break;
       default: html = screenTeacherInicio();
     }
   } else {
@@ -927,7 +960,7 @@ function render() {
     }
   }
 
-  document.getElementById('view-root').innerHTML = `<div class="anim-fade max-w-6xl mx-auto pb-10">${html}</div>`;
+  document.getElementById('view-root').innerHTML = `<div class="anim-fade max-w-6xl mx-auto pb-10">${bannerSinConexion()}${html}</div>`;
   document.getElementById('sidebar-backdrop').classList.toggle('hidden', !ui.sidebarOpen);
   renderModal();
 }
@@ -1509,6 +1542,10 @@ function teacherModalHTML() {
 
 /* ----------------------------- ADMIN: ESTUDIANTES -------------------------- */
 function screenAdminEstudiantes() {
+  // v3: filtros y paginación (RF-39)
+  const f = filtro('estudiantes');
+  const lista = db.students.filter(s => (!f.curso || s.courseId === f.curso) && coincide(f.texto, s.name, s.matricula, s.email));
+  const { items: pagina, controles } = paginar(lista, 'estudiantes');
   return `
     <div class="flex items-start justify-between gap-4 mb-6 flex-wrap">
       <div>
@@ -1517,19 +1554,20 @@ function screenAdminEstudiantes() {
       </div>
       <button onclick="window.openStudentModal()" class="${BTN_PRIMARY}">+ Nuevo Estudiante</button>
     </div>
+    <div class="flex gap-3 flex-wrap mb-4">${filtroTexto('estudiantes', 'Buscar por nombre, matrícula o correo')} ${filtroSelect('estudiantes', 'curso', opcionesCursos(), 'Todos los cursos')}</div>
     <div class="${CARD} overflow-hidden">
       <div class="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_120px] gap-2 px-5 py-3 text-[11px] font-bold text-slate-400 uppercase border-b border-slate-100 bg-slate-50">
-        <div>Estudiante</div><div>Correo</div><div>Matrícula</div><div>Curso</div><div>Acciones</div>
+        <div>Estudiante</div><div>Usuario</div><div>Matrícula</div><div>Curso</div><div>Acciones</div>
       </div>
-      <div class="max-h-[560px] overflow-y-auto">
-        ${db.students.length ? db.students.map(s => {
+      <div>
+        ${pagina.length ? pagina.map(s => {
           const course = getCourse(s.courseId);
           return `<div class="grid grid-cols-[1.4fr_1fr_1fr_0.8fr_120px] gap-2 px-5 py-3.5 items-center border-b border-slate-50 text-sm">
             <div class="flex items-center gap-2.5 min-w-0">
               <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs flex-shrink-0">${initials(s.name)}</div>
               <span class="font-semibold text-slate-700 truncate">${escapeHtml(s.name)}</span>
             </div>
-            <div class="text-slate-500 truncate text-xs">${escapeHtml(s.email)}</div>
+            <div class="text-slate-500 truncate text-xs"><code>${escapeHtml((cuentaDe('estudiante', s.id) || {}).usuario || '—')}</code></div>
             <div class="text-slate-500 text-xs">${escapeHtml(s.matricula)}</div>
             <div><span class="text-xs font-bold bg-sky-light text-primary-dark px-2 py-1 rounded-md">${course ? escapeHtml(course.name) : '—'}</span></div>
             <div class="flex gap-2.5">
@@ -1537,8 +1575,9 @@ function screenAdminEstudiantes() {
               <button onclick="window.deleteStudent('${s.id}')" class="${BTN_DANGER_TEXT}">Eliminar</button>
             </div>
           </div>`;
-        }).join('') : `<div class="p-10 text-center text-sm text-slate-400">Aún no hay estudiantes matriculados.</div>`}
+        }).join('') : `<div class="p-10 text-center text-sm text-slate-400">${db.students.length ? 'Sin resultados con estos filtros.' : 'Aún no hay estudiantes matriculados.'}</div>`}
       </div>
+      ${controles}
     </div>
   `;
 }
@@ -1579,6 +1618,7 @@ window.saveStudentForm = () => {
   if (!d.name.trim() || !d.email.trim() || !d.matricula.trim()) { toast('Completa nombre, correo y matrícula.', 'error'); return; }
   if (!d.courseId) { toast('Crea primero un curso en "Cursos y Materias".', 'error'); return; }
   if (!d.subjectIds.length) { toast('Selecciona al menos una materia.', 'error'); return; }
+  if ((d.repTelefono || '').trim() && !/^09\d{8}$/.test(d.repTelefono.trim())) { toast('El celular del representante debe tener 10 dígitos y empezar con 09.', 'error'); return; }
   if (ui.editingStudentId) {
     const s = getStudent(ui.editingStudentId);
     Object.assign(s, { name: d.name.trim(), email: d.email.trim(), matricula: d.matricula.trim(), courseId: d.courseId, subjectIds: [...d.subjectIds] });
@@ -1593,7 +1633,15 @@ window.saveStudentForm = () => {
       generateAttendanceForStudentSubject(student.id, subId, student.courseId);
     });
     ui.studentId = student.id;
-    toast('Estudiante matriculado — ya está disponible en la vista de Estudiante.');
+    // v3: cuenta con usuario generado y clave temporal aleatoria (RF-02, RF-03)
+    const cuenta = crearCuenta('estudiante', student.id, student.name, false);
+    if ((d.repNombre || '').trim()) {
+      const rep = { id: uid('rep'), nombre: d.repNombre.trim(), parentesco: 'Representante', telefono: (d.repTelefono || '').trim(), studentIds: [student.id], autorizado: false, verificado: false, baja: false };
+      db.representantes.push(rep);
+      crearCuenta('representante', rep.id, rep.nombre, false);
+    }
+    ui.credenciales = { nombre: student.name, usuario: cuenta.usuario, clave: cuenta.claveTemporal, vence: cuenta.venceTemporal };
+    toast('Estudiante matriculado. Entrega sus credenciales temporales.');
   }
   saveDB();
   ui.studentModalOpen = false;
@@ -1643,6 +1691,18 @@ function studentModalHTML() {
             </select>
           </div>
         </div>
+
+        ${isEdit ? '' : `<div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="${LABEL}">Representante (opcional)</label>
+            <input type="text" value="${escapeHtml(d.repNombre || '')}" oninput="window.updateStudentDraft('repNombre', this.value)" placeholder="Nombre y apellido" class="${INPUT}" />
+          </div>
+          <div>
+            <label class="${LABEL}">Celular del representante</label>
+            <input type="tel" value="${escapeHtml(d.repTelefono || '')}" oninput="window.updateStudentDraft('repTelefono', this.value)" placeholder="09XXXXXXXX" class="${INPUT}" />
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500 -mt-2 mb-4">Se crean las cuentas con clave temporal de un solo uso. La autorización de avisos se registra después, con la firma del representante.</p>`}
 
         <label class="${LABEL}">Materias asignadas</label>
         <div id="materias-checklist" class="grid grid-cols-2 gap-2 mb-5 max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-3">
@@ -2021,6 +2081,10 @@ window.updateGradeField = (subjectId, studentId, field, value) => {
   const e = ensureGradeEntry(subjectId, studentId);
   e[field] = value === '' ? null : value;
   saveDB();
+  // v3: cola sin conexión y aviso si el promedio baja de 7 (RF-30, RN-04)
+  registrarCambioLocal('nota', `Nota de ${(getStudent(studentId) || {}).name} en ${(getSubject(subjectId) || {}).name}`, { studentId, subjectId, field, value });
+  revisarPromedio(studentId, subjectId);
+  saveDB();
   renderPreservingScroll();
 };
 function gradeNumInput(subjectId, studentId, field, value, extraClass) {
@@ -2166,7 +2230,11 @@ function screenTeacherAsistencia() {
 }
 window.markAttendance = (studentId, subjectId, status) => {
   upsertAttendanceToday(studentId, subjectId, status);
-  toast('Asistencia registrada.');
+  registrarCambioLocal('asistencia', `Asistencia de ${(getStudent(studentId) || {}).name}`, { studentId, subjectId, status });
+  toast(ui.offline ? 'Asistencia guardada en este equipo (pendiente de sincronizar).' : 'Asistencia registrada.');
+  // v3: la falta sin justificar genera aviso; el atraso no (RF-31, RN-05)
+  if (status === 'falta') crearAviso(studentId, subjectId, 'falta_sin_justificar', { fecha: todayISO() });
+  saveDB();
   render();
 };
 
@@ -3184,6 +3252,9 @@ function renderModal() {
   if (ui.justifyModalOpen) { el.innerHTML = justifyModalHTML(); return; }
   if (ui.obsModalOpen) { el.innerHTML = obsModalHTML(); return; }
   if (ui.assignmentModalOpen) { el.innerHTML = assignmentModalHTML(); return; }
+  if (ui.credenciales) { el.innerHTML = credencialesModalHTML(); return; }
+  if (ui.waAvisoId) { el.innerHTML = whatsappModalHTML(); return; }
+  if (ui.conflicto) { el.innerHTML = conflictoModalHTML(); return; }
   el.innerHTML = '';
 }
 
@@ -3191,13 +3262,17 @@ function renderModal() {
 window.setAdminScreen = (s) => { ui.adminScreen = s; ui.sidebarOpen = false; if (s !== 'revision') ui.reviewingPlanId = null; render(); };
 window.setStudentScreen = (s) => { ui.studentScreen = s; ui.selectedSubjectId = null; ui.sidebarOpen = false; render(); };
 window.setRole = (r) => { ui.role = r; ui.sidebarOpen = false; render(); };
+window.setSecretariaScreen = (s) => { ui.secretariaScreen = s; ui.sidebarOpen = false; render(); };
+window.setRepScreen = (s) => { ui.repScreen = s; ui.sidebarOpen = false; render(); };
 window.selectStudent = (id) => { ui.studentId = id; ui.selectedSubjectId = null; ui.chatTeacherId = null; render(); };
 window.toggleSidebar = (v) => { ui.sidebarOpen = v; render(); };
 window.confirmResetDB = () => {
   if (!confirm('Esto borrará todos los datos actuales y restaurará el ejemplo inicial. ¿Continuar?')) return;
   localStorage.removeItem(DB_KEY);
   seedDB();
+  asegurarV3();
   saveDB();
+  ui.session = null;
   ui.studentId = db.students[0] ? db.students[0].id : null;
   ui.selectedSubjectId = null;
   ui.teacherId = db.teachers[0] ? db.teachers[0].id : null;
@@ -3211,6 +3286,7 @@ window.confirmResetDB = () => {
 /* ----------------------------------- INIT ----------------------------------- */
 document.addEventListener('DOMContentLoaded', () => {
   loadDB();
+  asegurarV3();
   ui.studentId = db.students[0] ? db.students[0].id : null;
   ui.teacherId = db.teachers[0] ? db.teachers[0].id : null;
   render();

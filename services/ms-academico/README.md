@@ -68,7 +68,7 @@ src/
   identidad/           Cliente de ms-identidad con token de servicio (T1110-A)
   salud/               GET /health
 test/                  Pruebas e2e
-  seguridad/           Suite de validación de entradas, inyección y autorización (T1109-A)
+  seguridad/           Suites de validación e inyección (T1109-A) y de privacidad (T1111-A)
   integracion/         Prueba contra un ms-identidad real (npm run test:integracion)
 ```
 
@@ -87,6 +87,7 @@ Para los DTOs se usan los decoradores de `src/comun/validadores.ts`:
 | `@TextoSeguro(max, min = 1)` | Texto escrito por personas: recorta espacios y admite letras con tildes, números y `. , ' ( ) / ° - –`. Rechaza ``< > ; " = \ ` ``, saltos de línea, el byte nulo (que PostgreSQL no acepta) y caracteres invisibles |
 | `@FechaCalendario()` | Fecha `AAAA-MM-DD` que existe (rechaza `2026-02-30` y fechas con hora) |
 | `@Identificador()` | UUID |
+| `@Cedula()` | Cédula ecuatoriana: provincia 01–24 o 30, tercer dígito 0–5 y verificador del módulo 10. Nunca se devuelve en una respuesta |
 | `@Opcional()` | Campo que se puede omitir. Usarlo en lugar de `@IsOptional()`, que también deja pasar un `null` explícito |
 
 Para errores propios del negocio: `throw new ExcepcionApi(409, 'CONFLICTO', 'El paralelo ya existe.')`. La validación no reemplaza a las consultas parametrizadas: con Prisma nunca se usa `$queryRawUnsafe` ni `$executeRawUnsafe` con texto armado a mano.
@@ -144,6 +145,29 @@ Los tokens se firman con una llave generada en cada ejecución (`tokens.ts`); el
 
 En el CI el resumen del job muestra el resultado por endpoint, y los reportes JUnit y JSON quedan en el artefacto `academico-resultados`.
 
+## Pruebas de privacidad (RNF-04)
+
+Un estudiante o un representante solo puede ver sus propios datos. `test/seguridad/verificar-privacidad.ts` arma por la API dos familias:
+
+- Curso X: el estudiante A, representado por RA y por RAC, y el estudiante B, representado por RB.
+- Curso Y: el estudiante C, representado por RAC.
+
+Luego prueba con el token de cada persona:
+
+| Qué | Esperado |
+|---|---|
+| `GET /matriculas` sin filtro | Cada uno recibe solo lo suyo; RAC ve a A y a C, nunca a B |
+| `GET /matriculas?estudianteId=` de otro | 403, **el mismo** para un estudiante que existe y uno inventado (no se puede averiguar quién está matriculado) |
+| Nómina del curso (`?cursoId=`) y `GET /personas` | 403, o una lista sin rastro de nadie ajeno (ni ids, ni nombres, ni cédula) |
+| Cabeceras (`X-Usuario-Id`...) o `?usuarioId=` con la identidad de otro | Se ignoran: la identidad sale solo del token |
+| `POST /matriculas`, `/representaciones` y `/personas` por un estudiante, representante o docente | 403, y el intento no le da acceso después |
+| La cédula | No aparece en ninguna respuesta, ni para el administrador |
+| Un token de servicio (T1110-A) | 401 o 403: no representa a una persona |
+
+Se ejecuta contra `referencia/modulo-matricula-referencia.ts`, que cumple todo y sirve de ejemplo de cómo decidir qué ve cada quien con el `sub` del token. También se ejecuta contra los endpoints reales (`privacidad.e2e.spec.ts`), que se omiten hasta que existan todas las rutas del escenario. Para probar la suite, se debilitó la referencia de 8 maneras: sin filtrar por persona, lista vacía en vez de 403, 404 que revela si el estudiante existe, identidad tomada de una cabecera, representante que puede vincularse, cédula en la respuesta, representante que ve todo el curso y estudiante que ve a todas las personas. En cada caso fallaron entre 1 y 17 pruebas.
+
+En los dos e2e, ms-identidad se reemplaza por `IdentidadFalsa` (`aplicacion-real.ts`); la comunicación real se prueba en `test/integracion/`. Las cédulas y los nombres se generan al ejecutar (`datos-ficticios.ts`).
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -154,6 +178,8 @@ En el CI el resumen del job muestra el resultado por endpoint, y los reportes JU
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |
+| Sprint 4 (11/11) | Validación de cédula y pruebas de privacidad de matrícula y personas (RNF-04) | Listo (T1111-A) |
+| Sprint 4 (11/11) | Endpoints de matrícula individual y personas | Pendiente (T1111-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

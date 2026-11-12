@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
+import { CanActivate, createParamDecorator, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { verify } from 'node:crypto';
@@ -10,6 +10,18 @@ import { AUDIENCIA, CLAVE_PUBLICA, EMISOR, KID, Reclamos } from '../tokens';
 
 const CLAVE_ROLES = 'roles-permitidos';
 export const Roles = (...roles: string[]): MethodDecorator => SetMetadata(CLAVE_ROLES, roles);
+
+/** Quién llama, tomado SOLO del token verificado: nunca de cabeceras, parámetros ni del cuerpo. */
+export interface UsuarioActual {
+  usuarioId: string;
+  roles: string[];
+}
+type PeticionConUsuario = Request & { usuarioActual?: UsuarioActual };
+
+export const Usuario = createParamDecorator(
+  (_dato: unknown, contexto: ExecutionContext): UsuarioActual =>
+    contexto.switchToHttp().getRequest<PeticionConUsuario>().usuarioActual as UsuarioActual,
+);
 
 const noAutorizado = (): ExcepcionApi => new ExcepcionApi(401, 'NO_AUTORIZADO', 'Inicia sesión para continuar.');
 
@@ -42,7 +54,9 @@ function verificarToken(cabecera: string | undefined): Reclamos {
     verify('sha256', Buffer.from(`${encabezado}.${cuerpo}`), CLAVE_PUBLICA, Buffer.from(firma, 'base64url'));
   const audiencias = Array.isArray(reclamos.aud) ? reclamos.aud : [reclamos.aud];
   const vigente = typeof reclamos.exp === 'number' && reclamos.exp > Date.now() / 1000;
-  if (!firmaValida || reclamos.iss !== EMISOR || !audiencias.includes(AUDIENCIA) || !vigente || !Array.isArray(reclamos.roles)) {
+  // Un token de servicio (tipo servicio, sin roles) no representa a una persona
+  const deUsuario = reclamos.tipo === 'usuario' && typeof reclamos.sub === 'string' && Array.isArray(reclamos.roles);
+  if (!firmaValida || reclamos.iss !== EMISOR || !audiencias.includes(AUDIENCIA) || !vigente || !deUsuario) {
     throw noAutorizado();
   }
   return reclamos;
@@ -53,7 +67,8 @@ export class GuardiaReferencia implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(contexto: ExecutionContext): boolean {
-    const reclamos = verificarToken(contexto.switchToHttp().getRequest<Request>().headers.authorization);
+    const peticion = contexto.switchToHttp().getRequest<PeticionConUsuario>();
+    const reclamos = verificarToken(peticion.headers.authorization);
     // Igual que ms-identidad: con la clave inicial solo se puede cambiar la clave
     if (reclamos.debe_cambiar_clave !== false) {
       throw new ExcepcionApi(403, 'CAMBIO_CLAVE_PENDIENTE', 'Cambia tu clave inicial para continuar.');
@@ -63,6 +78,7 @@ export class GuardiaReferencia implements CanActivate {
     if (permitidos && !permitidos.some((rol) => roles.includes(rol))) {
       throw new ExcepcionApi(403, 'ACCESO_DENEGADO', 'No tienes permiso para esta acción.');
     }
+    peticion.usuarioActual = { usuarioId: reclamos.sub as string, roles: roles.filter((rol): rol is string => typeof rol === 'string') };
     return true;
   }
 }

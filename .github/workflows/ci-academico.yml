@@ -83,6 +83,32 @@ jobs:
           for (const endpoint of new Set([...referencia.keys(), ...reales.keys()])) {
             lineas.push(`| \`${endpoint}\` | ${celda(referencia.get(endpoint) ?? [])} | ${celda(reales.get(endpoint) ?? [])} |`);
           }
+          // Privacidad (RNF-04, T1111-A): agrupada por lo que intenta cada persona
+          const porGrupo = (patron) => {
+            const grupos = new Map();
+            for (const t of r.testResults.filter((x) => patron.test(archivo(x)))) {
+              for (const p of t.assertionResults) {
+                const grupo = p.ancestorTitles.length > 1 ? p.ancestorTitles.at(-1) : 'Altas en ms-identidad';
+                grupos.set(grupo, [...(grupos.get(grupo) ?? []), p]);
+              }
+            }
+            return grupos;
+          };
+          const privRef = porGrupo(/^test\/seguridad\/referencia-privacidad\./);
+          const privReal = porGrupo(/^test\/seguridad\/privacidad\.e2e\./);
+          const de403 = (grupos) => [...grupos.values()].flat().filter((p) => p.title.includes('403'));
+          lineas.push(
+            '',
+            '### Privacidad: un estudiante o representante no accede a datos ajenos (RNF-04)',
+            '',
+            `Pruebas de 403: **${cuenta(de403(privRef), 'passed')}** pasaron en la referencia y **${cuenta(de403(privReal), 'passed')}** en los endpoints reales (${cuenta(de403(privReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...privRef.keys(), ...privReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(privRef.get(grupo) ?? [])} | ${celda(privReal.get(grupo) ?? [])} |`);
+          }
           const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
           if (fallidas.length) {
             lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));

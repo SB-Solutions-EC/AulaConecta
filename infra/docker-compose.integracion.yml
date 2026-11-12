@@ -1,0 +1,12 @@
+# Solo para la prueba de integración académico–identidad (T1110-A), en el CI o en local:
+#   docker compose -p aulaconecta-ci -f infra/docker-compose.yml -f infra/docker-compose.integracion.yml up -d --wait ms-identidad
+# Publica ms-identidad en el loopback del equipo para que la prueba de ms-academico lo llame directo.
+# El nombre de proyecto aparte (-p aulaconecta-ci) evita tocar los volúmenes del stack local.
+services:
+  ms-identidad:
+    ports:
+      - "127.0.0.1:18080:8080"
+    # La red interna no admite puertos publicados: se agrega la pública solo en esta prueba
+    networks:
+      - interna
+      - publica

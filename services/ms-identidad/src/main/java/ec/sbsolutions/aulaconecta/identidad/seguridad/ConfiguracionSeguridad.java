@@ -2,6 +2,7 @@ package ec.sbsolutions.aulaconecta.identidad.seguridad;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import ec.sbsolutions.aulaconecta.identidad.autenticacion.PropiedadesBloqueo;
+import ec.sbsolutions.aulaconecta.identidad.servicio.PropiedadesClientesServicio;
 import ec.sbsolutions.aulaconecta.identidad.usuario.CodigoRol;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import java.util.List;
@@ -38,50 +39,81 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 @Configuration
-@EnableConfigurationProperties({PropiedadesJwt.class, PropiedadesBloqueo.class})
+@EnableConfigurationProperties({PropiedadesJwt.class, PropiedadesBloqueo.class, PropiedadesClientesServicio.class})
 public class ConfiguracionSeguridad {
 
     // Parámetros mínimos recomendados por OWASP para Argon2id: 19 MiB de memoria, 2 iteraciones, 1 hilo
     private static final int ARGON2_MEMORIA_KIB = 19_456;
     private static final int ARGON2_ITERACIONES = 2;
 
+    // Alcance que ms-academico necesita para dar de alta las cuentas de docentes y estudiantes (RF-05)
+    static final String ALCANCE_CREAR_USUARIOS = "usuarios:crear";
+
     @Bean
     SecurityFilterChain cadenaDeSeguridad(HttpSecurity http) throws Exception {
+        AuthorizationManager<RequestAuthorizationContext> usuario = (autenticacion, contexto) ->
+                new AuthorizationDecision(esDeTipo(autenticacion.get(), EmisorTokens.TIPO_USUARIO));
         AuthorizationManager<RequestAuthorizationContext> sinClaveInicial = ConfiguracionSeguridad::sinClaveInicial;
         AuthorizationManager<RequestAuthorizationContext> administrador = AuthorizationManagers.allOf(
                 AuthorityAuthorizationManager.hasRole(CodigoRol.ADMIN.name()), sinClaveInicial);
+        AuthorizationManager<RequestAuthorizationContext> servicioQueCreaUsuarios = AuthorizationManagers.allOf(
+                (autenticacion, contexto) -> new AuthorizationDecision(
+                        esDeTipo(autenticacion.get(), EmisorTokens.TIPO_SERVICIO)),
+                AuthorityAuthorizationManager.hasAuthority("SCOPE_" + ALCANCE_CREAR_USUARIOS));
         http
                 // API sin sesión ni cookies de autenticación: cada petición trae su token bearer
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(peticiones -> peticiones
                         .requestMatchers(HttpMethod.GET, "/health", "/.well-known/jwks.json").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/oauth/token").permitAll()
                         .requestMatchers("/error").permitAll()
-                        // Con la clave inicial solo se puede consultar la sesión y cambiar la clave (RF-03)
-                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/auth/cambiar-clave").authenticated()
-                        // Gestión de cuentas y bitácora: solo el administrador (el token de servicio llega en T1110-A)
-                        .requestMatchers(HttpMethod.POST, "/usuarios", "/usuarios/*/desbloquear").access(administrador)
+                        // Con la clave inicial solo se puede consultar la sesión y cambiar la clave (RF-03).
+                        // Un token de servicio no es una persona: aquí no sirve
+                        .requestMatchers(HttpMethod.GET, "/auth/me").access(usuario)
+                        .requestMatchers(HttpMethod.POST, "/auth/cambiar-clave").access(usuario)
+                        // Altas: el administrador o un servicio con el alcance usuarios:crear (T1110-A)
+                        .requestMatchers(HttpMethod.POST, "/usuarios")
+                                .access(AuthorizationManagers.anyOf(administrador, servicioQueCreaUsuarios))
+                        // Desbloqueo y bitácora: solo el administrador
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/desbloquear").access(administrador)
                         .requestMatchers(HttpMethod.GET, "/auditoria-accesos").access(administrador)
                         .anyRequest().access(sinClaveInicial))
-                .oauth2ResourceServer(servidor -> servidor.jwt(jwt -> jwt.jwtAuthenticationConverter(convertidorDeRoles())));
+                .oauth2ResourceServer(servidor -> servidor.jwt(jwt -> jwt.jwtAuthenticationConverter(convertidorDeAutoridades())));
         return http.build();
     }
 
+    /** Una persona (no un servicio) que ya cambió su clave inicial. */
     static AuthorizationDecision sinClaveInicial(Supplier<? extends Authentication> autenticacion,
             RequestAuthorizationContext contexto) {
-        return new AuthorizationDecision(autenticacion.get() instanceof JwtAuthenticationToken token
-                && token.isAuthenticated()
-                && !Boolean.TRUE.equals(token.getToken().getClaimAsBoolean(EmisorTokens.RECLAMO_CAMBIO_CLAVE)));
+        Authentication actual = autenticacion.get();
+        return new AuthorizationDecision(esDeTipo(actual, EmisorTokens.TIPO_USUARIO)
+                && !Boolean.TRUE.equals(((JwtAuthenticationToken) actual).getToken()
+                        .getClaimAsBoolean(EmisorTokens.RECLAMO_CAMBIO_CLAVE)));
     }
 
-    private static JwtAuthenticationConverter convertidorDeRoles() {
+    static boolean esDeTipo(Authentication autenticacion, String tipo) {
+        return autenticacion instanceof JwtAuthenticationToken token
+                && token.isAuthenticated()
+                && tipo.equals(token.getToken().getClaimAsString(EmisorTokens.RECLAMO_TIPO));
+    }
+
+    /**
+     * Roles (ROLE_) para los tokens de usuario y alcances (SCOPE_) para los de servicio, nunca los dos:
+     * un token de usuario no puede traer alcances ni uno de servicio, roles.
+     */
+    private static JwtAuthenticationConverter convertidorDeAutoridades() {
         JwtGrantedAuthoritiesConverter roles = new JwtGrantedAuthoritiesConverter();
         roles.setAuthoritiesClaimName(EmisorTokens.RECLAMO_ROLES);
         roles.setAuthorityPrefix("ROLE_");
+        JwtGrantedAuthoritiesConverter alcances = new JwtGrantedAuthoritiesConverter();
+        alcances.setAuthoritiesClaimName(EmisorTokens.RECLAMO_ALCANCE);
+        alcances.setAuthorityPrefix("SCOPE_");
         JwtAuthenticationConverter convertidor = new JwtAuthenticationConverter();
-        convertidor.setJwtGrantedAuthoritiesConverter(roles);
+        convertidor.setJwtGrantedAuthoritiesConverter(jwt ->
+                EmisorTokens.TIPO_SERVICIO.equals(jwt.getClaimAsString(EmisorTokens.RECLAMO_TIPO))
+                        ? alcances.convert(jwt)
+                        : roles.convert(jwt));
         return convertidor;
     }
 

@@ -47,6 +47,7 @@ jobs:
             "ms-identidad (JUnit, JaCoCo, Dependency-Check)=pendiente" \
             "ms-academico (Vitest, npm audit)=pendiente" \
             "ms-notificaciones (pytest, pip-audit)=pendiente" \
+            "Integración académico–identidad=pendiente" \
             "PWA (lint, build, Vitest)=pendiente" \
             "Imágenes (Trivy, SBOM, GHCR)=pendiente" \
             "SonarQube (quality gate)=pendiente"
@@ -89,6 +90,12 @@ jobs:
   web:
     name: web
     uses: ./.github/workflows/ci-web.yml
+
+  # ms-academico pide su token de servicio a un ms-identidad real y crea una cuenta con él (T1110-A)
+  integracion:
+    name: integracion
+    needs: [identidad, academico]
+    uses: ./.github/workflows/ci-integracion.yml
 
   imagen-identidad:
     name: imagen-identidad
@@ -140,7 +147,7 @@ jobs:
 
   notificar-pruebas:
     name: telegram-pruebas
-    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, web,
+    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
@@ -163,6 +170,7 @@ jobs:
           IDENTIDAD: ${{ needs.identidad.result }}
           ACADEMICO: ${{ needs.academico.result }}
           NOTIFICACIONES: ${{ needs.notificaciones.result }}
+          INTEGRACION: ${{ needs.integracion.result }}
           WEB: ${{ needs.web.result }}
           IMAGENES: >-
             ${{ needs.imagen-identidad.result }} ${{ needs.imagen-academico.result }}
@@ -181,13 +189,14 @@ jobs:
             "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD" \
             "ms-academico (Vitest, npm audit)=$ACADEMICO" \
             "ms-notificaciones (pytest, pip-audit)=$NOTIFICACIONES" \
+            "Integración académico–identidad=$INTEGRACION" \
             "PWA (lint, build, Vitest)=$WEB" \
             "Imágenes (Trivy, SBOM, GHCR)=$imagenes" \
             "SonarQube (quality gate)=pendiente"
 
   quality:
     name: quality-pr
-    needs: [gitleaks, identidad, academico, notificaciones, web,
+    needs: [gitleaks, identidad, academico, notificaciones, integracion, web,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
     # Corre aunque falle una etapa previa: un job omitido cuenta como exitoso en los checks requeridos.
     # Los PR desde forks no llegan al runner propio.
@@ -308,7 +317,7 @@ jobs:
 
   notificar-calidad:
     name: telegram-calidad
-    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, web,
+    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa, notificar-pruebas, quality]
     if: ${{ !cancelled() && needs.quality.result != 'skipped' }}
     runs-on: ubuntu-latest
@@ -331,6 +340,7 @@ jobs:
           IDENTIDAD: ${{ needs.identidad.result }}
           ACADEMICO: ${{ needs.academico.result }}
           NOTIFICACIONES: ${{ needs.notificaciones.result }}
+          INTEGRACION: ${{ needs.integracion.result }}
           WEB: ${{ needs.web.result }}
           IMAGENES: >-
             ${{ needs.imagen-identidad.result }} ${{ needs.imagen-academico.result }}
@@ -350,6 +360,7 @@ jobs:
             "ms-identidad (JUnit, JaCoCo, Dependency-Check)=$IDENTIDAD" \
             "ms-academico (Vitest, npm audit)=$ACADEMICO" \
             "ms-notificaciones (pytest, pip-audit)=$NOTIFICACIONES" \
+            "Integración académico–identidad=$INTEGRACION" \
             "PWA (lint, build, Vitest)=$WEB" \
             "Imágenes (Trivy, SBOM, GHCR)=$imagenes" \
             "SonarQube (quality gate)=$CALIDAD"

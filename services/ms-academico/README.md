@@ -43,6 +43,9 @@ npm run start:dev
 | `NODE_ENV` | `development` | Entorno de ejecución |
 | `PORT` | `3000` | Puerto interno (C4) |
 | `SWAGGER_HABILITADO` | `true`, salvo en `production` | Publica `/docs` y `/docs-json` |
+| `IDENTIDAD_URL` | `http://ms-identidad:8080` | ms-identidad por la red interna, sin pasar por el gateway |
+| `AULACONECTA_CLIENTE_ID` | `ms-academico` | Nombre del cliente de servicio |
+| `AULACONECTA_CLIENTE_SECRETO_ARCHIVO` | — | Archivo con el secreto de servicio. Sin él, crear cuentas responde 503; el resto del servicio funciona |
 
 ## Imagen de Docker
 
@@ -62,9 +65,11 @@ src/
   swagger.ts           Configuración de Swagger
   comun/               Validación de entradas, decoradores y formato de errores (ErrorApi)
   config/              Configuración por variables de entorno
+  identidad/           Cliente de ms-identidad con token de servicio (T1110-A)
   salud/               GET /health
 test/                  Pruebas e2e
   seguridad/           Suite de validación de entradas, inyección y autorización (T1109-A)
+  integracion/         Prueba contra un ms-identidad real (npm run test:integracion)
 ```
 
 ## Validación de entradas y errores
@@ -85,6 +90,38 @@ Para los DTOs se usan los decoradores de `src/comun/validadores.ts`:
 | `@Opcional()` | Campo que se puede omitir. Usarlo en lugar de `@IsOptional()`, que también deja pasar un `null` explícito |
 
 Para errores propios del negocio: `throw new ExcepcionApi(409, 'CONFLICTO', 'El paralelo ya existe.')`. La validación no reemplaza a las consultas parametrizadas: con Prisma nunca se usa `$queryRawUnsafe` ni `$executeRawUnsafe` con texto armado a mano.
+
+## Comunicación con ms-identidad
+
+Para crear la cuenta de un docente, estudiante o representante (RF-05, RF-04), ms-academico llama a `POST /usuarios` de ms-identidad con un **token de servicio** (client credentials, `src/identidad/cliente-identidad.ts`):
+
+```ts
+constructor(private readonly identidad: ClienteIdentidad) {}   // importar IdentidadModule
+
+const cuenta = await this.identidad.crearCuenta({ id: persona.id, nombres, apellidos, cedulaInicial, roles: ['DOCENTE'] });
+// cuenta.nombreUsuario lo genera ms-identidad; la cédula solo sirve para la clave inicial y no se guarda allá
+```
+
+| Tema | Comportamiento |
+|---|---|
+| Token | Lo pide a `POST /oauth/token` y lo reutiliza hasta 30 s antes de que venza (dura 5 min). Las peticiones simultáneas comparten una sola solicitud |
+| Secreto | Se lee del archivo en cada renovación: si rota, no hace falta reiniciar. En local lo genera el servicio `secretos-servicio` de `infra/docker-compose.yml` |
+| 401 | Pide otro token y reintenta una sola vez |
+| 400 y 409 | Se deben a los datos (`NOMBRE_INVALIDO`, `USUARIO_EXISTENTE`): se devuelven con el código de ms-identidad |
+| Otros errores, caída o más de 5 s | `503 IDENTIDAD_NO_DISPONIBLE`; el detalle queda en el registro, sin el secreto, el token ni la cédula |
+
+### Prueba de integración
+
+`test/integracion/` prueba lo anterior contra un ms-identidad y un PostgreSQL reales. En el CI la corre el job `integracion / academico-identidad`, y si falla, `quality-pr` también falla. En local:
+
+```bash
+# Desde la raíz del repositorio. -p aulaconecta-ci: no toca los volúmenes del stack local
+docker compose -p aulaconecta-ci -f infra/docker-compose.yml -f infra/docker-compose.integracion.yml up -d --build --wait ms-identidad
+docker run --rm -v aulaconecta-ci_secreto-ms-academico:/s:ro --entrypoint cat alpine/openssl:3.5.9 /s/secreto > /tmp/secreto
+cd services/ms-academico
+IDENTIDAD_URL=http://127.0.0.1:18080 AULACONECTA_CLIENTE_SECRETO_ARCHIVO=/tmp/secreto npm run test:integracion
+cd ../.. && docker compose -p aulaconecta-ci -f infra/docker-compose.yml -f infra/docker-compose.integracion.yml down -v
+```
 
 ## Pruebas de seguridad (`test/seguridad/`)
 
@@ -116,6 +153,7 @@ En el CI el resumen del job muestra el resultado por endpoint, y los reportes JU
 | Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Pendiente (T1028-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
+| Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

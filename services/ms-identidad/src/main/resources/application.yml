@@ -9,6 +9,13 @@ aulaconecta:
     emisor: aulaconecta-identidad
     audiencia: aulaconecta
     duracion-acceso: 15m
+  # Tokens de servicio (client credentials, T1110-A). En local, infra/identidad/generar_secretos_servicio.sh
+  # deja el SHA-256 de cada secreto en el directorio: ms-identidad nunca ve el secreto.
+  clientes-servicio:
+    directorio-hashes: ${AULACONECTA_CLIENTES_SERVICIO_HASHES:}
+    duracion-token: 5m
+    alcances:
+      ms-academico: "usuarios:crear"
   # Tras 3 intentos fallidos seguidos la cuenta se bloquea 15 minutos (taller de riesgos)
   bloqueo:
     intentos-maximos: 3

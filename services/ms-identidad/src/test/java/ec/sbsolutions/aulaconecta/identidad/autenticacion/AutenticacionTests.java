@@ -301,6 +301,7 @@ class AutenticacionTests extends PruebaIntegracion {
                 .subject(sujeto.toString())
                 .issuedAt(vence.minusSeconds(900))
                 .expiresAt(vence)
+                .claim("tipo", "usuario")
                 .claim("roles", List.of("ADMIN"))
                 .claim("debe_cambiar_clave", false)
                 .build();

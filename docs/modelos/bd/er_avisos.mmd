@@ -1,0 +1,58 @@
+erDiagram
+    plantilla {
+        char(32) id_plantilla PK
+        varchar(30) codigo UK
+        varchar(80) nombre
+        text texto
+        tinyint(1) activa
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    comunicado {
+        char(32) id_comunicado PK
+        char(32) id_autor FK
+        char(32) id_curso FK
+        varchar(150) titulo
+        text contenido
+        datetime publicado_en
+        date vigente_hasta
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    notificacion {
+        char(32) id_notificacion PK
+        char(32) id_plantilla FK
+        char(32) id_representacion FK
+        char(32) id_materia FK
+        char(32) id_enviado_por FK
+        varchar(20) canal
+        varchar(20) estado
+        varchar(120) clave_antiduplicado UK
+        date fecha_evento
+        tinyint intentos
+        datetime enviada_en
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    suscripcion_push {
+        char(32) id_suscripcion_push PK
+        char(32) id_usuario FK
+        text endpoint
+        char(64) endpoint_hash UK
+        varchar(255) clave_p256dh
+        varchar(100) clave_auth
+        tinyint(1) activa
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    usuario ||--o{ comunicado : "1 a N · id_autor"
+    curso |o--o{ comunicado : "0..1 a N · id_curso"
+    plantilla ||--o{ notificacion : "1 a N · id_plantilla"
+    representacion ||--o{ notificacion : "1 a N · id_representacion"
+    materia |o--o{ notificacion : "0..1 a N · id_materia"
+    usuario |o--o{ notificacion : "0..1 a N · id_enviado_por"
+    usuario ||--o{ suscripcion_push : "1 a N · id_usuario"

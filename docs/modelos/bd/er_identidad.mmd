@@ -1,0 +1,52 @@
+erDiagram
+    persona {
+        char(32) id_persona PK
+        varchar(10) cedula UK
+        varchar(80) nombres
+        varchar(80) apellidos
+        date fecha_nacimiento
+        char(1) sexo
+        varchar(10) telefono
+        varchar(120) correo UK
+        varchar(200) direccion
+        tinyint(1) activo
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    usuario {
+        char(32) id_usuario PK
+        char(32) id_persona FK, UK
+        varchar(60) nombre_usuario UK
+        varchar(255) password_hash
+        varchar(255) clave_temporal_hash
+        datetime vence_clave_temporal
+        tinyint(1) debe_cambiar_clave
+        tinyint intentos_fallidos
+        datetime bloqueado_hasta
+        datetime ultimo_acceso
+        varchar(15) estado
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    rol {
+        char(32) id_rol PK
+        varchar(20) codigo UK
+        varchar(50) nombre
+        varchar(200) descripcion
+        varchar(10) estado
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    usuario_rol {
+        char(32) id_usuario_rol PK
+        char(32) id_usuario FK
+        char(32) id_rol FK
+        datetime fecha_asignacion
+        varchar(10) estado
+    }
+    persona ||--|| usuario : "1 a 1 · id_persona"
+    usuario ||--o{ usuario_rol : "1 a N · id_usuario"
+    rol ||--o{ usuario_rol : "1 a N · id_rol"

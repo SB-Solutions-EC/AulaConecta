@@ -18,6 +18,15 @@ services:
       - ./identidad/generar_clave_jwt.sh:/generar_clave_jwt.sh:ro
       - clave-jwt:/clave-jwt
 
+  # Secreto de ms-academico para pedir tokens de servicio a ms-identidad (T1110-A)
+  secretos-servicio:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_secretos_servicio.sh", "ms-academico"]
+    volumes:
+      - ./identidad/generar_secretos_servicio.sh:/generar_secretos_servicio.sh:ro
+      - hashes-servicio:/hashes
+      - secreto-ms-academico:/secretos/ms-academico
+
   gateway:
     image: traefik:v3.7.16
     user: "65532:65532"
@@ -125,10 +134,15 @@ services:
       SPRING_DATASOURCE_USERNAME: usr_identidad
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
       AULACONECTA_JWT_CLAVE_PRIVADA: /run/secrets/jwt/privada.pem
+      # Solo el SHA-256 de cada secreto de servicio
+      AULACONECTA_CLIENTES_SERVICIO_HASHES: /run/secrets/clientes
     volumes:
       - clave-jwt:/run/secrets/jwt:ro
+      - hashes-servicio:/run/secrets/clientes:ro
     depends_on:
       clave-jwt:
+        condition: service_completed_successfully
+      secretos-servicio:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
@@ -154,6 +168,15 @@ services:
       NODE_ENV: production
       PORT: "3000"
       SWAGGER_HABILITADO: "false"
+      # Token de servicio para crear cuentas en ms-identidad por la red interna (T1110-A)
+      IDENTIDAD_URL: http://ms-identidad:8080
+      AULACONECTA_CLIENTE_ID: ms-academico
+      AULACONECTA_CLIENTE_SECRETO_ARCHIVO: /run/secrets/identidad/secreto
+    volumes:
+      - secreto-ms-academico:/run/secrets/identidad:ro
+    depends_on:
+      secretos-servicio:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/health"]
       interval: 10s
@@ -218,6 +241,8 @@ services:
 volumes:
   certificados:
   clave-jwt:
+  hashes-servicio:
+  secreto-ms-academico:
   datos-postgres:
   datos-rabbitmq:
 

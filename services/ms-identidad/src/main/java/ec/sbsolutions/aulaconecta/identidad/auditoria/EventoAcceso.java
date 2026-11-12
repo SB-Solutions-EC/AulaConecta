@@ -9,5 +9,8 @@ public enum EventoAcceso {
     CAMBIO_CLAVE,
     LOGOUT,
     ROL_ASIGNADO,
-    ROL_RETIRADO
+    ROL_RETIRADO,
+    /** Token de servicio emitido (client credentials); el client_id va en nombre_usuario_intentado. */
+    TOKEN_SERVICIO,
+    TOKEN_SERVICIO_FALLIDO
 }

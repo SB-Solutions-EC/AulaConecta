@@ -27,6 +27,8 @@ Usa los puertos 80 y 443 del equipo; si otro programa los ocupa, hay que cerrarl
 
 La clave RSA con la que ms-identidad firma los tokens la genera el servicio `clave-jwt` (`identidad/generar_clave_jwt.sh`) del mismo modo: 3072 bits, en un volumen de Docker y legible solo por el usuario de ms-identidad. Se conserva entre reinicios; `down -v` la borra y los tokens anteriores dejan de valer. En los ambientes desplegados llega como secreto.
 
+El secreto con el que ms-academico pide tokens de servicio a ms-identidad (T1110-A) lo genera el servicio `secretos-servicio` (`identidad/generar_secretos_servicio.sh`): 256 bits al azar en el volumen `secreto-ms-academico`, que solo monta ms-academico. ms-identidad recibe únicamente su SHA-256, en el volumen `hashes-servicio`. Para rotarlo: `docker volume rm aulaconecta_secreto-ms-academico` y volver a levantar el stack. El gateway responde 403 a `/api/identidad/oauth/*`: los tokens de servicio solo se piden por la red interna.
+
 ## PostgreSQL
 
 Un servidor con tres bases y un usuario por servicio (`usr_identidad`, `usr_academico` y `usr_notificaciones`). Cada usuario solo puede conectarse a su base y ninguno puede crear bases ni usuarios. No publica puertos: solo se llega desde la red interna.

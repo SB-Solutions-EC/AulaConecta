@@ -19,6 +19,11 @@ public class ExcepcionApi extends RuntimeException {
         return new ExcepcionApi(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS", "Usuario o contraseña incorrectos");
     }
 
+    /** El mismo mensaje para un cliente inexistente, inactivo o con el secreto equivocado. */
+    public static ExcepcionApi clienteInvalido() {
+        return new ExcepcionApi(HttpStatus.UNAUTHORIZED, "CLIENTE_INVALIDO", "Credenciales del servicio inválidas");
+    }
+
     public static ExcepcionApi cuentaBloqueada() {
         return new ExcepcionApi(HttpStatus.LOCKED, "CUENTA_BLOQUEADA",
                 "La cuenta está bloqueada temporalmente; intenta más tarde o pide el desbloqueo al administrador");

@@ -5,10 +5,11 @@ import { FiltroErrores } from './comun/filtro-errores';
 import { SoloJsonMiddleware } from './comun/solo-json.middleware';
 import { crearPipeValidacion } from './comun/validacion';
 import { cargarConfiguracion } from './config/configuracion';
+import { IdentidadModule } from './identidad/identidad.module';
 import { SaludController } from './salud/salud.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, load: [cargarConfiguracion] })],
+  imports: [ConfigModule.forRoot({ isGlobal: true, load: [cargarConfiguracion] }), IdentidadModule],
   controllers: [SaludController],
   providers: [
     // Registrados aquí (y no en main.ts) para que las pruebas usen la misma validación que producción

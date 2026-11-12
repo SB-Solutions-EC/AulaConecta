@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+reportes/
 test/
 README.md
 .env

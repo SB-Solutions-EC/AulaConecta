@@ -1,0 +1,41 @@
+flowchart TB
+  subgraph PRES["Presentación"]
+    PWA["Aplicación web instalable (PWA)<br/><i>interfaz por rol, funciona sin conexión</i>"]
+    LOCAL[("Almacenamiento local cifrado<br/><i>cola de cambios pendientes</i>")]
+  end
+  subgraph COMP["Código compartido"]
+    CALC["Paquete de cálculo de notas<br/><i>nota final, cualitativo, estándares</i>"]
+  end
+  subgraph ACC["Acceso"]
+    GW["API Gateway<br/><i>HTTPS, límite de peticiones, enrutamiento</i>"]
+  end
+  subgraph NEG["Negocio (microservicios)"]
+    ID["Servicio de identidad<br/><i>cuentas, roles, clave temporal, JWT</i>"]
+    AC["Servicio académico<br/><i>matrícula, planificación, tareas, notas,<br/>asistencia, comportamiento, sincronización</i>"]
+    NO["Servicio de notificaciones<br/><i>avisos, plantillas, canales, historial</i>"]
+    BUS{{"Bus de eventos<br/><i>cola con reintentos</i>"}}
+  end
+  subgraph DAT["Datos"]
+    DBI[("BD identidad")]
+    DBA[("BD académica")]
+    DBN[("BD notificaciones")]
+  end
+  subgraph EXT["Integraciones externas"]
+    PUSH["Servicio push del navegador"]
+    WA["WhatsApp<br/><i>enlace wa.me · Cloud API opcional</i>"]
+  end
+  PWA -- "HTTPS / JSON + JWT" --> GW
+  PWA -- "guarda sin conexión" --> LOCAL
+  PWA -. "importa" .-> CALC
+  GW -- "REST /identidad" --> ID
+  GW -- "REST /academico" --> AC
+  GW -- "REST /notificaciones" --> NO
+  AC -- "valida JWT (claves públicas)" --> ID
+  AC -. "importa" .-> CALC
+  ID -- "SQL" --> DBI
+  AC -- "SQL" --> DBA
+  NO -- "SQL" --> DBN
+  AC -- "evento: promedio_bajo,<br/>falta_registrada" --> BUS
+  BUS -- "entrega el evento" --> NO
+  NO -- "Web Push" --> PUSH
+  NO -- "HTTPS / enlace" --> WA

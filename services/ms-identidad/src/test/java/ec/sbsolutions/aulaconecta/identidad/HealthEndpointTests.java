@@ -33,7 +33,8 @@ class HealthEndpointTests extends PruebaIntegracion {
     @ParameterizedTest
     @ValueSource(strings = {"/", "/env", "/beans", "/actuator", "/actuator/env"})
     void noSeExponenOtrosEndpointsDeGestion(String ruta) throws Exception {
-        mockMvc.perform(get(ruta).with(jwt())).andExpect(status().isNotFound());
+        mockMvc.perform(get(ruta).with(jwt().jwt(token -> token.claim("tipo", "usuario"))))
+                .andExpect(status().isNotFound());
     }
 
     @ParameterizedTest

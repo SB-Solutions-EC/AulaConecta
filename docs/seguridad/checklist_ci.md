@@ -74,7 +74,9 @@ El PR también tenía pendiente la aprobación humana, que es otro requisito de 
 | ✅ | `main` y `test` solo por PR con una aprobación | [proteccion-main-test.json](../../.github/rulesets/proteccion-main-test.json) |
 | ✅ | Sin force push ni borrado en `dev`, `test` y `main` | Rulesets activos |
 | ✅ | `main` y `test` exigen los checks de seguridad | `quality-pr`, `gitleaks` e `identidad / ms-identidad` aplicados el 30/10 y comprobados con el PR #257 |
-| ⚠️ | `main` y `test` exigen los checks de los 4 componentes | Los 10 checks están en [proteccion-main-test.json](../../.github/rulesets/proteccion-main-test.json); en GitHub solo hay 4 aplicados (acción 5) |
+| ✅ | `main` y `test` exigen los checks de los 4 componentes | Los 10 checks de [proteccion-main-test.json](../../.github/rulesets/proteccion-main-test.json), aplicados en GitHub (comprobado el 11/11 con `gh api`) |
+| ✅ | Integración académico–identidad con servicios reales | `integracion / academico-identidad` (T1110-A) levanta ms-identidad y PostgreSQL con `infra/docker-compose.yml`; `quality-pr` falla si la integración falla |
+| ✅ | Validación de entradas e inyección en ms-academico | `test/seguridad/` (T1109-A); un endpoint de RF-06/RF-07 que no valide hace fallar `academico / ms-academico` |
 | ⚠️ | `dev` exige el CI | Hoy no lo exige (acción 4) |
 
 ## 3. Pendientes
@@ -85,7 +87,6 @@ El PR también tenía pendiente la aprobación humana, que es otro requisito de 
 | 2 | Ejecutar el servicio del runner con una cuenta sin privilegios | Dueño del equipo | Amenaza E-03: SonarQube todavía corre en esa máquina |
 | 3 | Activar `sha_pinning_required` | Abner | Convierte la práctica actual en una regla; conviene hacerlo cuando todos los workflows de servicio ya estén fijados |
 | 4 | Decidir si `dev` exige el CI | Equipo | Bloquearía también los push directos que hoy permite el README; hasta decidirlo, el bloqueo efectivo está en `test` y `main` |
-| 5 | Aplicar el ruleset en GitHub | Abner | El archivo ya exige los checks de ms-academico, ms-notificaciones y la PWA, pero GitHub solo aplica lo que se sube con `gh api --method PUT` |
 
 ## 4. Hallazgos de la revisión
 
@@ -98,3 +99,4 @@ El PR también tenía pendiente la aprobación humana, que es otro requisito de 
 | ms-academico y ms-notificaciones no tenían CI, y SonarQube excluía todo su código: el quality gate no los revisaba | Corregido (07/11): `ci-academico.yml`, `ci-notificaciones.yml`, imágenes escaneadas y cobertura en SonarQube |
 | ms-notificaciones usaba `starlette` 0.41.3 (llega con FastAPI) con 14 vulnerabilidades conocidas | Corregido: FastAPI 0.162.0 y `starlette` 1.10.0 |
 | Las imágenes de ms-academico y ms-notificaciones incluían `npm` y `pip`, que no se usan en ejecución y traían vulnerabilidades HIGH | Corregido: se quitan de la imagen final |
+| ms-academico no validaba ninguna entrada: aceptaba formularios `urlencoded` además de JSON y sus errores (incluido el texto del analizador de JSON) salían con el formato de Nest | Corregido en T1109-A: pipe y filtro globales con el formato `ErrorApi`, solo JSON y suite de validación e inyección |

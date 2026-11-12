@@ -200,6 +200,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RespuestaTokenServicio"
+        "400":
+          description: "`grantType` distinto de `client_credentials` o un alcance que el servicio no tiene autorizado (`ALCANCE_INVALIDO`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
         "401":
           $ref: "#/components/responses/NoAutorizado"
 
@@ -451,7 +457,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Token JWT de servicio emitido por `/oauth/token` (`client_credentials`) con alcances internos (`usuarios:crear`, `usuarios:leer`).
+      description: Token JWT de servicio emitido por `/oauth/token` (`client_credentials`) con `tipo = servicio`, `client_id` y alcances internos (`usuarios:crear`, `usuarios:leer`), sin roles. No sirve en los endpoints de usuario (`/auth/*`), que responden 403.
 
   parameters:
     IdRecurso:

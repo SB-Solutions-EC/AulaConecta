@@ -39,16 +39,69 @@ jobs:
           # Rutas relativas a la raíz del repositorio, como las espera SonarQube
           sed -i 's|^SF:src/|SF:services/ms-academico/src/|' coverage/lcov.info
 
+      # Las pruebas de validación e inyección (test/seguridad/) se resumen por endpoint
+      - name: Reporte de pruebas en el resumen del job
+        if: ${{ !cancelled() && hashFiles('services/ms-academico/reportes/resultados.json') != '' }}
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/resultados.json');
+          const cuenta = (pruebas, estado) => pruebas.filter((p) => p.status === estado).length;
+          const celda = (pruebas) =>
+            pruebas.length ? `${cuenta(pruebas, 'passed')} ✅ · ${cuenta(pruebas, 'failed')} ❌ · ${cuenta(pruebas, 'skipped') + cuenta(pruebas, 'pending') + cuenta(pruebas, 'todo')} ⏭️` : '—';
+          const archivo = (t) => t.name.replace(/^.*\/ms-academico\//, '');
+          const omitidas = r.numPendingTests + r.numTodoTests;
+
+          const lineas = [
+            '## Pruebas de ms-academico',
+            '',
+            `**${r.numTotalTests}** pruebas: ${r.numPassedTests} pasaron, ${r.numFailedTests} fallaron y ${omitidas} se omitieron.`,
+            '',
+            '| Archivo | Resultado |',
+            '|---|---|',
+            ...r.testResults.map((t) => `| \`${archivo(t)}\` | ${celda(t.assertionResults)} |`),
+            '',
+            '### Validación de entradas e inyección (RF-06, RF-07)',
+            '',
+            'La suite de `test/seguridad/` se ejecuta contra la implementación de referencia y contra los endpoints reales;',
+            'los endpoints reales que aún no existen aparecen como omitidos.',
+            '',
+            '| Endpoint | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          ];
+          const porEndpoint = (patron) => {
+            const grupos = new Map();
+            for (const t of r.testResults.filter((x) => patron.test(archivo(x)))) {
+              for (const p of t.assertionResults) {
+                const endpoint = p.ancestorTitles.find((titulo) => /^(GET|POST|PUT|PATCH|DELETE) \//.test(titulo));
+                if (endpoint) grupos.set(endpoint, [...(grupos.get(endpoint) ?? []), p]);
+              }
+            }
+            return grupos;
+          };
+          const referencia = porEndpoint(/^test\/seguridad\/referencia\./);
+          const reales = porEndpoint(/^test\/seguridad\/endpoints-academicos\./);
+          for (const endpoint of new Set([...referencia.keys(), ...reales.keys()])) {
+            lineas.push(`| \`${endpoint}\` | ${celda(referencia.get(endpoint) ?? [])} | ${celda(reales.get(endpoint) ?? [])} |`);
+          }
+          const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
+          if (fallidas.length) {
+            lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));
+          }
+          console.log(lineas.join('\n'));
+          JS
+
       - name: Compilar
         run: npm run build
 
       - name: Auditar dependencias de producción (falla con HIGH o CRITICAL)
         run: npm audit --omit=dev --audit-level=high
 
-      - name: Guardar la cobertura
+      - name: Guardar la cobertura y los reportes de pruebas (JUnit y JSON)
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: academico-resultados
           retention-days: 7
-          path: services/ms-academico/coverage/lcov.info
+          path: |
+            services/ms-academico/coverage/lcov.info
+            services/ms-academico/reportes/

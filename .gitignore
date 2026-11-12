@@ -3,6 +3,7 @@ node_modules/
 dist/
 build/
 coverage/
+reportes/
 .turbo/
 *.tsbuildinfo
 __pycache__/

@@ -98,11 +98,11 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 | ID | Dónde | Amenaza | Nivel | Controles | Tarea |
 |---|---|---|---|---|---|
 | I-01 | PWA (dispositivo) | Datos de menores legibles en un equipo compartido, perdido o robado (**V1**) | A | Cifrado AES-GCM con WebCrypto; borrado al cerrar sesión y tras 15 min de inactividad; el service worker no guarda respuestas sensibles | T1230-A, T0105-A |
-| I-02 | ms-academico | Un estudiante o representante consulta datos de otro cambiando un identificador (IDOR) | A | Filtrar siempre por el `usuario_id` del token; pruebas 403 en cada módulo | T1111-A, T1120-A, T1207-A |
+| I-02 | ms-academico | Un estudiante o representante consulta datos de otro cambiando un identificador (IDOR) | A | Filtrar siempre por el `usuario_id` del token, nunca por cabeceras ni parámetros; pedir a otro estudiante responde el mismo 403 exista o no. Suite de privacidad de matrícula y personas en `test/seguridad/` (T1111-A); calificaciones y tareas en T1120-A y T1207-A | T1111-A, T1120-A, T1207-A |
 | I-03 | LC3 | El aviso llega a una persona equivocada (**V3**) | A | Número verificado con el mensaje de confirmación de autorización; plantillas sin detalle de notas | T1221-C, T1222-A, T1224-A |
 | I-04 | Repositorio y CI | Datos reales o secretos publicados en el repositorio, los registros o Telegram | A | Datos ficticios, Gitleaks con reglas de cédula y celular, mensajes del CI sin datos personales | T1022-A, T1029-A |
-| I-05 | Roles | La Secretaría ve calificaciones o planificaciones | M | Permisos denegados por defecto; cada endpoint declara los roles permitidos | T1105-M, T1111-A |
-| I-06 | Pantallas y exportaciones | La cédula completa aparece en listados, reportes o archivos | M | Cédula enmascarada fuera de la ficha del estudiante | T1111-A |
+| I-05 | Roles | La Secretaría ve calificaciones o planificaciones | M | Permisos denegados por defecto; cada endpoint declara los roles permitidos. Solo `ADMIN` y `SECRETARIA` matriculan, registran personas y vinculan representantes (probado en T1111-A) | T1105-M, T1111-A |
+| I-06 | Pantallas y exportaciones | La cédula completa aparece en listados, reportes o archivos | M | La API no devuelve la cédula en altas ni listados (probado en T1111-A); enmascarada en la ficha del estudiante | T1111-A |
 | I-07 | LC1 | Tráfico interceptado en la red del colegio | M | TLS en el gateway; HSTS en la PWA | T1027-A |
 | I-08 | Respaldos | Una copia de la base termina en manos de alguien sin permiso | M | Respaldos con acceso restringido y prueba de restauración documentada | T0113-M |
 

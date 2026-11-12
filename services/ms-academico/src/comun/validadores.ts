@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { Transform } from 'class-transformer';
-import { IsISO8601, IsString, IsUUID, Length, Matches, ValidateIf } from 'class-validator';
+import { IsISO8601, IsString, IsUUID, Length, Matches, ValidateIf, ValidationArguments, ValidationOptions, registerDecorator } from 'class-validator';
 
 // Letras (con tildes y ñ), números, espacios y . , ' ( ) / ° - –. Sin < > ; " ` \ = ni caracteres de control.
 export const PATRON_TEXTO_SEGURO = /^[\p{L}\p{N}](?:[\p{L}\p{N} .,'()/°–-]*[\p{L}\p{N}.)°])?$/u;
@@ -43,4 +43,35 @@ export function Opcional(): PropertyDecorator {
 /** UUID en forma canónica (lo genera la PWA sin conexión o el servidor). */
 export function Identificador(): PropertyDecorator {
   return IsUUID('all', { message: '$property debe ser un UUID' });
+}
+
+/**
+ * Cédula de identidad ecuatoriana: 10 dígitos, provincia 01 a 24 o 30 (exterior), tercer dígito de 0 a 5
+ * (persona natural) y dígito verificador con el módulo 10 del Registro Civil.
+ */
+export function esCedulaValida(valor: unknown): boolean {
+  if (typeof valor !== 'string' || !/^\d{10}$/.test(valor)) {
+    return false;
+  }
+  const provincia = Number(valor.slice(0, 2));
+  if (!((provincia >= 1 && provincia <= 24) || provincia === 30) || Number(valor[2]) > 5) {
+    return false;
+  }
+  const suma = [...valor.slice(0, 9)].reduce((total, caracter, posicion) => {
+    const producto = Number(caracter) * (posicion % 2 === 0 ? 2 : 1);
+    return total + (producto > 9 ? producto - 9 : producto);
+  }, 0);
+  return (10 - (suma % 10)) % 10 === Number(valor[9]);
+}
+
+/** La cédula solo se usa para el registro y la clave inicial: nunca vuelve en una respuesta (RNF-04). */
+export function Cedula(opciones?: ValidationOptions): PropertyDecorator {
+  return (objetivo: object, propiedad: string | symbol) =>
+    registerDecorator({
+      name: 'cedula',
+      target: objetivo.constructor,
+      propertyName: String(propiedad),
+      options: { message: (args: ValidationArguments) => `${args.property} no es una cédula válida`, ...opciones },
+      validator: { validate: esCedulaValida },
+    });
 }

@@ -15,31 +15,42 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
   beforeEach(() => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: () =>
-          Promise.resolve({
-            status: 'UP',
-            accessToken: TOKEN_SIMULADO,
-            tokenType: 'Bearer',
-            expiresIn: 900,
-            usuario: {
-              id: '00000000-0000-0000-0000-000000000001',
-              nombreUsuario: 'ana.perez',
-              roles: [
-                'ADMIN',
-                'SECRETARIA',
-                'DOCENTE',
-                'ESTUDIANTE',
-                'REPRESENTANTE',
-              ],
-              debeCambiarClave: false,
-              estado: 'ACTIVO',
-              intentosFallidos: 0,
-              version: 1,
-            },
-          }),
+      vi.fn().mockImplementation((url: string) => {
+        const esCatalogoAcademico =
+          typeof url === 'string' &&
+          (url.includes('/anios-lectivos') ||
+            url.includes('/cursos') ||
+            url.includes('/materias'));
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve(
+              esCatalogoAcademico
+                ? []
+                : {
+                    status: 'UP',
+                    accessToken: TOKEN_SIMULADO,
+                    tokenType: 'Bearer',
+                    expiresIn: 900,
+                    usuario: {
+                      id: '00000000-0000-0000-0000-000000000001',
+                      nombreUsuario: 'ana.perez',
+                      roles: [
+                        'ADMIN',
+                        'SECRETARIA',
+                        'DOCENTE',
+                        'ESTUDIANTE',
+                        'REPRESENTANTE',
+                      ],
+                      debeCambiarClave: false,
+                      estado: 'ACTIVO',
+                      intentosFallidos: 0,
+                      version: 1,
+                    },
+                  },
+            ),
+        });
       }),
     );
   });
@@ -113,9 +124,11 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     // Como ADMIN ve Configuración académica y puede navegar a ella
     const itemConfig = screen.getByTestId('nav-item-configuracion-academica');
     fireEvent.click(itemConfig);
-    expect(
-      screen.getByTestId('vista-modulo-configuracion-academica'),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('pantalla-configuracion-academica'),
+      ).toBeInTheDocument();
+    });
 
     // Si cambia al rol Docente mientras está en /configuracion-academica, RutaProtegida bloquea con 403
     const botonDocente = screen.getByRole('button', { name: 'Docente' });

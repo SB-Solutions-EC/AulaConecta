@@ -22,6 +22,7 @@ import {
   type MotivoCierreSesion,
 } from './api/autenticacionApi';
 import { LayoutPwa } from './componentes/LayoutPwa';
+import { PantallaConfiguracionAcademica } from './componentes/PantallaConfiguracionAcademica';
 import {
   CATALOGO_MODULOS,
   METADATOS_ROLES,
@@ -268,6 +269,8 @@ export default function App({
               verificarServicios().catch(() => undefined);
             }}
           />
+        ) : moduloActual.ruta === '/configuracion-academica' ? (
+          <PantallaConfiguracionAcademica />
         ) : (
           <section
             aria-label={`Contenido del módulo ${moduloActual.etiqueta}`}

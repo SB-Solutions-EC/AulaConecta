@@ -22,7 +22,9 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
             url.includes('/cursos') ||
             url.includes('/materias') ||
             url.includes('/personas') ||
-            url.includes('/asignaciones'));
+            url.includes('/asignaciones') ||
+            url.includes('/matriculas') ||
+            url.includes('/contactos'));
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -127,6 +129,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     fireEvent.click(screen.getByTestId('nav-item-personal-docente'));
     await waitFor(() => {
       expect(screen.getByTestId('pantalla-docentes')).toBeInTheDocument();
+    });
+
+    // Como ADMIN ve Matrícula y representantes y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-matriculas'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-matricula')).toBeInTheDocument();
     });
 
     // Como ADMIN ve Configuración académica y puede navegar a ella

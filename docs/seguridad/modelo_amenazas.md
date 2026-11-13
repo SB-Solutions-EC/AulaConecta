@@ -82,7 +82,7 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 | T-01 | ms-academico | Un estudiante cambia una nota enviando la petición directamente a la API | A | Autorización en el servicio dueño (solo el docente de la materia califica), DTO con lista blanca de campos | T1118-M, T1120-A |
 | T-02 | ms-academico | Un usuario interno cambia notas sin dejar rastro (**V4**) | M | Auditoría con valor anterior, nuevo, usuario y fecha; bloqueo al cerrar el trimestre | T1126-M, T1126-A |
 | T-03 | Sincronización | Un cambio hecho sin conexión sobrescribe el de otra persona (**V2**) | A | `baseVersion` y respuesta 409, bandeja de conflictos, clave de idempotencia por operación | T1231-M, T0104-M, T0104-A |
-| T-04 | Importación Excel | Un archivo con fórmulas o demasiado grande daña los datos o el servidor | M | Validar tipo, tamaño y número de filas; validar cada fila; exportar sin fórmulas ejecutables | T1112-A, T1203-A |
+| T-04 | Importación Excel | Un archivo con fórmulas o demasiado grande daña los datos o el servidor | M | Controles de carga en `src/importacion/` (T1112-A): 2 MB, contenido real de `.xlsx`, sin macros, fórmulas, vínculos ni DTD (XXE), sin bombas ZIP, hasta 5 hojas, 30 columnas y 1000 filas; probados con 47 archivos inválidos. Validar cada fila (T1112-M); exportar sin fórmulas ejecutables (T1203-A) | T1112-A, T1203-A |
 | T-05 | Planificación | Código malicioso (XSS) en los campos de texto largo | M | Sanitizar al guardar y al mostrar; cabeceras CSP en la PWA | T1210-A |
 | T-06 | CI/CD (LC4) | Una dependencia o una acción de GitHub comprometida entra al código | M | npm audit, pip-audit, Dependency-Check y Trivy; acciones fijadas por versión; permisos mínimos del workflow | T1029-M, T1029-A, T1104-A |
 

@@ -75,6 +75,7 @@ El PR también tenía pendiente la aprobación humana, que es otro requisito de 
 | ✅ | Sin force push ni borrado en `dev`, `test` y `main` | Rulesets activos |
 | ✅ | `main` y `test` exigen los checks de seguridad | `quality-pr`, `gitleaks` e `identidad / ms-identidad` aplicados el 30/10 y comprobados con el PR #257 |
 | ✅ | `main` y `test` exigen los checks de los 4 componentes | Los 10 checks de [proteccion-main-test.json](../../.github/rulesets/proteccion-main-test.json), aplicados en GitHub (comprobado el 11/11 con `gh api`) |
+| ✅ | Controles de carga de la nómina en Excel (RF-04) | `test/seguridad/` (T1112-A): 47 archivos inválidos (tipo, tamaño, macros, fórmulas, bombas ZIP, XXE, zip slip, límites); se aplica solo al importador real de T1112-M |
 | ✅ | Privacidad de matrícula y personas (RNF-04) | `test/seguridad/` (T1111-A): 403 a lo ajeno y a las escrituras; se aplica sola a los endpoints reales de T1111-M y el resumen del job cuenta las pruebas de 403 |
 | ✅ | Integración académico–identidad con servicios reales | `integracion / academico-identidad` (T1110-A) levanta ms-identidad y PostgreSQL con `infra/docker-compose.yml`; `quality-pr` falla si la integración falla |
 | ✅ | Validación de entradas e inyección en ms-academico | `test/seguridad/` (T1109-A); un endpoint de RF-06/RF-07 que no valide hace fallar `academico / ms-academico` |

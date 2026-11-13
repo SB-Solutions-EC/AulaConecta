@@ -66,9 +66,10 @@ src/
   comun/               Validación de entradas, decoradores y formato de errores (ErrorApi)
   config/              Configuración por variables de entorno
   identidad/           Cliente de ms-identidad con token de servicio (T1110-A)
+  importacion/         Controles de carga de la nómina en Excel (T1112-A)
   salud/               GET /health
 test/                  Pruebas e2e
-  seguridad/           Suites de validación e inyección (T1109-A) y de privacidad (T1111-A)
+  seguridad/           Suites de validación e inyección (T1109-A), privacidad (T1111-A) y carga de archivos (T1112-A)
   integracion/         Prueba contra un ms-identidad real (npm run test:integracion)
 ```
 
@@ -168,6 +169,41 @@ Se ejecuta contra `referencia/modulo-matricula-referencia.ts`, que cumple todo y
 
 En los dos e2e, ms-identidad se reemplaza por `IdentidadFalsa` (`aplicacion-real.ts`); la comunicación real se prueba en `test/integracion/`. Las cédulas y los nombres se generan al ejecutar (`datos-ficticios.ts`).
 
+## Controles de carga de la nómina (RF-04)
+
+`POST /matriculas/importar` recibe el Excel con `ArchivoExcelInterceptor` y `ArchivoExcelPipe` (`src/importacion/`). El importador recibe un `LibroValidado` y solo tiene que leer los datos:
+
+```ts
+@Post('matriculas/importar')
+@Roles('ADMIN', 'SECRETARIA')
+@UseInterceptors(ArchivoExcelInterceptor)
+importar(@UploadedFile(ArchivoExcelPipe) libro: LibroValidado, @Body() { cursoId }: SolicitudImportacion) {
+  // libro.contenido: el .xlsx ya revisado; libro.filasDeDatos: filas debajo del encabezado
+}
+```
+
+| Control | Límite o regla (`LIMITES_CARGA`) | Respuesta |
+|---|---|---|
+| Tamaño | 2 MB; multer corta la subida al pasarlo | 413 `SOLICITUD_MUY_GRANDE` |
+| Forma de la solicitud | Un solo archivo en el campo `archivo`, pocos campos | 400 |
+| Nombre y tipo declarados | `.xlsx`, sin caracteres de control; tipo de Excel u `octet-stream` | 415 `TIPO_NO_ADMITIDO` |
+| Contenido real | Firma ZIP y partes de un libro de Excel normal: no basta con renombrar un CSV, PDF, ejecutable, `.xls`, `.docx` o `.xltx` | 415 `TIPO_NO_ADMITIDO` |
+| Macros | Sin `vbaProject.bin` ni tipo `macroEnabled` | 415 `ARCHIVO_CON_MACROS` |
+| Fórmulas | Ninguna celda con fórmula (modelo de amenazas T-04) | 400 `ARCHIVO_CON_FORMULAS` |
+| Bombas ZIP | 25 MB descomprimidos en total, proporción máxima 100 y descompresión cortada aunque los encabezados mientan; 100 archivos internos | 400 `ARCHIVO_SOSPECHOSO` |
+| Estructuras de ataque | Rutas `../` o absolutas (zip slip), entradas repetidas o cifradas, ZIP64, vínculos externos, `<!DOCTYPE>` o `<!ENTITY>` (XXE, "mil millones de risas"), partes en UTF-16 | 400 `ARCHIVO_SOSPECHOSO` |
+| Dañado | ZIP truncado, CRC distinto, compresión inválida | 400 `ARCHIVO_DANADO` |
+| Límites de la nómina | 5 hojas, 30 columnas y 1000 filas de datos por hoja (también por índice de fila) | 400 `DEMASIADAS_HOJAS`, `DEMASIADAS_COLUMNAS`, `DEMASIADAS_FILAS` |
+| Sin datos | Al menos una fila debajo del encabezado | 400 `ARCHIVO_SIN_DATOS` |
+
+El archivo nunca se escribe en disco ni se usa su nombre para guardar nada. Los mensajes indican qué hacer (por ejemplo, "guárdalo como .xlsx sin contraseña") sin repetir el contenido del archivo. Las validaciones de cada fila (cédula con `@Cedula()`, duplicados) son del importador (T1112-M).
+
+**Pruebas con archivos inválidos.** `test/seguridad/archivos-invalidos.ts` arma al ejecutar 47 archivos (no hay binarios en el repositorio) y `verificar-carga.ts` los envía por HTTP:
+- contra la referencia (`referencia-carga.spec.ts`);
+- contra el importador real (`carga.e2e.spec.ts`, que se omite hasta que exista).
+
+`src/importacion/*.spec.ts` prueba el lector de ZIP y el validador sin HTTP. Para probar la suite, se desactivaron 9 controles, uno por vez: firma, tipo declarado, macros, DTD, filas, tamaño descomprimido total, nombres peligrosos, CRC y cifrado. En cada caso fallaron entre 1 y 5 pruebas.
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -180,6 +216,8 @@ En los dos e2e, ms-identidad se reemplaza por `IdentidadFalsa` (`aplicacion-real
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |
 | Sprint 4 (11/11) | Validación de cédula y pruebas de privacidad de matrícula y personas (RNF-04) | Listo (T1111-A) |
 | Sprint 4 (11/11) | Endpoints de matrícula individual y personas | Pendiente (T1111-M) |
+| Sprint 4 (12/11) | Controles de carga de la nómina en Excel y pruebas con archivos inválidos | Listo (T1112-A) |
+| Sprint 4 (12/11) | Importador de nóminas | Pendiente (T1112-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

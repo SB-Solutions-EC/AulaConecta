@@ -1,0 +1,59 @@
+{
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "aulaconecta.eventos",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "notificaciones.avisos.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic"
+      }
+    },
+    {
+      "name": "notificaciones.avisos",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-dead-letter-exchange": "",
+        "x-dead-letter-routing-key": "notificaciones.avisos.dlq"
+      }
+    }
+  ],
+  "bindings": [
+    {
+      "source": "aulaconecta.eventos",
+      "vhost": "/",
+      "destination": "notificaciones.avisos",
+      "destination_type": "queue",
+      "routing_key": "academico.promedio_bajo",
+      "arguments": {}
+    },
+    {
+      "source": "aulaconecta.eventos",
+      "vhost": "/",
+      "destination": "notificaciones.avisos",
+      "destination_type": "queue",
+      "routing_key": "academico.falta_registrada",
+      "arguments": {}
+    }
+  ]
+}
+

@@ -1,0 +1,28 @@
+erDiagram
+    auditoria {
+        char(32) id_auditoria PK
+        char(32) id_usuario FK
+        varchar(40) entidad
+        char(32) id_registro
+        varchar(15) accion
+        text valor_anterior
+        text valor_nuevo
+        varchar(60) usuario_intentado
+        varchar(45) ip
+        datetime ocurrido_en
+    }
+    cambio_sincronizado {
+        char(32) id_cambio_sincronizado PK
+        char(32) id_usuario FK
+        char(32) clave_idempotencia UK
+        varchar(40) entidad
+        char(32) id_registro
+        int version_base
+        varchar(10) operacion
+        text datos
+        varchar(12) estado
+        varchar(20) resolucion
+        datetime recibido_en
+    }
+    usuario |o--o{ auditoria : "0..1 a N · id_usuario"
+    usuario ||--o{ cambio_sincronizado : "1 a N · id_usuario"

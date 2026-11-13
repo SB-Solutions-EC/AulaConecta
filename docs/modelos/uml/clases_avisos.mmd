@@ -1,0 +1,93 @@
+classDiagram
+  direction LR
+  class ServicioAvisos {
+    +generarAviso(evento) Notificacion[]
+    -verificarAutorizacion(representacion) boolean
+    -verificarDuplicado(clave) boolean
+    +reintentarCola() void
+  }
+  class Notificacion {
+    +id: UUID
+    +canal: Canal
+    +estado: EstadoNotificacion
+    +claveAntiduplicado: string
+    +intentos: int
+    +marcarEnviada() void
+    +marcarEntregada() void
+    +marcarFallida(motivo) void
+  }
+  class Plantilla {
+    +codigo: string
+    +texto: string
+    +llenar(datos) string
+  }
+  class Representacion {
+    +autorizaAvisos: boolean
+    +puedeRecibirAvisos() boolean
+  }
+  class CanalNotificacion {
+    <<interface>>
+    +enviar(notificacion) Resultado
+  }
+  class PushCanal {
+    +enviar(notificacion) Resultado
+  }
+  class WhatsAppAsistidoCanal {
+    +enviar(notificacion) Resultado
+    +prepararEnlace(telefono, texto) string
+  }
+  class WhatsAppApiCanal {
+    +enviar(notificacion) Resultado
+  }
+  class SuscripcionPush {
+    +endpoint: string
+    +activa: boolean
+    +desactivar() void
+  }
+  class Usuario {
+    +id: UUID
+    +nombreUsuario: string
+  }
+  class Comunicado {
+    +titulo: string
+    +vigenteHasta: Date
+    +publicar() void
+    +estaVigente() boolean
+  }
+  class Auditoria {
+    +entidad: string
+    +accion: string
+    +valorAnterior: string
+    +valorNuevo: string
+    +registrar(entidad, accion, antes, despues) void
+  }
+  class CambioSincronizado {
+    +claveIdempotencia: string
+    +versionBase: int
+    +estado: string
+    +aplicar() void
+    +marcarConflicto() void
+    +resolver(opcion) void
+  }
+  class EstadoNotificacion {
+    <<enumeration>>
+    EN_COLA
+    PREPARADA
+    ENVIADA
+    ENTREGADA
+    FALLIDA
+    SIN_AUTORIZACION
+  }
+  ServicioAvisos ..> Notificacion : crea
+  ServicioAvisos ..> CanalNotificacion : usa
+  CanalNotificacion <|.. PushCanal
+  CanalNotificacion <|.. WhatsAppAsistidoCanal
+  CanalNotificacion <|.. WhatsAppApiCanal
+  Plantilla "1" -- "0..*" Notificacion
+  Representacion "1" -- "0..*" Notificacion : destinataria
+  Notificacion --> EstadoNotificacion
+  PushCanal ..> SuscripcionPush : usa
+  Usuario "1" -- "0..*" SuscripcionPush
+  Usuario "1" -- "0..*" Comunicado : autor
+  Usuario "0..1" -- "0..*" Auditoria : registra
+  Usuario "1" -- "0..*" CambioSincronizado : envía

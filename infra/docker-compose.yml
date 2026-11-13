@@ -1,0 +1,252 @@
+# Stack local de AulaConecta. Uso: docker compose -f infra/docker-compose.yml up --build
+# Solo el gateway publica puertos hacia el exterior; el panel de RabbitMQ se liga a 127.0.0.1 para inspección local (docs/arquitectura/c4.md).
+
+name: aulaconecta
+
+services:
+  certificados:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_certificado.sh"]
+    volumes:
+      - ./traefik/generar_certificado.sh:/generar_certificado.sh:ro
+      - certificados:/certificados
+
+  clave-jwt:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_clave_jwt.sh"]
+    volumes:
+      - ./identidad/generar_clave_jwt.sh:/generar_clave_jwt.sh:ro
+      - clave-jwt:/clave-jwt
+
+  # Secreto de ms-academico para pedir tokens de servicio a ms-identidad (T1110-A)
+  secretos-servicio:
+    image: alpine/openssl:3.5.9
+    entrypoint: ["/bin/sh", "/generar_secretos_servicio.sh", "ms-academico"]
+    volumes:
+      - ./identidad/generar_secretos_servicio.sh:/generar_secretos_servicio.sh:ro
+      - hashes-servicio:/hashes
+      - secreto-ms-academico:/secretos/ms-academico
+
+  gateway:
+    image: traefik:v3.7.16
+    user: "65532:65532"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dinamico.yml:/etc/traefik/dinamico.yml:ro
+      - certificados:/certificados:ro
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      certificados:
+        condition: service_completed_successfully
+      ms-identidad:
+        condition: service_healthy
+      ms-academico:
+        condition: service_healthy
+      ms-notificaciones:
+        condition: service_healthy
+      pwa:
+        condition: service_healthy
+    networks:
+      - publica
+      - interna
+
+  postgres:
+    image: postgres:16.15-alpine3.24
+    user: "70:70"
+    read_only: true
+    tmpfs:
+      - /var/run/postgresql:uid=70,gid=70
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      # Sin esto, las conexiones locales dentro del contenedor entrarían sin contraseña (trust)
+      POSTGRES_INITDB_ARGS: --auth-local=scram-sha-256 --auth-host=scram-sha-256
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_IDENTIDAD_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_ACADEMICO_PASSWORD: ${POSTGRES_ACADEMICO_PASSWORD:?Copia infra/.env.example a infra/.env}
+      POSTGRES_NOTIFICACIONES_PASSWORD: ${POSTGRES_NOTIFICACIONES_PASSWORD:?Copia infra/.env.example a infra/.env}
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - datos-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - interna
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    user: "100:101"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      # Panel de administración solo en loopback local (T1028-C, docs/arquitectura/c4.md)
+      - "127.0.0.1:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-aulaconecta}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Copia infra/.env.example a infra/.env}
+    volumes:
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - datos-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    networks:
+      - interna
+
+  ms-identidad:
+    build: ../services/ms-identidad
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/db_identidad
+      SPRING_DATASOURCE_USERNAME: usr_identidad
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_IDENTIDAD_PASSWORD:?Copia infra/.env.example a infra/.env}
+      AULACONECTA_JWT_CLAVE_PRIVADA: /run/secrets/jwt/privada.pem
+      # Solo el SHA-256 de cada secreto de servicio
+      AULACONECTA_CLIENTES_SERVICIO_HASHES: /run/secrets/clientes
+    volumes:
+      - clave-jwt:/run/secrets/jwt:ro
+      - hashes-servicio:/run/secrets/clientes:ro
+    depends_on:
+      clave-jwt:
+        condition: service_completed_successfully
+      secretos-servicio:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+    networks:
+      - interna
+
+  ms-academico:
+    build: ../services/ms-academico
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      SWAGGER_HABILITADO: "false"
+      # Token de servicio para crear cuentas en ms-identidad por la red interna (T1110-A)
+      IDENTIDAD_URL: http://ms-identidad:8080
+      AULACONECTA_CLIENTE_ID: ms-academico
+      AULACONECTA_CLIENTE_SECRETO_ARCHIVO: /run/secrets/identidad/secreto
+    volumes:
+      - secreto-ms-academico:/run/secrets/identidad:ro
+    depends_on:
+      secretos-servicio:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    networks:
+      - interna
+
+  ms-notificaciones:
+    build: ../services/ms-notificaciones
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      DATABASE_URL: postgresql+psycopg://usr_notificaciones:${POSTGRES_NOTIFICACIONES_PASSWORD:?Copia infra/.env.example a infra/.env}@postgres:5432/db_notificaciones
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-aulaconecta}:${RABBITMQ_PASSWORD:?Copia infra/.env.example a infra/.env}@rabbitmq:5672/%2F
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
+    networks:
+      - interna
+
+  pwa:
+    build: ../apps/pwa
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx:uid=101,gid=101
+      - /var/run:uid=101,gid=101
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - interna
+
+volumes:
+  certificados:
+  clave-jwt:
+  hashes-servicio:
+  secreto-ms-academico:
+  datos-postgres:
+  datos-rabbitmq:
+
+networks:
+  publica:
+  interna:
+    internal: true

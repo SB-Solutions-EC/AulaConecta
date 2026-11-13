@@ -26,11 +26,37 @@
       "parameters": {
         "required_status_checks": [
           {
-            "context": "CI / quality",
-            "integration_id": null
+            "context": "quality-pr"
+          },
+          {
+            "context": "gitleaks"
+          },
+          {
+            "context": "identidad / ms-identidad"
+          },
+          {
+            "context": "academico / ms-academico"
+          },
+          {
+            "context": "notificaciones / ms-notificaciones"
+          },
+          {
+            "context": "web / pwa"
+          },
+          {
+            "context": "imagen-identidad / escanear"
+          },
+          {
+            "context": "imagen-academico / escanear"
+          },
+          {
+            "context": "imagen-notificaciones / escanear"
+          },
+          {
+            "context": "imagen-pwa / escanear"
           }
         ],
-        "strict_required_status_checks_policy": true
+        "strict_required_status_checks_policy": false
       }
     }
   ]

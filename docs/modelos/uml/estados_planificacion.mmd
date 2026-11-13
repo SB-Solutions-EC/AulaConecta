@@ -1,0 +1,9 @@
+stateDiagram-v2
+  direction LR
+  [*] --> BORRADOR : crear planificación
+  BORRADOR --> BORRADOR : guardar cambios
+  BORRADOR --> EN_REVISION : enviar a revisión [campos obligatorios completos]
+  EN_REVISION --> APROBADA : aprobar
+  EN_REVISION --> CON_OBSERVACIONES : devolver [al menos una observación]
+  CON_OBSERVACIONES --> EN_REVISION : reenviar corregida [observaciones resueltas]
+  APROBADA --> [*] : cerrar el trimestre

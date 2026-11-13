@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: ms-identidad
+
+aulaconecta:
+  jwt:
+    # Archivo PEM (PKCS#8) montado como secreto; en local lo genera infra/identidad/generar_clave_jwt.sh
+    clave-privada: ${AULACONECTA_JWT_CLAVE_PRIVADA}
+    emisor: aulaconecta-identidad
+    audiencia: aulaconecta
+    duracion-acceso: 15m
+  # Tokens de servicio (client credentials, T1110-A). En local, infra/identidad/generar_secretos_servicio.sh
+  # deja el SHA-256 de cada secreto en el directorio: ms-identidad nunca ve el secreto.
+  clientes-servicio:
+    directorio-hashes: ${AULACONECTA_CLIENTES_SERVICIO_HASHES:}
+    duracion-token: 5m
+    alcances:
+      ms-academico: "usuarios:crear"
+  # Tras 3 intentos fallidos seguidos la cuenta se bloquea 15 minutos (taller de riesgos)
+  bloqueo:
+    intentos-maximos: 3
+    duracion: 15m
+
+server:
+  port: 8080
+  shutdown: graceful
+  # La IP del cliente la pone el gateway; solo se confía en proxies de redes privadas (la red interna)
+  forward-headers-strategy: native
+
+# Solo se expone /health, sin detalles internos: el gateway lo publica en /api/identidad/health.
+management:
+  endpoints:
+    web:
+      base-path: /
+      discovery:
+        enabled: false
+      exposure:
+        include: health
+      path-mapping:
+        health: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: false

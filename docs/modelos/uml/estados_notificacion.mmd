@@ -1,0 +1,14 @@
+stateDiagram-v2
+  direction LR
+  [*] --> SIN_AUTORIZACION : generar aviso [sin autorización o con baja]
+  [*] --> EN_COLA : generar aviso [autorizado, sin conexión]
+  [*] --> ENVIADA : generar aviso push [autorizado, con conexión]
+  [*] --> PREPARADA : generar aviso WhatsApp asistido [autorizado]
+  EN_COLA --> ENVIADA : volver la conexión
+  EN_COLA --> FALLIDA : agotar reintentos (24 h)
+  PREPARADA --> ENVIADA : docente pulsa «Avisar por WhatsApp»
+  ENVIADA --> ENTREGADA : confirmar entrega
+  ENVIADA --> FALLIDA : error del proveedor
+  ENTREGADA --> [*]
+  FALLIDA --> [*]
+  SIN_AUTORIZACION --> [*]

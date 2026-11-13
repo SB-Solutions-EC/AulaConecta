@@ -1,0 +1,161 @@
+classDiagram
+  direction TB
+  class Persona {
+    +id: UUID
+    +cedula: string
+    +nombres: string
+    +apellidos: string
+    +activo: boolean
+    +actualizarDatos() void
+    +desactivar() void
+  }
+  class Usuario {
+    +id: UUID
+    +nombreUsuario: string
+    -passwordHash: string
+    -claveTemporalHash: string
+    +venceClaveTemporal: Date
+    +intentosFallidos: int
+    +estado: EstadoCuenta
+    +generarClaveTemporal() string
+    +activarCuenta(claveTemporal, nueva) void
+    +iniciarSesion(clave) boolean
+    +bloquear() void
+    +tieneRol(codigo) boolean
+  }
+  class Rol {
+    +id: UUID
+    +codigo: string
+    +nombre: string
+    +estado: string
+    +desactivar() void
+  }
+  class UsuarioRol {
+    +fechaAsignacion: Date
+    +estado: string
+    +revocar() void
+  }
+  class Curso {
+    +id: UUID
+    +nivel: string
+    +paralelo: string
+  }
+  class Materia {
+    +id: UUID
+    +codigo: string
+    +nombre: string
+  }
+  class Asignacion {
+    +id: UUID
+    +horarioResumen: string
+  }
+  class Matricula {
+    +id: UUID
+    +codigoMatricula: string
+    +estado: string
+    +retirar() void
+  }
+  class Representacion {
+    +parentesco: string
+    +telefonoWhatsapp: string
+    +autorizaAvisos: boolean
+    +fechaBaja: Date
+    +autorizar() void
+    +darDeBaja() void
+    +puedeRecibirAvisos() boolean
+  }
+  class Planificacion {
+    +id: UUID
+    +unidad: int
+    +titulo: string
+    +estado: EstadoPlanificacion
+    +enviarARevision() void
+    +aprobar(revisor) void
+    +devolver(observaciones) void
+    +exportar(formato) Archivo
+  }
+  class SemanaPlanificacion {
+    +numero: int
+    +destrezas: string
+    +actividadesErca: string
+  }
+  class Observacion {
+    +campo: string
+    +ronda: int
+    +resuelta: boolean
+    +marcarResuelta() void
+  }
+  class Tarea {
+    +id: UUID
+    +tipo: string
+    +bloque: int
+    +fechaEntrega: Date
+    +esAporte() boolean
+  }
+  class Entrega {
+    +nota: decimal
+    +estado: string
+    +calificar(nota, retroalimentacion) void
+  }
+  class Calificacion {
+    +promedioAportes: decimal
+    +notaProyecto: decimal
+    +notaExamen: decimal
+    +notaFinal: decimal
+    +cualitativo: string
+    +recalcular(parametros) void
+    +esPromedioBajo(minimo) boolean
+  }
+  class Asistencia {
+    +fecha: Date
+    +estado: string
+    +estadoJustificacion: string
+    +solicitarJustificacion(motivo) void
+    +aceptarJustificacion() void
+  }
+  class Comportamiento {
+    +indicadores: char[9]
+    +nota: decimal
+    +cualitativo: string
+    +calcular() void
+  }
+  class Parametro {
+    +clave: string
+    +valor: string
+    +comoNumero() decimal
+  }
+  class CalculadoraNotas {
+    <<utilidad>>
+    +notaFinal(aportes, proyecto, examen, pesos) decimal
+    +cualitativo(nota) string
+    +truncar2(valor) decimal
+  }
+  class EstadoPlanificacion {
+    <<enumeration>>
+    BORRADOR
+    EN_REVISION
+    CON_OBSERVACIONES
+    APROBADA
+  }
+  Persona "1" -- "1" Usuario : tiene cuenta
+  Usuario "1" -- "1..*" UsuarioRol
+  Rol "1" -- "0..*" UsuarioRol
+  Persona "1" -- "0..*" Matricula : estudiante
+  Curso "1" -- "0..*" Matricula
+  Persona "1" -- "0..*" Asignacion : docente
+  Materia "1" -- "0..*" Asignacion
+  Curso "1" -- "0..*" Asignacion
+  Persona "1" -- "0..*" Representacion : representante
+  Asignacion "1" -- "0..*" Planificacion
+  Planificacion "1" *-- "1..*" SemanaPlanificacion : contiene
+  Planificacion "1" o-- "0..*" Observacion : recibe
+  Planificacion --> EstadoPlanificacion
+  Asignacion "1" -- "0..*" Tarea
+  Tarea "1" -- "0..*" Entrega
+  Matricula "1" -- "0..*" Entrega
+  Matricula "1" -- "0..*" Calificacion
+  Asignacion "1" -- "0..*" Calificacion
+  Matricula "1" -- "0..*" Asistencia
+  Matricula "1" -- "0..*" Comportamiento
+  Calificacion ..> CalculadoraNotas : usa
+  CalculadoraNotas ..> Parametro : lee pesos

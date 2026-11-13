@@ -3,8 +3,13 @@ node_modules/
 dist/
 build/
 coverage/
+reportes/
 .turbo/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
+.scannerwork/
+target/
 
 # Variables de entorno y secretos (nunca se suben)
 .env

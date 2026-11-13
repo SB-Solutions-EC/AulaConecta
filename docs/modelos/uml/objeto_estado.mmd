@@ -1,0 +1,23 @@
+flowchart TB
+  U["<u><b>usrLaura : Usuario</b></u><hr/>nombre_usuario = laura.mendoza<br/>estado = ACTIVO"]
+  A["<u><b>asig9A : Asignacion</b></u><hr/>materia = Matemática<br/>curso = 9no EGB «A»"]
+  P1["<u><b>plan301 : Planificacion</b></u><hr/>unidad = 3<br/>estado = APROBADA"]
+  P2["<u><b>plan302 : Planificacion</b></u><hr/>unidad = 4<br/>estado = CON_OBSERVACIONES"]
+  P3["<u><b>plan303 : Planificacion</b></u><hr/>unidad = 5<br/>estado = BORRADOR"]
+  O1["<u><b>obs501 : Observacion</b></u><hr/>campo = objetivos<br/>ronda = 1<br/>resuelta = 0"]
+  M["<u><b>matCamila : Matricula</b></u><hr/>codigo_matricula = AND-2026-0009<br/>estado = ACTIVA"]
+  C["<u><b>cal088 : Calificacion</b></u><hr/>nota_final = 6.45<br/>cualitativo = C+"]
+  R["<u><b>repLucia : Representacion</b></u><hr/>parentesco = MADRE<br/>autoriza_avisos = 1<br/>fecha_baja = (vacía)"]
+  N1["<u><b>avi9001 : Notificacion</b></u><hr/>plantilla = PROMEDIO_BAJO<br/>canal = PUSH<br/>estado = ENTREGADA"]
+  N2["<u><b>avi9002 : Notificacion</b></u><hr/>plantilla = PROMEDIO_BAJO<br/>canal = WHATSAPP_ASISTIDO<br/>estado = PREPARADA"]
+  U -- "es la cuenta del docente de" --> A
+  A -- "se planifica en" --> P1
+  A -- "se planifica en" --> P2
+  A -- "se planifica en" --> P3
+  P2 -- "tiene" --> O1
+  M -- "obtiene" --> C
+  A -- "califica" --> C
+  C -- "promedio menor a 7 genera" --> N1
+  C -- "promedio menor a 7 genera" --> N2
+  R -- "es destinataria de" --> N1
+  R -- "es destinataria de" --> N2

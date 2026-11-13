@@ -137,6 +137,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
       expect(screen.getByTestId('pantalla-matricula')).toBeInTheDocument();
     });
 
+    // Como ADMIN ve Importación de nóminas y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-importacion-nominas'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-importacion')).toBeInTheDocument();
+    });
+
     // Como ADMIN ve Configuración académica y puede navegar a ella
     const itemConfig = screen.getByTestId('nav-item-configuracion-academica');
     fireEvent.click(itemConfig);

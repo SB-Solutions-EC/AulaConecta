@@ -3,7 +3,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   ClipboardCheck,
-  MessageSquareCheck,
+  MessageSquare,
   Plus,
   ShieldCheck,
   UserCheck,
@@ -413,7 +413,7 @@ export function PantallaMatricula({
               : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
           }`}
         >
-          <MessageSquareCheck className="w-4 h-4" />
+          <MessageSquare className="w-4 h-4" />
           Contactos y consentimiento WhatsApp
         </button>
       </nav>

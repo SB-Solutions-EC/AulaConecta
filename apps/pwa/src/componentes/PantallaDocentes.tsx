@@ -114,14 +114,14 @@ export function PantallaDocentes({
         setMaterias(listaMaterias);
         setAsignaciones(listaAsignaciones);
 
-        if (listaDocentes.length > 0 && !docenteSeleccionadoId) {
-          setDocenteSeleccionadoId(listaDocentes[0].id);
+        if (listaDocentes.length > 0) {
+          setDocenteSeleccionadoId((actual) => actual || listaDocentes[0].id);
         }
-        if (listaCursos.length > 0 && !cursoSeleccionadoId) {
-          setCursoSeleccionadoId(listaCursos[0].id);
+        if (listaCursos.length > 0) {
+          setCursoSeleccionadoId((actual) => actual || listaCursos[0].id);
         }
-        if (listaMaterias.length > 0 && !materiaSeleccionadaId) {
-          setMateriaSeleccionadaId(listaMaterias[0].id);
+        if (listaMaterias.length > 0) {
+          setMateriaSeleccionadaId((actual) => actual || listaMaterias[0].id);
         }
       } catch (error) {
         setErrorGlobal(
@@ -134,13 +134,7 @@ export function PantallaDocentes({
         setCargando(false);
       }
     },
-    [
-      servicioDocentes,
-      servicioAcademico,
-      docenteSeleccionadoId,
-      cursoSeleccionadoId,
-      materiaSeleccionadaId,
-    ],
+    [servicioDocentes, servicioAcademico],
   );
 
   useEffect(() => {

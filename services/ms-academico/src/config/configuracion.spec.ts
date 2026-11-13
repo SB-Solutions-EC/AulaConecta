@@ -35,7 +35,7 @@ describe('cargarConfiguracion', () => {
     vi.stubEnv('AULACONECTA_CLIENTE_SECRETO_ARCHIVO', '');
 
     expect(cargarConfiguracion().identidad).toEqual({
-      url: 'http://ms-identidad:8080',
+      url: 'https://ms-identidad:8443',
       clienteId: 'ms-academico',
       secretoArchivo: undefined,
       tiempoMaximoMs: 5000,

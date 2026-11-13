@@ -43,7 +43,7 @@ export function cargarConfiguracion(): Configuracion {
     // En producción Swagger se apaga salvo que se pida explícitamente.
     swaggerHabilitado: (process.env.SWAGGER_HABILITADO ?? (entorno === 'production' ? 'false' : 'true')) === 'true',
     identidad: {
-      url: urlIdentidad(process.env.IDENTIDAD_URL || 'http://ms-identidad:8080'),
+      url: urlIdentidad(process.env.IDENTIDAD_URL || 'https://ms-identidad:8443'),
       clienteId: process.env.AULACONECTA_CLIENTE_ID || 'ms-academico',
       secretoArchivo: process.env.AULACONECTA_CLIENTE_SECRETO_ARCHIVO || undefined,
       tiempoMaximoMs: 5000,

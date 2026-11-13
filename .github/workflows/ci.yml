@@ -23,6 +23,7 @@ jobs:
   # Crea el mensaje de Telegram; los avisos siguientes lo editan con el resultado de cada etapa.
   notificar-inicio:
     name: telegram-inicio
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'synchronize' && (github.head_ref == 'dev' || github.head_ref == 'test' || github.head_ref == 'main')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -149,7 +150,7 @@ jobs:
     name: telegram-pruebas
     needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.notificar-inicio.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -319,7 +320,7 @@ jobs:
     name: telegram-calidad
     needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa, notificar-pruebas, quality]
-    if: ${{ !cancelled() && needs.quality.result != 'skipped' }}
+    if: ${{ !cancelled() && needs.quality.result != 'skipped' && needs.notificar-inicio.result != 'skipped' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
 

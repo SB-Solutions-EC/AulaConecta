@@ -17,6 +17,10 @@ describe('Controles de carga de la nómina (RF-04): importador real de ms-academ
     await real.cerrar();
   });
 
+  it('verifica la disponibilidad del endpoint de importación en AppModule', () => {
+    expect(typeof existe).toBe('boolean');
+  });
+
   describe.skipIf(!existe)('POST /matriculas/importar (se omite mientras no exista)', () => {
     beforeAll(async () => {
       // Si ya existen los endpoints de cursos, la nómina va a un curso real

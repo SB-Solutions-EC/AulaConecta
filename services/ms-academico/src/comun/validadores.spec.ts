@@ -40,7 +40,7 @@ describe('PATRON_TEXTO_SEGURO', () => {
     '-Matemática',
     'Mate\u0000mática',
     'Mate\nmática',
-    'Materia‮gpj.exe',
+    'Materia\u202Egpj.exe',
     'Mate​mática',
   ])('rechaza %j', (texto) => {
     expect(PATRON_TEXTO_SEGURO.test(texto)).toBe(false);

@@ -47,7 +47,7 @@ const TEXTOS_INVALIDOS: Entrada[] = [
   { nombre: 'byte nulo', valor: 'Mate\u0000mática' },
   { nombre: 'salto de línea (CRLF)', valor: 'Matemática\r\nSet-Cookie: x=1' },
   { nombre: 'caracteres de control', valor: 'Mate\u0007mática\u001b[31m' },
-  { nombre: 'invertir dirección (U+202E)', valor: 'Materia‮gpj.exe' },
+  { nombre: 'invertir dirección (U+202E)', valor: 'Materia\u202Egpj.exe' },
 ];
 
 const UUIDS_INVALIDOS: Entrada[] = [

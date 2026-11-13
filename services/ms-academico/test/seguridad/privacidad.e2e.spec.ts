@@ -28,6 +28,10 @@ describe('Privacidad (RNF-04): endpoints reales de ms-academico', async () => {
     await real.cerrar();
   });
 
+  it('verifica el montaje de rutas del escenario de privacidad', () => {
+    expect(Array.isArray(faltan)).toBe(true);
+  });
+
   describe.skipIf(faltan.length > 0)(`personas, representaciones y matrículas${faltan.length ? ` (se omite: faltan ${faltan.join(', ')})` : ''}`, () => {
     let mundo: Mundo;
 

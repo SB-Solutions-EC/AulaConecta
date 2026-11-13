@@ -199,8 +199,8 @@ describe('PantallaDocentes', () => {
       expect(screen.getByRole('status')).toHaveTextContent(
         /Paredes Vega Ana Lucía.*registrado correctamente/i,
       );
+      expect(screen.getByText('Paredes Vega Ana Lucía')).toBeInTheDocument();
     });
-    expect(screen.getByText('Paredes Vega Ana Lucía')).toBeInTheDocument();
 
     // Búsqueda de docentes
     fireEvent.change(screen.getByLabelText(/Buscar docente/i), {
@@ -257,11 +257,10 @@ describe('PantallaDocentes', () => {
       expect(screen.getByRole('status')).toHaveTextContent(
         /Asignación de materia registrada correctamente/i,
       );
+      const listaAsignaciones = screen.getByTestId('lista-asignaciones');
+      expect(listaAsignaciones).toHaveTextContent('Matemáticas · 1ro BGU "A"');
+      expect(listaAsignaciones).toHaveTextContent('Mié h2');
     });
-
-    const listaAsignaciones = screen.getByTestId('lista-asignaciones');
-    expect(listaAsignaciones).toHaveTextContent('Matemáticas · 1ro BGU "A"');
-    expect(listaAsignaciones).toHaveTextContent('Mié h2');
   });
 
   it('muestra errores de API al fallar la carga inicial o el registro', async () => {

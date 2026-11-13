@@ -23,6 +23,7 @@ import {
 } from './api/autenticacionApi';
 import { LayoutPwa } from './componentes/LayoutPwa';
 import { PantallaConfiguracionAcademica } from './componentes/PantallaConfiguracionAcademica';
+import { PantallaDocentes } from './componentes/PantallaDocentes';
 import {
   CATALOGO_MODULOS,
   METADATOS_ROLES,
@@ -271,6 +272,8 @@ export default function App({
           />
         ) : moduloActual.ruta === '/configuracion-academica' ? (
           <PantallaConfiguracionAcademica />
+        ) : moduloActual.ruta === '/docentes' ? (
+          <PantallaDocentes />
         ) : (
           <section
             aria-label={`Contenido del módulo ${moduloActual.etiqueta}`}

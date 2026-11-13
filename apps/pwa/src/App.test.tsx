@@ -20,7 +20,9 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
           typeof url === 'string' &&
           (url.includes('/anios-lectivos') ||
             url.includes('/cursos') ||
-            url.includes('/materias'));
+            url.includes('/materias') ||
+            url.includes('/personas') ||
+            url.includes('/asignaciones'));
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -119,6 +121,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
 
     await waitFor(() => {
       expect(screen.getAllByText('UP')).toHaveLength(3);
+    });
+
+    // Como ADMIN ve Personal docente y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-personal-docente'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-docentes')).toBeInTheDocument();
     });
 
     // Como ADMIN ve Configuración académica y puede navegar a ella

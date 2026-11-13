@@ -17,7 +17,7 @@ const RUTAS_DEL_ESCENARIO: ['get' | 'post', string][] = [
 
 describe('Privacidad (RNF-04): endpoints reales de ms-academico', async () => {
   const real = await crearAplicacionReal();
-  const faltan = [];
+  const faltan: string[] = [];
   for (const [metodo, ruta] of RUTAS_DEL_ESCENARIO) {
     if (!(await real.montado(metodo, ruta))) {
       faltan.push(`${metodo.toUpperCase()} ${ruta}`);

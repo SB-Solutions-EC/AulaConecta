@@ -84,18 +84,18 @@ jobs:
             lineas.push(`| \`${endpoint}\` | ${celda(referencia.get(endpoint) ?? [])} | ${celda(reales.get(endpoint) ?? [])} |`);
           }
           // Privacidad (RNF-04, T1111-A): agrupada por lo que intenta cada persona
-          const porGrupo = (patron) => {
+          const porGrupo = (patron, raiz) => {
             const grupos = new Map();
             for (const t of r.testResults.filter((x) => patron.test(archivo(x)))) {
               for (const p of t.assertionResults) {
-                const grupo = p.ancestorTitles.length > 1 ? p.ancestorTitles.at(-1) : 'Altas en ms-identidad';
+                const grupo = p.ancestorTitles.length > 1 ? p.ancestorTitles.at(-1) : raiz;
                 grupos.set(grupo, [...(grupos.get(grupo) ?? []), p]);
               }
             }
             return grupos;
           };
-          const privRef = porGrupo(/^test\/seguridad\/referencia-privacidad\./);
-          const privReal = porGrupo(/^test\/seguridad\/privacidad\.e2e\./);
+          const privRef = porGrupo(/^test\/seguridad\/referencia-privacidad\./, 'Altas en ms-identidad');
+          const privReal = porGrupo(/^test\/seguridad\/privacidad\.e2e\./, 'Altas en ms-identidad');
           const de403 = (grupos) => [...grupos.values()].flat().filter((p) => p.title.includes('403'));
           lineas.push(
             '',
@@ -108,6 +108,22 @@ jobs:
           );
           for (const grupo of new Set([...privRef.keys(), ...privReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(privRef.get(grupo) ?? [])} | ${celda(privReal.get(grupo) ?? [])} |`);
+          }
+          // Controles de carga de la nómina en Excel (RF-04, T1112-A)
+          const cargaRef = porGrupo(/^test\/seguridad\/referencia-carga\./, 'Nómina válida hasta el importador');
+          const cargaReal = porGrupo(/^test\/seguridad\/carga\.e2e\./, 'Nómina válida hasta el importador');
+          const invalidos = (grupos) => grupos.get('archivos inválidos') ?? [];
+          lineas.push(
+            '',
+            '### Controles de carga de la nómina en Excel (RF-04)',
+            '',
+            `Archivos inválidos rechazados: **${cuenta(invalidos(cargaRef), 'passed')} de ${invalidos(cargaRef).length}** con los controles de \`src/importacion/\` y **${cuenta(invalidos(cargaReal), 'passed')}** en el importador real (${cuenta(invalidos(cargaReal), 'skipped')} omitidas hasta que exista).`,
+            '',
+            '| Qué se prueba | Referencia | Importador real |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...cargaRef.keys(), ...cargaReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(cargaRef.get(grupo) ?? [])} | ${celda(cargaReal.get(grupo) ?? [])} |`);
           }
           const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
           if (fallidas.length) {

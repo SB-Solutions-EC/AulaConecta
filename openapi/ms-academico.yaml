@@ -354,7 +354,14 @@ paths:
     post:
       tags: [Matrícula y Nóminas]
       summary: Importar nómina de estudiantes desde archivo Excel (.xlsx) (RF-04)
-      description: Valida tipo, tamaño máximo, número de filas, formato de cédula y duplicados, devolviendo el resumen de altas y errores por fila.
+      description: |
+        Valida tipo, tamaño máximo, número de filas, formato de cédula y duplicados, devolviendo el resumen de altas y errores por fila.
+
+        **Controles de carga** (`src/importacion/`, T1112-A), antes de leer los datos:
+        - Solo `ADMIN` y `SECRETARIA`; un solo archivo en el campo `archivo`.
+        - Hasta 2 MB, con extensión `.xlsx` y contenido real de Excel (no basta con la extensión ni con el tipo declarado).
+        - Sin macros, fórmulas, vínculos a otros libros, DTD (XXE) ni partes cifradas; sin bombas ZIP (máximo 25 MB descomprimido y 100 archivos internos).
+        - Hasta 5 hojas, 30 columnas y 1000 filas de datos por hoja, más el encabezado.
       operationId: importarNominaExcel
       requestBody:
         required: true
@@ -377,6 +384,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResultadoImportacionExcel"
+        "400":
+          description: "Sin archivo (`ARCHIVO_REQUERIDO`), vacío (`ARCHIVO_VACIO`), dañado (`ARCHIVO_DANADO`), con estructura de ataque (`ARCHIVO_SOSPECHOSO`), con fórmulas (`ARCHIVO_CON_FORMULAS`), fuera de los límites (`DEMASIADAS_FILAS`, `DEMASIADAS_COLUMNAS`, `DEMASIADAS_HOJAS`) o sin estudiantes (`ARCHIVO_SIN_DATOS`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "413":
+          description: "El archivo supera los 2 MB (`SOLICITUD_MUY_GRANDE`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+        "415":
+          description: "No es un libro .xlsx (`TIPO_NO_ADMITIDO`) o tiene macros (`ARCHIVO_CON_MACROS`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
 
   /planificaciones:
     get:

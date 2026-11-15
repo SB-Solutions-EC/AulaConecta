@@ -155,6 +155,21 @@ services:
     networks:
       - interna
 
+  # Aplica las migraciones de Prisma una vez y termina (T1030-M). Usa la etapa de compilación,
+  # que tiene la CLI de Prisma; la imagen final del servicio no la incluye.
+  migraciones-academico:
+    build:
+      context: ../services/ms-academico
+      target: compilacion
+    entrypoint: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: postgresql://usr_academico:${POSTGRES_ACADEMICO_PASSWORD:?Copia infra/.env.example a infra/.env}@postgres:5432/db_academico
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - interna
+
   ms-academico:
     build: ../services/ms-academico
     read_only: true
@@ -168,6 +183,7 @@ services:
       NODE_ENV: production
       PORT: "3000"
       SWAGGER_HABILITADO: "false"
+      DATABASE_URL: postgresql://usr_academico:${POSTGRES_ACADEMICO_PASSWORD:?Copia infra/.env.example a infra/.env}@postgres:5432/db_academico
       # Token de servicio para crear cuentas en ms-identidad por la red interna (T1110-A)
       IDENTIDAD_URL: http://ms-identidad:8080
       AULACONECTA_CLIENTE_ID: ms-academico
@@ -176,6 +192,8 @@ services:
       - secreto-ms-academico:/run/secrets/identidad:ro
     depends_on:
       secretos-servicio:
+        condition: service_completed_successfully
+      migraciones-academico:
         condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/health"]

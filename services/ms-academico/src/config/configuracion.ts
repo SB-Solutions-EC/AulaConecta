@@ -9,6 +9,14 @@ export interface ConfiguracionIdentidad {
   tiempoMaximoMs: number;
 }
 
+/** Validación de los tokens de acceso que emite ms-identidad. */
+export interface ConfiguracionJwt {
+  /** JWKS público de ms-identidad (por la red interna). */
+  jwksUrl: string;
+  emisor: string;
+  audiencia: string;
+}
+
 export interface Configuracion {
   entorno: string;
   puerto: number;
@@ -16,17 +24,18 @@ export interface Configuracion {
   /** URL de db_academico (DATABASE_URL); sin ella el servicio arranca, pero no puede guardar datos. */
   baseDatosUrl?: string;
   identidad: ConfiguracionIdentidad;
+  jwt: ConfiguracionJwt;
 }
 
-function urlIdentidad(valor: string): string {
+function urlHttp(variable: string, valor: string): string {
   let url: URL;
   try {
     url = new URL(valor);
   } catch {
-    throw new Error(`IDENTIDAD_URL no es una URL válida: ${valor}`);
+    throw new Error(`${variable} no es una URL válida: ${valor}`);
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-    throw new Error(`IDENTIDAD_URL debe usar http o https: ${valor}`);
+    throw new Error(`${variable} debe usar http o https: ${valor}`);
   }
   return url.toString().replace(/\/$/, '');
 }
@@ -46,10 +55,15 @@ export function cargarConfiguracion(): Configuracion {
     swaggerHabilitado: (process.env.SWAGGER_HABILITADO ?? (entorno === 'production' ? 'false' : 'true')) === 'true',
     baseDatosUrl: process.env.DATABASE_URL || undefined,
     identidad: {
-      url: urlIdentidad(process.env.IDENTIDAD_URL || 'http://ms-identidad:8080'),
+      url: urlHttp('IDENTIDAD_URL', process.env.IDENTIDAD_URL || 'http://ms-identidad:8080'),
       clienteId: process.env.AULACONECTA_CLIENTE_ID || 'ms-academico',
       secretoArchivo: process.env.AULACONECTA_CLIENTE_SECRETO_ARCHIVO || undefined,
       tiempoMaximoMs: 5000,
+    },
+    jwt: {
+      jwksUrl: urlHttp('AULACONECTA_JWKS_URL', process.env.AULACONECTA_JWKS_URL || 'http://ms-identidad:8080/.well-known/jwks.json'),
+      emisor: process.env.AULACONECTA_JWT_EMISOR || 'aulaconecta-identidad',
+      audiencia: process.env.AULACONECTA_JWT_AUDIENCIA || 'aulaconecta',
     },
   };
 }

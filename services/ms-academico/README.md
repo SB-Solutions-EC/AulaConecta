@@ -45,6 +45,7 @@ npm run start:dev
 | `SWAGGER_HABILITADO` | `true`, salvo en `production` | Publica `/docs` y `/docs-json` |
 | `IDENTIDAD_URL` | `http://ms-identidad:8080` | ms-identidad por la red interna, sin pasar por el gateway |
 | `AULACONECTA_CLIENTE_ID` | `ms-academico` | Nombre del cliente de servicio |
+| `AULACONECTA_JWKS_URL` | `http://ms-identidad:8080/.well-known/jwks.json` | Llaves públicas de ms-identidad para validar los tokens de acceso |
 | `DATABASE_URL` | — | Conexión a `db_academico` con `usr_academico`. Sin ella el servicio arranca, pero no guarda datos |
 | `AULACONECTA_CLIENTE_SECRETO_ARCHIVO` | — | Archivo con el secreto de servicio. Sin él, crear cuentas responde 503; el resto del servicio funciona |
 
@@ -115,6 +116,24 @@ Para los DTOs se usan los decoradores de `src/comun/validadores.ts`:
 
 Para errores propios del negocio: `throw new ExcepcionApi(409, 'CONFLICTO', 'El paralelo ya existe.')`. La validación no reemplaza a las consultas parametrizadas: con Prisma nunca se usa `$queryRawUnsafe` ni `$executeRawUnsafe` con texto armado a mano.
 
+## Autenticación y roles
+
+Todas las rutas exigen el token de acceso de ms-identidad (`Authorization: Bearer ...`), salvo las marcadas con `@Publico()` como `/health`. La guardia global está en [src/autenticacion](src/autenticacion):
+
+```ts
+@Get()
+@Roles('ADMIN', 'SECRETARIA')            // basta con tener uno; sin @Roles alcanza con haber iniciado sesión
+listar(@UsuarioActual() usuario: UsuarioToken) { ... }   // usuario.id es el UUID de la cuenta
+```
+
+| Caso | Respuesta |
+|---|---|
+| Sin token, firma inválida, `alg` distinto de RS256, kid desconocido, vencido, otro emisor u otra audiencia, token de servicio | `401 NO_AUTORIZADO` |
+| Clave inicial sin cambiar (`debe_cambiar_clave`) | `403 CAMBIO_CLAVE_PENDIENTE` |
+| Rol no permitido | `403 ACCESO_DENEGADO` |
+
+Las llaves públicas se descargan de `AULACONECTA_JWKS_URL` y se guardan 10 minutos. Si llega un kid nuevo (ms-identidad rotó la llave) se recarga, como mucho una vez cada 30 s. Si ms-identidad no responde se conservan las llaves anteriores. El emisor y la audiencia se pueden cambiar con `AULACONECTA_JWT_EMISOR` y `AULACONECTA_JWT_AUDIENCIA`.
+
 ## Comunicación con ms-identidad
 
 Para crear la cuenta de un docente, estudiante o representante (RF-05, RF-04), ms-academico llama a `POST /usuarios` de ms-identidad con un **token de servicio** (client credentials, `src/identidad/cliente-identidad.ts`):
@@ -176,6 +195,7 @@ En el CI el resumen del job muestra el resultado por endpoint, y los reportes JU
 | Sprint 3 (27/10) | Esqueleto en NestJS con `/health`, Swagger, pruebas y Dockerfile | Listo (T1027-M) |
 | Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Listo (T1028-M) |
 | Sprint 4 (04/11) | Pruebas de integración con PostgreSQL real (Testcontainers) | Listo (T1104-M) |
+| Sprint 4 (05/11) | Validación del JWT con JWKS y guardas por rol | Listo (T1105-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |

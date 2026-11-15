@@ -67,4 +67,22 @@ describe('cargarConfiguracion', () => {
     vi.stubEnv('DATABASE_URL', '');
     expect(cargarConfiguracion().baseDatosUrl).toBeUndefined();
   });
+
+  it('valida los tokens con el JWKS, el emisor y la audiencia de ms-identidad por defecto', () => {
+    vi.stubEnv('AULACONECTA_JWKS_URL', '');
+    vi.stubEnv('AULACONECTA_JWT_EMISOR', '');
+    vi.stubEnv('AULACONECTA_JWT_AUDIENCIA', '');
+
+    expect(cargarConfiguracion().jwt).toEqual({
+      jwksUrl: 'http://ms-identidad:8080/.well-known/jwks.json',
+      emisor: 'aulaconecta-identidad',
+      audiencia: 'aulaconecta',
+    });
+  });
+
+  it.each(['no es url', 'file:///etc/passwd'])('rechaza AULACONECTA_JWKS_URL = %s', (valor) => {
+    vi.stubEnv('AULACONECTA_JWKS_URL', valor);
+
+    expect(() => cargarConfiguracion()).toThrow('AULACONECTA_JWKS_URL');
+  });
 });

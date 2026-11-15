@@ -90,6 +90,12 @@ npx prisma migrate dev --name <cambio> --create-only   # nueva migración, revis
 
 Las migraciones se versionan en `prisma/migrations`; nunca se edita una que ya está en `dev`.
 
+### Pruebas con PostgreSQL real (Testcontainers)
+
+`npm test` levanta un contenedor `postgres:16.15-alpine3.24` (la misma versión del docker-compose), aplica las migraciones con `prisma migrate deploy` y pasa la URL a las pruebas con `inject('urlBaseDatos')` ([test/postgres-global.ts](test/postgres-global.ts)). Cada ejecución empieza con una base vacía y el contenedor se borra al terminar. Necesita Docker en marcha.
+
+[test/base-datos/esquema.bd.spec.ts](test/base-datos/esquema.bd.spec.ts) comprueba en la base, no solo en el código, las claves únicas (año lectivo, curso por nivel y paralelo, matrícula, `usuario_id`), las llaves foráneas, el borrado restringido y que las fechas se guardan como `DATE`. Los datos de prueba son ficticios: las cédulas usan la provincia 99, que no existe.
+
 ## Validación de entradas y errores
 
 Todo endpoint queda protegido por lo que registra `app.module.ts`, sin configurar nada en el controlador:
@@ -169,6 +175,7 @@ En el CI el resumen del job muestra el resultado por endpoint, y los reportes JU
 | Sprint 3 (26/10) | Contrato OpenAPI v0 y estructura en el monorepo | Listo (T1026-C) |
 | Sprint 3 (27/10) | Esqueleto en NestJS con `/health`, Swagger, pruebas y Dockerfile | Listo (T1027-M) |
 | Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Listo (T1028-M) |
+| Sprint 4 (04/11) | Pruebas de integración con PostgreSQL real (Testcontainers) | Listo (T1104-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |

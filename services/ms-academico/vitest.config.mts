@@ -6,6 +6,9 @@ export default defineConfig({
   test: {
     globals: true,
     include: ['src/**/*.spec.ts', 'test/**/*.spec.ts'],
+    // PostgreSQL real con Testcontainers para las pruebas que usan la base (T1104-M); necesita Docker
+    globalSetup: ['./test/postgres-global.ts'],
+    hookTimeout: 120_000,
     // En el CI también se guardan los resultados (JUnit y JSON) para el reporte de pruebas
     reporters: process.env.CI ? ['default', 'junit', 'json'] : ['default'],
     outputFile: { junit: 'reportes/junit.xml', json: 'reportes/resultados.json' },

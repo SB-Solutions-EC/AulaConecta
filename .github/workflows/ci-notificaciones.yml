@@ -19,6 +19,21 @@ jobs:
       run:
         working-directory: services/ms-notificaciones
 
+    # PostgreSQL de prueba (la misma versión del docker-compose) para aplicar las migraciones de Alembic.
+    # La clave es solo de este contenedor efímero del CI: no es un secreto.
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24
+        env:
+          POSTGRES_USER: usr_notificaciones
+          POSTGRES_PASSWORD: clave-solo-ci
+          POSTGRES_DB: db_notificaciones
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usr_notificaciones -d db_notificaciones"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -32,6 +47,16 @@ jobs:
 
       - name: Instalar dependencias
         run: pip install -r requirements-dev.txt "pip-audit==${PIP_AUDIT_VERSION}"
+
+      - name: Aplicar las migraciones de Alembic y comprobar que coinciden con los modelos
+        env:
+          DATABASE_URL: postgresql+psycopg://usr_notificaciones:clave-solo-ci@localhost:5432/db_notificaciones
+        run: |
+          alembic upgrade head
+          # Falla si alguien cambió app/db.py sin crear su migración
+          alembic check
+          # La migración también debe poder deshacerse
+          alembic downgrade base
 
       - name: Pruebas y cobertura (pytest)
         run: |

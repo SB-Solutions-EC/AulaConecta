@@ -4,8 +4,8 @@
 |---|---|---|
 | `ci.yml` | Gitleaks · llama a cada servicio · validación del repositorio · SonarQube multilenguaje · avisos en Telegram | `dev`, `test`, `main` y sus PR |
 | `ci-identidad.yml` | JUnit 5 · cobertura con JaCoCo · Dependency-Check (falla con CVSS 7 o mayor) | Lo llama `ci.yml` |
-| `ci-academico.yml` | Verificación de tipos · Vitest con cobertura LCOV · compilación · `npm audit` (falla con HIGH o CRITICAL) | Lo llama `ci.yml` |
-| `ci-notificaciones.yml` | pytest con cobertura · `pip-audit` (falla con cualquier vulnerabilidad conocida) | Lo llama `ci.yml` |
+| `ci-academico.yml` | PostgreSQL de prueba: valida el esquema de Prisma, aplica las migraciones y falla si no coinciden con el esquema · verificación de tipos · Vitest con cobertura LCOV · compilación · `npm audit` (falla con HIGH o CRITICAL) | Lo llama `ci.yml` |
+| `ci-notificaciones.yml` | PostgreSQL de prueba: `alembic upgrade head`, `alembic check` (falla si los modelos no coinciden con las migraciones) y `alembic downgrade base` · pytest con cobertura · `pip-audit` (falla con cualquier vulnerabilidad conocida) | Lo llama `ci.yml` |
 | `ci-web.yml` | Lint y verificación de tipos (`tsc`) · Vitest con cobertura LCOV · compilación de la PWA (`vite build`) · `npm audit` | Lo llama `ci.yml` |
 | `ci-imagen.yml` | Construcción · SBOM CycloneDX · Trivy (falla con HIGH o CRITICAL con corrección disponible) · publicación en GHCR | Lo llama `ci.yml` por cada servicio |
 

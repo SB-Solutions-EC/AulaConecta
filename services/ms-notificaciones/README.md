@@ -10,7 +10,25 @@ Microservicio de notificaciones y consentimiento de AulaConecta en **FastAPI + P
 | Sprint 3 (26/10) | Contrato OpenAPI v0 y estructura en el monorepo |
 | Sprint 3 (27/10) | Esqueleto en FastAPI con `/health` y pruebas con `pytest` |
 | Sprint 3 (28/10) | `db_notificaciones` con Alembic (`alembic/versions/0001_init.py`) y RabbitMQ en `docker-compose.yml` |
+| Sprint 4 (06/11) | Validación del JWT de ms-identidad, roles y pruebas `pytest` de autorización (T1106-M) |
 | Sprint 8 | Contactos, consentimiento, consumidor de RabbitMQ, canales Push/WhatsApp e historial |
+
+## Autenticación y roles
+
+Los endpoints (salvo `/health`) exigen el token de acceso de ms-identidad (`Authorization: Bearer ...`). La validación está en [app/seguridad.py](app/seguridad.py) y se usa como dependencia de FastAPI:
+
+```python
+@aplicacion.get("/plantillas")
+def listar(usuario: Annotated[UsuarioToken, Depends(requiere_roles("ADMIN", "SECRETARIA", "DOCENTE"))]): ...
+```
+
+Solo se acepta RS256 con un kid del JWKS de ms-identidad (`AULACONECTA_JWKS_URL`, por defecto `http://ms-identidad:8080/.well-known/jwks.json`); las llaves se guardan 10 minutos. Un token inválido, vencido, de otro emisor o audiencia, o de servicio responde `401 NO_AUTORIZADO`; la clave inicial sin cambiar, `403 CAMBIO_CLAVE_PENDIENTE`; un rol no permitido, `403 ACCESO_DENEGADO`. Todos los errores tienen la forma ErrorApi `{codigo, mensaje, timestamp}`.
+
+| Endpoint | Roles |
+|---|---|
+| `GET /plantillas` | ADMIN, SECRETARIA, DOCENTE |
+
+Las pruebas ([tests/test_autorizacion.py](tests/test_autorizacion.py)) generan llaves RSA en cada ejecución y publican el JWKS en un servidor local.
 
 ## Cómo ejecutarlo
 

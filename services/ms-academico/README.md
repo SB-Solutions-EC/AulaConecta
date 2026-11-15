@@ -45,6 +45,7 @@ npm run start:dev
 | `SWAGGER_HABILITADO` | `true`, salvo en `production` | Publica `/docs` y `/docs-json` |
 | `IDENTIDAD_URL` | `http://ms-identidad:8080` | ms-identidad por la red interna, sin pasar por el gateway |
 | `AULACONECTA_CLIENTE_ID` | `ms-academico` | Nombre del cliente de servicio |
+| `DATABASE_URL` | — | Conexión a `db_academico` con `usr_academico`. Sin ella el servicio arranca, pero no guarda datos |
 | `AULACONECTA_CLIENTE_SECRETO_ARCHIVO` | — | Archivo con el secreto de servicio. Sin él, crear cuentas responde 503; el resto del servicio funciona |
 
 ## Imagen de Docker
@@ -71,6 +72,23 @@ test/                  Pruebas e2e
   seguridad/           Suite de validación de entradas, inyección y autorización (T1109-A)
   integracion/         Prueba contra un ms-identidad real (npm run test:integracion)
 ```
+
+## Base de datos (Prisma)
+
+`db_academico` se define en [prisma/schema.prisma](prisma/schema.prisma), siguiendo el modelo de [docs/modelos/bd](../../docs/modelos/bd): claves UUID que genera la aplicación, columna `version` para la sincronización y referencias a otros servicios solo por UUID (`persona.usuario_id` enlaza 1 a 1 con la cuenta de ms-identidad).
+
+| Migración | Tablas |
+|---|---|
+| `20261028000000_inicial` (T1028-M) | `anio_lectivo`, `periodo`, `curso`, `materia`, `persona`, `matricula` |
+
+```bash
+npm install                 # genera el cliente en src/generado/prisma (no se sube al repositorio)
+npm run prisma:validar      # revisa el esquema
+npm run prisma:migrar       # aplica las migraciones pendientes (necesita DATABASE_URL)
+npx prisma migrate dev --name <cambio> --create-only   # nueva migración, revisarla antes de subirla
+```
+
+Las migraciones se versionan en `prisma/migrations`; nunca se edita una que ya está en `dev`.
 
 ## Validación de entradas y errores
 
@@ -150,7 +168,7 @@ En el CI el resumen del job muestra el resultado por endpoint, y los reportes JU
 |---|---|---|
 | Sprint 3 (26/10) | Contrato OpenAPI v0 y estructura en el monorepo | Listo (T1026-C) |
 | Sprint 3 (27/10) | Esqueleto en NestJS con `/health`, Swagger, pruebas y Dockerfile | Listo (T1027-M) |
-| Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Pendiente (T1028-M) |
+| Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Listo (T1028-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |

@@ -39,3 +39,6 @@ desktop.ini
 # Registros
 *.log
 npm-debug.log*
+
+# Cliente de Prisma: se genera con npm install (postinstall)
+services/ms-academico/src/generado/

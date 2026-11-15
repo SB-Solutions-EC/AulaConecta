@@ -59,4 +59,12 @@ describe('cargarConfiguracion', () => {
 
     expect(() => cargarConfiguracion()).toThrow('IDENTIDAD_URL');
   });
+
+  it('lee la URL de db_academico de DATABASE_URL y la deja vacía si no existe', () => {
+    vi.stubEnv('DATABASE_URL', 'postgresql://usr_academico:x@postgres:5432/db_academico');
+    expect(cargarConfiguracion().baseDatosUrl).toBe('postgresql://usr_academico:x@postgres:5432/db_academico');
+
+    vi.stubEnv('DATABASE_URL', '');
+    expect(cargarConfiguracion().baseDatosUrl).toBeUndefined();
+  });
 });

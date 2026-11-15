@@ -1,7 +1,9 @@
 # Etapa de compilación de ms-academico (NestJS + TypeScript)
 FROM node:24-alpine AS compilacion
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json prisma.config.ts ./
+# El esquema va antes de npm ci: postinstall genera el cliente de Prisma
+COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./
 COPY src ./src

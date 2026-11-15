@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { BaseDatosModule } from './base-datos/base-datos.module';
 import { FiltroErrores } from './comun/filtro-errores';
 import { SoloJsonMiddleware } from './comun/solo-json.middleware';
 import { crearPipeValidacion } from './comun/validacion';
@@ -9,7 +10,7 @@ import { IdentidadModule } from './identidad/identidad.module';
 import { SaludController } from './salud/salud.controller';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, load: [cargarConfiguracion] }), IdentidadModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true, load: [cargarConfiguracion] }), BaseDatosModule, IdentidadModule],
   controllers: [SaludController],
   providers: [
     // Registrados aquí (y no en main.ts) para que las pruebas usen la misma validación que producción

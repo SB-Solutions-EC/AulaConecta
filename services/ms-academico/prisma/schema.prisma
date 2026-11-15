@@ -1,0 +1,132 @@
+// Esquema de db_academico (PostgreSQL). Sigue el modelo de 26 tablas de docs/modelos/bd:
+// claves primarias UUID generadas por la aplicación (también sin conexión), columna version
+// para la sincronización y referencias a otros servicios solo por UUID, sin llave foránea.
+// La URL de conexión está en prisma.config.ts (Prisma 7).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generado/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Año escolar con sus fechas (RF-07).
+model AnioLectivo {
+  id            String    @id @db.Uuid
+  nombre        String    @unique @db.VarChar(20)
+  fechaInicio   DateTime  @map("fecha_inicio") @db.Date
+  fechaFin      DateTime  @map("fecha_fin") @db.Date
+  activo        Boolean   @default(false)
+  version       Int       @default(1)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime? @updatedAt @map("actualizado_en")
+
+  periodos Periodo[]
+  cursos   Curso[]
+
+  @@map("anio_lectivo")
+}
+
+/// Trimestre del año lectivo; al cerrarse se bloquean las notas (RN-18).
+model Periodo {
+  id            String    @id @db.Uuid
+  anioLectivoId String    @map("id_anio_lectivo") @db.Uuid
+  numero        Int       @db.SmallInt
+  fechaInicio   DateTime  @map("fecha_inicio") @db.Date
+  fechaFin      DateTime  @map("fecha_fin") @db.Date
+  cerrado       Boolean   @default(false)
+  version       Int       @default(1)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime? @updatedAt @map("actualizado_en")
+
+  anioLectivo AnioLectivo @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
+
+  @@unique([anioLectivoId, numero])
+  @@map("periodo")
+}
+
+/// Datos personales de docentes, estudiantes y representantes. La cuenta vive en ms-identidad
+/// y se enlaza 1 a 1 por usuario_id (único).
+model Persona {
+  id            String     @id @db.Uuid
+  usuarioId     String?    @unique @map("usuario_id") @db.Uuid
+  tipo          TipoPersona
+  cedula        String     @unique @db.VarChar(10)
+  nombres       String     @db.VarChar(80)
+  apellidos     String     @db.VarChar(80)
+  area          String?    @db.VarChar(80)
+  activo        Boolean    @default(true)
+  version       Int        @default(1)
+  creadoEn      DateTime   @default(now()) @map("creado_en")
+  actualizadoEn DateTime?  @updatedAt @map("actualizado_en")
+
+  cursosTutor Curso[]     @relation("TutorCurso")
+  matriculas  Matricula[]
+
+  @@index([tipo])
+  @@map("persona")
+}
+
+enum TipoPersona {
+  DOCENTE
+  ESTUDIANTE
+  REPRESENTANTE
+}
+
+/// Curso y paralelo de un año lectivo (RF-06).
+model Curso {
+  id            String    @id @db.Uuid
+  anioLectivoId String    @map("id_anio_lectivo") @db.Uuid
+  tutorId       String?   @map("id_tutor") @db.Uuid
+  nivel         String    @db.VarChar(40)
+  paralelo      String    @db.VarChar(2)
+  version       Int       @default(1)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime? @updatedAt @map("actualizado_en")
+
+  anioLectivo AnioLectivo @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
+  tutor       Persona?    @relation("TutorCurso", fields: [tutorId], references: [id], onDelete: Restrict)
+  matriculas  Matricula[]
+
+  @@unique([anioLectivoId, nivel, paralelo])
+  @@map("curso")
+}
+
+/// Catálogo de asignaturas (RF-06).
+model Materia {
+  id            String    @id @db.Uuid
+  nombre        String    @db.VarChar(80)
+  area          String    @db.VarChar(80)
+  version       Int       @default(1)
+  creadoEn      DateTime  @default(now()) @map("creado_en")
+  actualizadoEn DateTime? @updatedAt @map("actualizado_en")
+
+  @@map("materia")
+}
+
+/// Tabla intermedia N a N entre estudiante (persona) y curso (RF-04).
+model Matricula {
+  id             String          @id @db.Uuid
+  estudianteId   String          @map("id_estudiante") @db.Uuid
+  cursoId        String          @map("id_curso") @db.Uuid
+  fechaMatricula DateTime        @default(now()) @map("fecha_matricula") @db.Date
+  estado         EstadoMatricula @default(ACTIVA)
+  version        Int             @default(1)
+  creadoEn       DateTime        @default(now()) @map("creado_en")
+  actualizadoEn  DateTime?       @updatedAt @map("actualizado_en")
+
+  estudiante Persona @relation(fields: [estudianteId], references: [id], onDelete: Restrict)
+  curso      Curso   @relation(fields: [cursoId], references: [id], onDelete: Restrict)
+
+  @@unique([estudianteId, cursoId])
+  @@index([cursoId])
+  @@map("matricula")
+}
+
+enum EstadoMatricula {
+  ACTIVA
+  RETIRADA
+}

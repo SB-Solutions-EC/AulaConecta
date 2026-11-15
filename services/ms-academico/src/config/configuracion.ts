@@ -13,6 +13,8 @@ export interface Configuracion {
   entorno: string;
   puerto: number;
   swaggerHabilitado: boolean;
+  /** URL de db_academico (DATABASE_URL); sin ella el servicio arranca, pero no puede guardar datos. */
+  baseDatosUrl?: string;
   identidad: ConfiguracionIdentidad;
 }
 
@@ -42,6 +44,7 @@ export function cargarConfiguracion(): Configuracion {
     puerto,
     // En producción Swagger se apaga salvo que se pida explícitamente.
     swaggerHabilitado: (process.env.SWAGGER_HABILITADO ?? (entorno === 'production' ? 'false' : 'true')) === 'true',
+    baseDatosUrl: process.env.DATABASE_URL || undefined,
     identidad: {
       url: urlIdentidad(process.env.IDENTIDAD_URL || 'http://ms-identidad:8080'),
       clienteId: process.env.AULACONECTA_CLIENTE_ID || 'ms-academico',

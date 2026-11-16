@@ -15,31 +15,46 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
   beforeEach(() => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: () =>
-          Promise.resolve({
-            status: 'UP',
-            accessToken: TOKEN_SIMULADO,
-            tokenType: 'Bearer',
-            expiresIn: 900,
-            usuario: {
-              id: '00000000-0000-0000-0000-000000000001',
-              nombreUsuario: 'ana.perez',
-              roles: [
-                'ADMIN',
-                'SECRETARIA',
-                'DOCENTE',
-                'ESTUDIANTE',
-                'REPRESENTANTE',
-              ],
-              debeCambiarClave: false,
-              estado: 'ACTIVO',
-              intentosFallidos: 0,
-              version: 1,
-            },
-          }),
+      vi.fn().mockImplementation((url: string) => {
+        const esCatalogoAcademico =
+          typeof url === 'string' &&
+          (url.includes('/anios-lectivos') ||
+            url.includes('/cursos') ||
+            url.includes('/materias') ||
+            url.includes('/personas') ||
+            url.includes('/asignaciones') ||
+            url.includes('/matriculas') ||
+            url.includes('/contactos'));
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () =>
+            Promise.resolve(
+              esCatalogoAcademico
+                ? []
+                : {
+                    status: 'UP',
+                    accessToken: TOKEN_SIMULADO,
+                    tokenType: 'Bearer',
+                    expiresIn: 900,
+                    usuario: {
+                      id: '00000000-0000-0000-0000-000000000001',
+                      nombreUsuario: 'ana.perez',
+                      roles: [
+                        'ADMIN',
+                        'SECRETARIA',
+                        'DOCENTE',
+                        'ESTUDIANTE',
+                        'REPRESENTANTE',
+                      ],
+                      debeCambiarClave: false,
+                      estado: 'ACTIVO',
+                      intentosFallidos: 0,
+                      version: 1,
+                    },
+                  },
+            ),
+        });
       }),
     );
   });
@@ -110,12 +125,32 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
       expect(screen.getAllByText('UP')).toHaveLength(3);
     });
 
+    // Como ADMIN ve Personal docente y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-personal-docente'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-docentes')).toBeInTheDocument();
+    });
+
+    // Como ADMIN ve Matrícula y representantes y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-matriculas'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-matricula')).toBeInTheDocument();
+    });
+
+    // Como ADMIN ve Importación de nóminas y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-importacion-nominas'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-importacion')).toBeInTheDocument();
+    });
+
     // Como ADMIN ve Configuración académica y puede navegar a ella
     const itemConfig = screen.getByTestId('nav-item-configuracion-academica');
     fireEvent.click(itemConfig);
-    expect(
-      screen.getByTestId('vista-modulo-configuracion-academica'),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('pantalla-configuracion-academica'),
+      ).toBeInTheDocument();
+    });
 
     // Si cambia al rol Docente mientras está en /configuracion-academica, RutaProtegida bloquea con 403
     const botonDocente = screen.getByRole('button', { name: 'Docente' });

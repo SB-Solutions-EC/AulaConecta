@@ -12,8 +12,8 @@ Los controles son los previstos en el Product Backlog, cada uno en su sprint. Cl
 |---|---|---|---|---|---|
 | Contraseñas y tokens (JWT, refresh) | Todos los usuarios | ms-identidad (`db_identidad`) | Crítica | V5 | Hash Argon2/BCrypt, bloqueo tras 3 intentos, límite de peticiones en el gateway |
 | Secretos de infraestructura (Telegram, SonarQube, WhatsApp API) | Equipo | GitHub Secrets | Crítica | — | Nunca en el código; Gitleaks en local y en el CI |
-| Nombres y apellidos de estudiantes | Menor | ms-academico (`PERSONA`) | Alta | — | Acceso por rol (RNF-04); datos ficticios en el repositorio |
-| Cédula | Estudiante, docente, representante | ms-academico; ms-identidad la usa solo como clave inicial | Alta | — | Se muestra enmascarada; la clave inicial se cambia en el primer ingreso |
+| Nombres y apellidos de estudiantes | Menor | ms-academico (`PERSONA`) | Alta | — | Acceso por rol (RNF-04): un estudiante o representante solo ve a su círculo, probado en `test/seguridad/` (T1111-A); datos ficticios en el repositorio |
+| Cédula | Estudiante, docente, representante | ms-academico; ms-identidad la usa solo como clave inicial | Alta | — | Se valida con el módulo 10 (`@Cedula()`); la API no la devuelve en altas ni listados; se muestra enmascarada; la clave inicial se cambia en el primer ingreso. En las pruebas se genera al ejecutar, nunca queda escrita |
 | Calificaciones, asistencia y comportamiento | Menor | ms-academico | Alta | V4 | Auditoría de cambios (RNF-09); el estudiante y el representante solo ven lo suyo |
 | Número de WhatsApp y autorización de avisos | Representante | ms-notificaciones | Alta | V3 | Solo números verificados y autorizados (RNF-05); solo el servicio que envía ve los teléfonos |
 | Historial de avisos (destinatario y motivo) | Menor y representante | ms-notificaciones | Alta | V3 | Plantillas sin detalle de notas; acceso solo de docente y administrador |

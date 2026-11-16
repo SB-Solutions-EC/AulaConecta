@@ -22,6 +22,10 @@ import {
   type MotivoCierreSesion,
 } from './api/autenticacionApi';
 import { LayoutPwa } from './componentes/LayoutPwa';
+import { PantallaConfiguracionAcademica } from './componentes/PantallaConfiguracionAcademica';
+import { PantallaDocentes } from './componentes/PantallaDocentes';
+import { PantallaMatricula } from './componentes/PantallaMatricula';
+import { PantallaImportacion } from './componentes/PantallaImportacion';
 import {
   CATALOGO_MODULOS,
   METADATOS_ROLES,
@@ -268,6 +272,14 @@ export default function App({
               verificarServicios().catch(() => undefined);
             }}
           />
+        ) : moduloActual.ruta === '/configuracion-academica' ? (
+          <PantallaConfiguracionAcademica />
+        ) : moduloActual.ruta === '/docentes' ? (
+          <PantallaDocentes />
+        ) : moduloActual.ruta === '/matriculas' ? (
+          <PantallaMatricula />
+        ) : moduloActual.ruta === '/importacion' ? (
+          <PantallaImportacion />
         ) : (
           <section
             aria-label={`Contenido del módulo ${moduloActual.etiqueta}`}

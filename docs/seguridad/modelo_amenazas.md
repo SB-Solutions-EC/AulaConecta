@@ -82,7 +82,7 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 | T-01 | ms-academico | Un estudiante cambia una nota enviando la petición directamente a la API | A | Autorización en el servicio dueño (solo el docente de la materia califica), DTO con lista blanca de campos | T1118-M, T1120-A |
 | T-02 | ms-academico | Un usuario interno cambia notas sin dejar rastro (**V4**) | M | Auditoría con valor anterior, nuevo, usuario y fecha; bloqueo al cerrar el trimestre | T1126-M, T1126-A |
 | T-03 | Sincronización | Un cambio hecho sin conexión sobrescribe el de otra persona (**V2**) | A | `baseVersion` y respuesta 409, bandeja de conflictos, clave de idempotencia por operación | T1231-M, T0104-M, T0104-A |
-| T-04 | Importación Excel | Un archivo con fórmulas o demasiado grande daña los datos o el servidor | M | Validar tipo, tamaño y número de filas; validar cada fila; exportar sin fórmulas ejecutables | T1112-A, T1203-A |
+| T-04 | Importación Excel | Un archivo con fórmulas o demasiado grande daña los datos o el servidor | M | Controles de carga en `src/importacion/` (T1112-A): 2 MB, contenido real de `.xlsx`, sin macros, fórmulas, vínculos ni DTD (XXE), sin bombas ZIP, hasta 5 hojas, 30 columnas y 1000 filas; probados con 47 archivos inválidos. Validar cada fila (T1112-M); exportar sin fórmulas ejecutables (T1203-A) | T1112-A, T1203-A |
 | T-05 | Planificación | Código malicioso (XSS) en los campos de texto largo | M | Sanitizar al guardar y al mostrar; cabeceras CSP en la PWA | T1210-A |
 | T-06 | CI/CD (LC4) | Una dependencia o una acción de GitHub comprometida entra al código | M | npm audit, pip-audit, Dependency-Check y Trivy; acciones fijadas por versión; permisos mínimos del workflow | T1029-M, T1029-A, T1104-A |
 
@@ -98,11 +98,11 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 | ID | Dónde | Amenaza | Nivel | Controles | Tarea |
 |---|---|---|---|---|---|
 | I-01 | PWA (dispositivo) | Datos de menores legibles en un equipo compartido, perdido o robado (**V1**) | A | Cifrado AES-GCM con WebCrypto; borrado al cerrar sesión y tras 15 min de inactividad; el service worker no guarda respuestas sensibles | T1230-A, T0105-A |
-| I-02 | ms-academico | Un estudiante o representante consulta datos de otro cambiando un identificador (IDOR) | A | Filtrar siempre por el `usuario_id` del token; pruebas 403 en cada módulo | T1111-A, T1120-A, T1207-A |
+| I-02 | ms-academico | Un estudiante o representante consulta datos de otro cambiando un identificador (IDOR) | A | Filtrar siempre por el `usuario_id` del token, nunca por cabeceras ni parámetros; pedir a otro estudiante responde el mismo 403 exista o no. Suite de privacidad de matrícula y personas en `test/seguridad/` (T1111-A); calificaciones y tareas en T1120-A y T1207-A | T1111-A, T1120-A, T1207-A |
 | I-03 | LC3 | El aviso llega a una persona equivocada (**V3**) | A | Número verificado con el mensaje de confirmación de autorización; plantillas sin detalle de notas | T1221-C, T1222-A, T1224-A |
 | I-04 | Repositorio y CI | Datos reales o secretos publicados en el repositorio, los registros o Telegram | A | Datos ficticios, Gitleaks con reglas de cédula y celular, mensajes del CI sin datos personales | T1022-A, T1029-A |
-| I-05 | Roles | La Secretaría ve calificaciones o planificaciones | M | Permisos denegados por defecto; cada endpoint declara los roles permitidos | T1105-M, T1111-A |
-| I-06 | Pantallas y exportaciones | La cédula completa aparece en listados, reportes o archivos | M | Cédula enmascarada fuera de la ficha del estudiante | T1111-A |
+| I-05 | Roles | La Secretaría ve calificaciones o planificaciones | M | Permisos denegados por defecto; cada endpoint declara los roles permitidos. Solo `ADMIN` y `SECRETARIA` matriculan, registran personas y vinculan representantes (probado en T1111-A) | T1105-M, T1111-A |
+| I-06 | Pantallas y exportaciones | La cédula completa aparece en listados, reportes o archivos | M | La API no devuelve la cédula en altas ni listados (probado en T1111-A); enmascarada en la ficha del estudiante | T1111-A |
 | I-07 | LC1 | Tráfico interceptado en la red del colegio | M | TLS en el gateway; HSTS en la PWA | T1027-A |
 | I-08 | Respaldos | Una copia de la base termina en manos de alguien sin permiso | M | Respaldos con acceso restringido y prueba de restauración documentada | T0113-M |
 

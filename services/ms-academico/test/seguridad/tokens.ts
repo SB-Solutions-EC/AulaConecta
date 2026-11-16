@@ -21,10 +21,13 @@ const base64url = (datos: string | Buffer): string => Buffer.from(datos).toStrin
 
 export interface Reclamos {
   sub?: string;
+  tipo?: string;
   iss?: string;
   aud?: string | string[];
   roles?: unknown;
   debe_cambiar_clave?: boolean;
+  scope?: string;
+  client_id?: string;
   iat?: number;
   exp?: number;
 }
@@ -33,6 +36,8 @@ function reclamos(roles: string[], cambios: Reclamos = {}): Reclamos {
   const ahora = Math.floor(Date.now() / 1000);
   return {
     sub: randomUUID(),
+    // Como ms-identidad desde T1110-A: separa los tokens de usuario de los de servicio
+    tipo: 'usuario',
     iss: EMISOR,
     aud: [AUDIENCIA],
     roles,
@@ -88,4 +93,20 @@ export function tokensRechazados(): TokenMalicioso[] {
     { nombre: 'de otro emisor', cabecera: `Bearer ${tokenValido(['ADMIN'], { iss: 'emisor-falso' })}` },
     { nombre: 'para otra audiencia', cabecera: `Bearer ${tokenValido(['ADMIN'], { aud: ['otro-sistema'] })}` },
   ];
+}
+
+/** Token de servicio como el de T1110-A (tipo servicio, alcance, sin roles): no representa a una persona. */
+export function tokenDeServicio(): string {
+  const ahora = Math.floor(Date.now() / 1000);
+  const cuerpo: Reclamos = {
+    sub: randomUUID(),
+    tipo: 'servicio',
+    client_id: 'ms-academico',
+    scope: 'usuarios:crear',
+    iss: EMISOR,
+    aud: [AUDIENCIA],
+    iat: ahora,
+    exp: ahora + 300,
+  };
+  return firmarRs256(cuerpo, llave.privada, KID);
 }

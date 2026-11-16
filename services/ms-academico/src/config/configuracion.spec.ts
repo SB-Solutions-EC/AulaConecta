@@ -35,7 +35,7 @@ describe('cargarConfiguracion', () => {
     vi.stubEnv('AULACONECTA_CLIENTE_SECRETO_ARCHIVO', '');
 
     expect(cargarConfiguracion().identidad).toEqual({
-      url: 'http://ms-identidad:8080',
+      url: 'https://ms-identidad:8443',
       clienteId: 'ms-academico',
       secretoArchivo: undefined,
       tiempoMaximoMs: 5000,
@@ -69,12 +69,13 @@ describe('cargarConfiguracion', () => {
   });
 
   it('valida los tokens con el JWKS, el emisor y la audiencia de ms-identidad por defecto', () => {
+    vi.stubEnv('IDENTIDAD_URL', '');
     vi.stubEnv('AULACONECTA_JWKS_URL', '');
     vi.stubEnv('AULACONECTA_JWT_EMISOR', '');
     vi.stubEnv('AULACONECTA_JWT_AUDIENCIA', '');
 
     expect(cargarConfiguracion().jwt).toEqual({
-      jwksUrl: 'http://ms-identidad:8080/.well-known/jwks.json',
+      jwksUrl: 'https://ms-identidad:8443/.well-known/jwks.json',
       emisor: 'aulaconecta-identidad',
       audiencia: 'aulaconecta',
     });

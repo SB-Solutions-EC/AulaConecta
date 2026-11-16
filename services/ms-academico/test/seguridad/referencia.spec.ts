@@ -23,6 +23,10 @@ describe('Suite de seguridad: implementación de referencia de RF-06 y RF-07', (
     await app.close();
   });
 
+  it('inicializa AppModule con ModuloReferencia', () => {
+    expect(app).toBeDefined();
+  });
+
   for (const endpoint of CREACIONES) {
     verificarCreacion(servidor, endpoint);
   }

@@ -48,6 +48,8 @@ export function cargarConfiguracion(): Configuracion {
     throw new Error(`PORT no es un puerto válido: ${process.env.PORT}`);
   }
 
+  const urlIdentidad = urlHttp('IDENTIDAD_URL', process.env.IDENTIDAD_URL || 'https://ms-identidad:8443');
+
   return {
     entorno,
     puerto,
@@ -55,13 +57,14 @@ export function cargarConfiguracion(): Configuracion {
     swaggerHabilitado: (process.env.SWAGGER_HABILITADO ?? (entorno === 'production' ? 'false' : 'true')) === 'true',
     baseDatosUrl: process.env.DATABASE_URL || undefined,
     identidad: {
-      url: urlHttp('IDENTIDAD_URL', process.env.IDENTIDAD_URL || 'http://ms-identidad:8080'),
+      url: urlIdentidad,
       clienteId: process.env.AULACONECTA_CLIENTE_ID || 'ms-academico',
       secretoArchivo: process.env.AULACONECTA_CLIENTE_SECRETO_ARCHIVO || undefined,
       tiempoMaximoMs: 5000,
     },
     jwt: {
-      jwksUrl: urlHttp('AULACONECTA_JWKS_URL', process.env.AULACONECTA_JWKS_URL || 'http://ms-identidad:8080/.well-known/jwks.json'),
+      // Por defecto, el JWKS que publica la misma ms-identidad
+      jwksUrl: urlHttp('AULACONECTA_JWKS_URL', process.env.AULACONECTA_JWKS_URL || `${urlIdentidad}/.well-known/jwks.json`),
       emisor: process.env.AULACONECTA_JWT_EMISOR || 'aulaconecta-identidad',
       audiencia: process.env.AULACONECTA_JWT_AUDIENCIA || 'aulaconecta',
     },

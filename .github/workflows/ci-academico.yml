@@ -17,13 +17,14 @@ jobs:
         working-directory: services/ms-academico
 
     # PostgreSQL de prueba (la misma versión del docker-compose) para aplicar las migraciones de Prisma.
-    # La clave es solo de este contenedor efímero del CI: no es un secreto.
+    # Contenedor efímero que solo escucha en la máquina del job: acepta conexiones sin clave (trust),
+    # así no queda ninguna contraseña escrita en el workflow (SonarQube secrets:S6698).
     services:
       postgres:
         image: postgres:16.15-alpine3.24
         env:
           POSTGRES_USER: usr_academico
-          POSTGRES_PASSWORD: clave-solo-ci
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: db_academico
         ports:
           - 5432:5432
@@ -32,7 +33,7 @@ jobs:
           --health-interval 5s --health-timeout 3s --health-retries 10
 
     env:
-      DATABASE_URL: postgresql://usr_academico:clave-solo-ci@localhost:5432/db_academico
+      DATABASE_URL: postgresql://usr_academico@localhost:5432/db_academico
 
     steps:
       - name: Checkout

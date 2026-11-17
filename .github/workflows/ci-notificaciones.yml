@@ -20,13 +20,14 @@ jobs:
         working-directory: services/ms-notificaciones
 
     # PostgreSQL de prueba (la misma versión del docker-compose) para aplicar las migraciones de Alembic.
-    # La clave es solo de este contenedor efímero del CI: no es un secreto.
+    # Contenedor efímero que solo escucha en la máquina del job: acepta conexiones sin clave (trust),
+    # así no queda ninguna contraseña escrita en el workflow (SonarQube secrets:S6698).
     services:
       postgres:
         image: postgres:16.15-alpine3.24
         env:
           POSTGRES_USER: usr_notificaciones
-          POSTGRES_PASSWORD: clave-solo-ci
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: db_notificaciones
         ports:
           - 5432:5432
@@ -50,7 +51,7 @@ jobs:
 
       - name: Aplicar las migraciones de Alembic y comprobar que coinciden con los modelos
         env:
-          DATABASE_URL: postgresql+psycopg://usr_notificaciones:clave-solo-ci@localhost:5432/db_notificaciones
+          DATABASE_URL: postgresql+psycopg://usr_notificaciones@localhost:5432/db_notificaciones
         run: |
           alembic upgrade head
           # Falla si alguien cambió app/db.py sin crear su migración

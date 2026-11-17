@@ -75,16 +75,25 @@ describe('Guardia JWT de ms-academico', () => {
   it('rechaza los tokens de servicio en la API de usuarios', async () => {
     const token = tokenValido(['ADMIN'], { tipo: 'servicio' } as Reclamos);
 
-    await conToken('/prueba-guardia/sesion', token).expect(401);
+    const respuesta = await conToken('/prueba-guardia/sesion', token);
+
+    expect(respuesta.status).toBe(401);
+    expect(respuesta.body.codigo).toBe('NO_AUTORIZADO');
   });
 
   it('acepta el reclamo tipo = usuario', async () => {
-    await conToken('/prueba-guardia/sesion', tokenValido(['DOCENTE'], { tipo: 'usuario' } as Reclamos)).expect(200);
+    const respuesta = await conToken('/prueba-guardia/sesion', tokenValido(['DOCENTE'], { tipo: 'usuario' } as Reclamos));
+
+    expect(respuesta.status).toBe(200);
+    expect(respuesta.body.roles).toEqual(['DOCENTE']);
   });
 
   it('rechaza roles que no son una lista de textos', async () => {
-    await conToken('/prueba-guardia/sesion', tokenValido([], { roles: 'ADMIN' })).expect(401);
-    await conToken('/prueba-guardia/sesion', tokenValido([], { roles: [1] })).expect(401);
+    const comoTexto = await conToken('/prueba-guardia/sesion', tokenValido([], { roles: 'ADMIN' }));
+    const conNumeros = await conToken('/prueba-guardia/sesion', tokenValido([], { roles: [1] }));
+
+    expect(comoTexto.status).toBe(401);
+    expect(conNumeros.status).toBe(401);
   });
 
   it('con la clave inicial pendiente responde 403 CAMBIO_CLAVE_PENDIENTE', async () => {

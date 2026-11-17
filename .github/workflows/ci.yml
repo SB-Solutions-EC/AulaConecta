@@ -354,10 +354,27 @@ jobs:
 
           $nuevos = Invoke-RestMethod -Uri "$servidor/api/issues/search?componentKeys=$proyecto&inNewCodePeriod=true&resolved=false&ps=100" -Headers $cabeceras
           Write-Output "Problemas nuevos sin resolver: $($nuevos.total)"
+
+          # Además del log: tabla en el resumen de la ejecución y anotación en la línea del archivo (pestaña Files changed del PR)
+          $resumen = @(
+            "## SonarQube: el quality gate falló",
+            "",
+            "| Estado | Métrica | Umbral | Valor |",
+            "|---|---|---|---|"
+          )
+          foreach ($condicion in $estado.projectStatus.conditions) {
+            $resumen += "| $($condicion.status) | $($condicion.metricKey) | $($condicion.comparator) $($condicion.errorThreshold) | $($condicion.actualValue) |"
+          }
+          $resumen += @("", "### Problemas nuevos sin resolver: $($nuevos.total)", "", "| Gravedad | Archivo | Regla | Mensaje |", "|---|---|---|---|")
           foreach ($problema in $nuevos.issues) {
             $archivo = $problema.component -replace '^[^:]*:', ''
+            $mensaje = $problema.message -replace '\|', '\|'
             Write-Output "- [$($problema.severity)] $archivo`:$($problema.line) $($problema.rule): $($problema.message)"
+            Write-Output "::error file=$archivo,line=$($problema.line),title=SonarQube $($problema.rule)::$($problema.message)"
+            $resumen += "| $($problema.severity) | ``$archivo`:$($problema.line)`` | $($problema.rule) | $mensaje |"
           }
+          # UTF-8 sin BOM: Out-File de PowerShell 5 agrega un BOM que rompe el título del resumen
+          [System.IO.File]::AppendAllLines($env:GITHUB_STEP_SUMMARY, [string[]]$resumen, (New-Object System.Text.UTF8Encoding($false)))
 
   notificar-calidad:
     name: telegram-calidad

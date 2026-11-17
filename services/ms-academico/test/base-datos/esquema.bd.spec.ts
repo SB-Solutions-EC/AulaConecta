@@ -43,7 +43,7 @@ describe('db_academico en PostgreSQL real', () => {
 
   it('guarda el UUID generado por la aplicación y pone version = 1', async () => {
     const id = randomUUID();
-    const materia = await prisma.materia.create({ data: { id, nombre: `Física ${unico()}`, area: 'Ciencias Naturales' } });
+    const materia = await prisma.materia.create({ data: { id, codigo: `F${unico()}`, nombre: `Física ${unico()}`, area: 'Ciencias Naturales' } });
 
     expect(materia).toMatchObject({ id, version: 1 });
   });
@@ -74,10 +74,10 @@ describe('db_academico en PostgreSQL real', () => {
   it('no deja matricular dos veces al mismo estudiante en el mismo curso', async () => {
     const cursoId = (await prisma.curso.create({ data: { id: randomUUID(), anioLectivoId: await crearAnio(), nivel: '7mo EGB', paralelo: 'A' } })).id;
     const estudianteId = await crearPersona('ESTUDIANTE');
-    const matricula = await prisma.matricula.create({ data: { id: randomUUID(), estudianteId, cursoId } });
+    const matricula = await prisma.matricula.create({ data: { id: randomUUID(), codigoMatricula: `AND-${unico()}`, estudianteId, cursoId } });
 
     expect(matricula.estado).toBe('ACTIVA');
-    await expect(prisma.matricula.create({ data: { id: randomUUID(), estudianteId, cursoId } })).rejects.toMatchObject({ code: 'P2002' });
+    await expect(prisma.matricula.create({ data: { id: randomUUID(), codigoMatricula: `AND-${unico()}`, estudianteId, cursoId } })).rejects.toMatchObject({ code: 'P2002' });
   });
 
   it('no borra un año lectivo que tiene cursos (borrado restringido: se conserva el historial)', async () => {
@@ -101,5 +101,31 @@ describe('db_academico en PostgreSQL real', () => {
     const anio = await prisma.anioLectivo.findUniqueOrThrow({ where: { id: await crearAnio() } });
 
     expect(anio.fechaInicio.toISOString()).toMatch(/T00:00:00\.000Z$/);
+  });
+  // Alineación con el diccionario de datos del Taller 2 (migración 20261116000000_alineacion_taller2)
+  it('el código de materia es obligatorio y único; el área es opcional', async () => {
+    const codigo = `Q${unico()}`;
+    await prisma.materia.create({ data: { id: randomUUID(), codigo, nombre: 'Química' } });
+
+    await expect(prisma.materia.create({ data: { id: randomUUID(), codigo, nombre: 'Química II' } })).rejects.toMatchObject({ code: 'P2002' });
+  });
+
+  it('el código visible de la matrícula es único', async () => {
+    const anioLectivoId = await crearAnio();
+    const { id: cursoId } = await prisma.curso.create({ data: { id: randomUUID(), anioLectivoId, nivel: '9no EGB', paralelo: 'B' } });
+    const codigoMatricula = `AND-${unico()}`;
+    await prisma.matricula.create({ data: { id: randomUUID(), codigoMatricula, estudianteId: await crearPersona('ESTUDIANTE'), cursoId } });
+
+    await expect(
+      prisma.matricula.create({ data: { id: randomUUID(), codigoMatricula, estudianteId: await crearPersona('ESTUDIANTE'), cursoId } }),
+    ).rejects.toMatchObject({ code: 'P2002' });
+  });
+
+  it('los datos opcionales de la persona respetan el diccionario: correo único y sexo M o F', async () => {
+    const correo = `persona${unico()}@ejemplo.ec`;
+    await prisma.persona.update({ where: { id: await crearPersona('DOCENTE') }, data: { correo, sexo: 'F', fechaNacimiento: fecha('1990-05-20') } });
+
+    await expect(prisma.persona.update({ where: { id: await crearPersona('DOCENTE') }, data: { correo } })).rejects.toMatchObject({ code: 'P2002' });
+    await expect(prisma.persona.update({ where: { id: await crearPersona('DOCENTE') }, data: { sexo: 'X' } })).rejects.toBeDefined();
   });
 });

@@ -18,12 +18,13 @@ public record UsuarioIdentidad(
         Instant creadoEn,
         Instant actualizadoEn,
         UUID actualizadoPor,
-        int version) {
+        int version,
+        Instant claveTemporalVence) {
 
     public static UsuarioIdentidad de(Usuario usuario) {
         return new UsuarioIdentidad(usuario.id(), usuario.nombreUsuario(), usuario.roles(),
                 usuario.debeCambiarClave(), usuario.estado(), usuario.intentosFallidos(), usuario.bloqueadoHasta(),
                 usuario.ultimoAcceso(), usuario.creadoEn(), usuario.actualizadoEn(), usuario.actualizadoPor(),
-                usuario.version());
+                usuario.version(), usuario.tieneClaveTemporal() ? usuario.claveTemporalVence() : null);
     }
 }

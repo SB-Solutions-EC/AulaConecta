@@ -10,6 +10,8 @@ import { TipoCampo } from './entradas-maliciosas';
 interface Esquema {
   type?: string;
   format?: string;
+  minimum?: number;
+  maximum?: number;
   required?: string[];
   properties?: Record<string, Esquema>;
   $ref?: string;
@@ -35,6 +37,9 @@ const contrato = parse(readFileSync(resolve(__dirname, '../../../../openapi/ms-a
 function tipoEnContrato(propiedad: Esquema): TipoCampo | string {
   if (propiedad.type === 'boolean') {
     return 'booleano';
+  }
+  if (propiedad.type === 'integer' && propiedad.minimum === 1 && propiedad.maximum === 3) {
+    return 'trimestre';
   }
   if (propiedad.type === 'string') {
     return { uuid: 'uuid', date: 'fecha' }[propiedad.format ?? ''] ?? (propiedad.format ? `string/${propiedad.format}` : 'texto');

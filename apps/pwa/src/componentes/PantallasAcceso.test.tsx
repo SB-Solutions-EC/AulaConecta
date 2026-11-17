@@ -9,7 +9,7 @@ import { ServicioAutenticacionApi } from '../api/autenticacionApi';
 import { PantallaCambioClaveInicial } from './PantallaCambioClaveInicial';
 import { PantallaInicioSesion } from './PantallaInicioSesion';
 
-// Hace de cédula inicial con provincia 99 (no existe en Ecuador) para no activar cedula-ecuador en Gitleaks
+// Hace de clave temporal; parece una cédula con provincia 99 (no existe en Ecuador) para no activar cedula-ecuador en Gitleaks
 const CLAVE_INICIAL_FICTICIA = '9900000001';
 const CLAVE_NUEVA_PRUEBA = 'aaaaaaaa';
 const CLAVE_OTRA_PRUEBA = 'bbbbbbbb';
@@ -103,7 +103,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     );
 
     const inputUsuario = screen.getByLabelText(/Nombre de usuario/i);
-    const inputClave = screen.getByLabelText(/Contraseña o clave inicial/i);
+    const inputClave = screen.getByLabelText(/Contraseña o clave temporal/i);
 
     fireEvent.change(inputUsuario, { target: { value: 'carlos.mora' } });
     fireEvent.change(inputClave, { target: { value: CLAVE_INICIAL_FICTICIA } });
@@ -123,6 +123,42 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
         clave: CLAVE_INICIAL_FICTICIA,
       });
       expect(alAutenticar).toHaveBeenCalledWith(RESPUESTA_TOKEN_PRUEBA);
+    });
+  });
+
+  it('PantallaInicioSesion explica la clave temporal ya usada o vencida (RF-03 v1.1, CR-02)', async () => {
+    const ejecutarLogin = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new ErrorHttpApi(401, 'CLAVE_TEMPORAL_USADA', 'La clave temporal ya se usó.'),
+      )
+      .mockRejectedValueOnce(
+        new ErrorHttpApi(401, 'CLAVE_TEMPORAL_VENCIDA', 'La clave temporal venció.'),
+      );
+
+    render(
+      <PantallaInicioSesion
+        nombreUsuarioInicial="ana.perez"
+        alAutenticarExitosamente={vi.fn()}
+        ejecutarLogin={ejecutarLogin}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(/Contraseña o clave temporal/i), {
+      target: { value: CLAVE_OTRA_PRUEBA },
+    });
+
+    fireEvent.click(screen.getByTestId('boton-enviar-login'));
+    await waitFor(() => {
+      expect(screen.getByTestId('alerta-error-login')).toHaveTextContent(
+        /ya se usó.*pida otra a la secretaría/i,
+      );
+    });
+
+    fireEvent.click(screen.getByTestId('boton-enviar-login'));
+    await waitFor(() => {
+      expect(screen.getByTestId('alerta-error-login')).toHaveTextContent(
+        /venció.*72 horas/i,
+      );
     });
   });
 
@@ -153,7 +189,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
       />,
     );
 
-    fireEvent.change(screen.getByLabelText(/Contraseña o clave inicial/i), {
+    fireEvent.change(screen.getByLabelText(/Contraseña o clave temporal/i), {
       target: { value: CLAVE_OTRA_PRUEBA },
     });
 
@@ -205,7 +241,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     );
 
     const botonGuardar = screen.getByTestId('boton-guardar-cambio-clave');
-    const campoActual = screen.getByLabelText(/Clave actual/i);
+    const campoActual = screen.getByLabelText(/^Clave temporal$/i);
     const campoNueva = screen.getByLabelText(
       /Nueva contraseña \(mín\. 8 caracteres\)/i,
     );
@@ -233,7 +269,7 @@ describe('Pantallas de inicio de sesión y cambio obligatorio de clave inicial (
     });
     fireEvent.click(botonGuardar);
     expect(screen.getByTestId('alerta-error-cambio-clave')).toHaveTextContent(
-      /distinta de su clave inicial/i,
+      /distinta de su clave temporal/i,
     );
 
     // 4. Igual al nombre de usuario

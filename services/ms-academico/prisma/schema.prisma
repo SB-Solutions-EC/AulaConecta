@@ -51,17 +51,25 @@ model Periodo {
 /// Datos personales de docentes, estudiantes y representantes. La cuenta vive en ms-identidad
 /// y se enlaza 1 a 1 por usuario_id (único).
 model Persona {
-  id            String     @id @db.Uuid
-  usuarioId     String?    @unique @map("usuario_id") @db.Uuid
-  tipo          TipoPersona
-  cedula        String     @unique @db.VarChar(10)
-  nombres       String     @db.VarChar(80)
-  apellidos     String     @db.VarChar(80)
-  area          String?    @db.VarChar(80)
-  activo        Boolean    @default(true)
-  version       Int        @default(1)
-  creadoEn      DateTime   @default(now()) @map("creado_en")
-  actualizadoEn DateTime?  @updatedAt @map("actualizado_en")
+  id              String      @id @db.Uuid
+  usuarioId       String?     @unique @map("usuario_id") @db.Uuid
+  tipo            TipoPersona
+  cedula          String      @unique @db.VarChar(10)
+  nombres         String      @db.VarChar(80)
+  apellidos       String      @db.VarChar(80)
+  area            String?     @db.VarChar(80)
+  // Datos opcionales del diccionario de datos (Taller 2, tabla persona); solo los ve el personal del colegio
+  fechaNacimiento DateTime?   @map("fecha_nacimiento") @db.Date
+  /// M o F (restricción CHECK en la migración)
+  sexo            String?     @db.Char(1)
+  /// Contacto general 09XXXXXXXX. El celular para avisos y su autorización viven en ms-notificaciones
+  telefono        String?     @db.VarChar(10)
+  correo          String?     @unique @db.VarChar(120)
+  direccion       String?     @db.VarChar(200)
+  activo          Boolean     @default(true)
+  version         Int         @default(1)
+  creadoEn        DateTime    @default(now()) @map("creado_en")
+  actualizadoEn   DateTime?   @updatedAt @map("actualizado_en")
 
   cursosTutor Curso[]     @relation("TutorCurso")
   matriculas  Matricula[]
@@ -95,11 +103,12 @@ model Curso {
   @@map("curso")
 }
 
-/// Catálogo de asignaturas (RF-06).
+/// Catálogo de asignaturas (RF-06). El código corto (p. ej. MAT) es único (Taller 2, tabla materia).
 model Materia {
   id            String    @id @db.Uuid
+  codigo        String    @unique @db.VarChar(10)
   nombre        String    @db.VarChar(80)
-  area          String    @db.VarChar(80)
+  area          String?   @db.VarChar(80)
   version       Int       @default(1)
   creadoEn      DateTime  @default(now()) @map("creado_en")
   actualizadoEn DateTime? @updatedAt @map("actualizado_en")
@@ -109,14 +118,16 @@ model Materia {
 
 /// Tabla intermedia N a N entre estudiante (persona) y curso (RF-04).
 model Matricula {
-  id             String          @id @db.Uuid
-  estudianteId   String          @map("id_estudiante") @db.Uuid
-  cursoId        String          @map("id_curso") @db.Uuid
-  fechaMatricula DateTime        @default(now()) @map("fecha_matricula") @db.Date
-  estado         EstadoMatricula @default(ACTIVA)
-  version        Int             @default(1)
-  creadoEn       DateTime        @default(now()) @map("creado_en")
-  actualizadoEn  DateTime?       @updatedAt @map("actualizado_en")
+  id              String          @id @db.Uuid
+  estudianteId    String          @map("id_estudiante") @db.Uuid
+  cursoId         String          @map("id_curso") @db.Uuid
+  /// Código visible de la matrícula, p. ej. AND-2026-0001 (Taller 2, tabla matricula)
+  codigoMatricula String          @unique @map("codigo_matricula") @db.VarChar(15)
+  fechaMatricula  DateTime        @default(now()) @map("fecha_matricula") @db.Date
+  estado          EstadoMatricula @default(ACTIVA)
+  version         Int             @default(1)
+  creadoEn        DateTime        @default(now()) @map("creado_en")
+  actualizadoEn   DateTime?       @updatedAt @map("actualizado_en")
 
   estudiante Persona @relation(fields: [estudianteId], references: [id], onDelete: Restrict)
   curso      Curso   @relation(fields: [cursoId], references: [id], onDelete: Restrict)

@@ -66,6 +66,7 @@ test.describe('Pantalla de docentes y asignación de materias (RF-05)', () => {
         body: JSON.stringify([
           {
             id: 'mat-1',
+            codigo: 'MAT',
             nombre: 'Matemáticas',
             area: 'Ciencias Exactas',
             version: 1,

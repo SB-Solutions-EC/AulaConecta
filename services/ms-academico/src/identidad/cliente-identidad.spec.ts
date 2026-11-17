@@ -24,15 +24,22 @@ interface Respuesta {
 
 // Como el real: 32 bytes al azar en base64url, generado en cada ejecución
 const SECRETO = randomBytes(32).toString('base64url');
-// Provincia 99: no existe, no puede ser la cédula de una persona real
 const SOLICITUD: SolicitudCrearCuenta = {
   id: '6f1c2e8a-3b4d-4c5e-8f9a-0b1c2d3e4f5a',
   nombres: 'Lucía',
   apellidos: 'Prueba Servicio',
-  cedulaInicial: '9900000001',
   roles: ['DOCENTE'],
 };
-const CUENTA = { id: SOLICITUD.id, nombreUsuario: 'lucia.prueba', roles: ['DOCENTE'], estado: 'ACTIVO', debeCambiarClave: true };
+// La clave temporal se genera al ejecutar, como la de ms-identidad
+const CUENTA = {
+  id: SOLICITUD.id,
+  nombreUsuario: 'lucia.prueba',
+  roles: ['DOCENTE'],
+  estado: 'ACTIVO',
+  debeCambiarClave: true,
+  claveTemporal: randomBytes(5).toString('hex'),
+  claveTemporalVence: new Date(Date.now() + 72 * 3600 * 1000).toISOString(),
+};
 
 let servidor: Server;
 let url: string;
@@ -200,7 +207,7 @@ describe('ClienteIdentidad', () => {
     expect((await error(crearCliente().crearCuenta(SOLICITUD))).getStatus()).toBe(503);
   });
 
-  it('si rechaza las credenciales responde 503 y el registro no muestra el secreto ni la cédula', async () => {
+  it('si rechaza las credenciales responde 503 y el registro no muestra el secreto', async () => {
     const registro = vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     responderToken = () => ({ estado: 401, cuerpo: { codigo: 'CLIENTE_INVALIDO' } });
 
@@ -211,7 +218,6 @@ describe('ClienteIdentidad', () => {
     const escrito = JSON.stringify(registro.mock.calls);
     expect(escrito).toContain('HTTP 401');
     expect(escrito).not.toContain(SECRETO);
-    expect(escrito).not.toContain(SOLICITUD.cedulaInicial);
   });
 
   it.each([

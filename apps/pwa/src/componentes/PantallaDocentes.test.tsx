@@ -111,7 +111,15 @@ describe('PantallaDocentes', () => {
           version: 1,
         };
         docentes.push(nuevo);
-        return nuevo;
+        // CR-02: el alta devuelve la clave temporal de la cuenta una sola vez
+        return {
+          ...nuevo,
+          credenciales: {
+            nombreUsuario: 'ana.paredes',
+            claveTemporal: 'Tq7mPz3RkW',
+            claveTemporalVence: '2026-11-19T18:00:00Z',
+          },
+        };
       }),
       listarAsignaciones: vi.fn(async () => [...asignaciones]),
       crearAsignacion: vi.fn(async (solicitud) => {
@@ -141,6 +149,7 @@ describe('PantallaDocentes', () => {
       listarMaterias: vi.fn(async () => [
         {
           id: 'mat-1',
+          codigo: 'MAT',
           nombre: 'Matemáticas',
           area: 'Ciencias Exactas',
           version: 1,
@@ -201,6 +210,9 @@ describe('PantallaDocentes', () => {
       );
       expect(screen.getByText('Paredes Vega Ana Lucía')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('tarjeta-clave-temporal')).toHaveTextContent(
+      /ana\.paredes.*Tq7mPz3RkW.*único inicio de sesión/i,
+    );
 
     // Búsqueda de docentes
     fireEvent.change(screen.getByLabelText(/Buscar docente/i), {

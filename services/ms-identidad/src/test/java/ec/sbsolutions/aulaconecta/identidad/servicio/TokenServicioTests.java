@@ -134,7 +134,7 @@ class TokenServicioTests extends PruebaApi {
     void conElAlcanceUsuariosCrearDaDeAltaUnaCuentaYQuedaComoResponsable() throws Exception {
         UUID id = UUID.randomUUID();
         Map<String, Object> solicitud = Map.of("id", id, "nombres", "Teresa", "apellidos", "Servicio Prueba",
-                "cedulaInicial", CEDULA_FICTICIA, "roles", List.of("DOCENTE"));
+                "roles", List.of("DOCENTE"));
 
         JsonNode cuenta = enviar(post("/usuarios"), tokenServicio(), solicitud, 201);
 
@@ -143,8 +143,8 @@ class TokenServicioTests extends PruebaApi {
         UUID asignadoPor = jdbc.sql("SELECT asignado_por FROM usuario_rol WHERE usuario_id = :id")
                 .param("id", id).query(UUID.class).single();
         assertThat(asignadoPor).isEqualTo(idCliente);
-        // La persona entra con su cédula y debe cambiarla
-        assertThat(login(cuenta.get("nombreUsuario").asString(), CEDULA_FICTICIA, 200)
+        // La persona entra con la clave temporal que recibe ms-academico y debe cambiarla
+        assertThat(login(cuenta.get("nombreUsuario").asString(), cuenta.get("claveTemporal").asString(), 200)
                 .get("usuario").get("debeCambiarClave").asBoolean()).isTrue();
     }
 
@@ -154,7 +154,7 @@ class TokenServicioTests extends PruebaApi {
         registrar(lector, secreto, "usuarios:leer");
         String token = pedirToken(lector, secreto, null, 200).get("accessToken").asString();
 
-        enviar(post("/usuarios"), token, Map.of("nombres", "Ana", "apellidos", "Lara", "cedulaInicial", CEDULA_FICTICIA,
+        enviar(post("/usuarios"), token, Map.of("nombres", "Ana", "apellidos", "Lara",
                 "roles", List.of("DOCENTE")), 403);
     }
 
@@ -179,6 +179,6 @@ class TokenServicioTests extends PruebaApi {
         assertThat(reclamos.get("tipo").asString()).isEqualTo("usuario");
         assertThat(reclamos.has("scope")).isFalse();
         enviar(post("/usuarios"), token(nombre), Map.of("nombres", "Ana", "apellidos", "Lara",
-                "cedulaInicial", CEDULA_FICTICIA, "roles", List.of("ADMIN")), 403);
+                "roles", List.of("ADMIN")), 403);
     }
 }

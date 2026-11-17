@@ -140,7 +140,7 @@ describe('Sesión, cierre por inactividad y menú según el rol (T1106-C)', () =
     });
 
     // Iniciar sesión nuevamente con una cuenta que tiene únicamente ['DOCENTE', 'REPRESENTANTE']
-    fireEvent.change(screen.getByLabelText(/Contraseña o clave inicial/i), {
+    fireEvent.change(screen.getByLabelText(/Contraseña o clave temporal/i), {
       target: { value: 'aaaaaaaa' },
     });
     fireEvent.click(screen.getByTestId('boton-enviar-login'));

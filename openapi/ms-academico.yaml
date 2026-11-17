@@ -25,7 +25,7 @@ tags:
   - name: Salud
     description: Verificación de disponibilidad del microservicio
   - name: Configuración Académica
-    description: Año lectivo, días no dictados, cursos, paralelos y materias (RF-06, RF-07, RF-08)
+    description: Año lectivo y sus trimestres, cursos, paralelos y materias (RF-06, RF-07). Los días no dictados (RF-08, Could) quedan fuera de la versión 1.0
   - name: Personas, Docentes y Asignaciones
     description: Registro de docentes, estudiantes, representantes, asignaciones y horarios (RF-05)
   - name: Matrícula y Nóminas
@@ -104,7 +104,8 @@ paths:
       - $ref: "#/components/parameters/IdRecurso"
     get:
       tags: [Configuración Académica]
-      summary: Listar días no dictados del año lectivo (RF-08)
+      summary: Listar días no dictados del año lectivo (RF-08, fuera de la versión 1.0)
+      description: "RF-08 tiene prioridad Could y el documento integrado v1.0 y el Taller 2 lo dejan fuera de la versión 1.0: no se implementa en el backend salvo que sobre tiempo. Se conserva como referencia de la pantalla de la PWA."
       operationId: listarDiasNoDictados
       responses:
         "200":
@@ -117,7 +118,7 @@ paths:
                   $ref: "#/components/schemas/DiaNoDictado"
     post:
       tags: [Configuración Académica]
-      summary: Registrar día no dictado (ADMIN)
+      summary: Registrar día no dictado (ADMIN; RF-08, fuera de la versión 1.0)
       operationId: crearDiaNoDictado
       requestBody:
         required: true
@@ -132,6 +133,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DiaNoDictado"
+
+  /periodos:
+    get:
+      tags: [Configuración Académica]
+      summary: Listar los trimestres de un año lectivo (RF-07)
+      operationId: listarPeriodos
+      parameters:
+        - name: anioLectivoId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Trimestres ordenados por número
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Periodo"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+    post:
+      tags: [Configuración Académica]
+      summary: Definir un trimestre del año lectivo (ADMIN, RF-07)
+      description: |
+        Un trimestre (1, 2 o 3) por año lectivo, con fechas dentro del año y sin superponerse con otro trimestre (RF-07, RN-10).
+        Al cerrarse, sus notas se bloquean (RN-18).
+      operationId: crearPeriodo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudPeriodo"
+      responses:
+        "201":
+          description: Trimestre creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Periodo"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          description: Ya existe ese trimestre en el año lectivo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
 
   /cursos:
     get:
@@ -229,7 +283,12 @@ paths:
     post:
       tags: [Personas, Docentes y Asignaciones]
       summary: Registrar docente, estudiante o representante y crear su usuario en ms-identidad (RF-02, RF-05)
-      description: Crea el registro en `PERSONA` y solicita a `ms-identidad` (con token de servicio) la creación de la cuenta con clave inicial igual a la cédula.
+      description: |
+        Crea el registro en `PERSONA` y solicita a `ms-identidad` (con token de servicio) la creación de la cuenta.
+        ms-identidad genera el nombre de usuario y una **clave temporal aleatoria de un solo uso que vence a las 72 horas**
+        (RF-03 v1.1, CR-02); la cédula se queda en `ms-academico` y no viaja a ms-identidad. La respuesta trae la clave
+        temporal en `credenciales` para que la secretaría la entregue a la persona: es la única vez que aparece y ningún
+        listado la repite.
       operationId: crearPersona
       requestBody:
         required: true
@@ -239,11 +298,11 @@ paths:
               $ref: "#/components/schemas/SolicitudPersona"
       responses:
         "201":
-          description: Persona registrada y vinculada con `usuarioId`
+          description: Persona registrada y vinculada con `usuarioId`, con sus credenciales iniciales
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Persona"
+                $ref: "#/components/schemas/PersonaCreada"
 
   /representaciones:
     post:
@@ -1178,31 +1237,106 @@ components:
 
     Materia:
       type: object
-      required: [id, nombre, area, version]
+      required: [id, codigo, nombre, version]
       properties:
         id:
           type: string
           format: uuid
+        codigo:
+          type: string
+          description: Código corto único de la asignatura (Taller 2, tabla materia)
+          example: MAT
         nombre:
           type: string
           example: Matemática
         area:
-          type: string
+          type: [string, "null"]
           example: Matemática
         version:
           type: integer
 
     SolicitudMateria:
       type: object
-      required: [nombre, area]
+      required: [codigo, nombre]
       properties:
         id:
           type: string
           format: uuid
+        codigo:
+          type: string
         nombre:
           type: string
         area:
           type: string
+
+    Periodo:
+      type: object
+      required: [id, anioLectivoId, numero, inicio, fin, cerrado, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        anioLectivoId:
+          type: string
+          format: uuid
+        numero:
+          type: integer
+          minimum: 1
+          maximum: 3
+        inicio:
+          type: string
+          format: date
+        fin:
+          type: string
+          format: date
+        cerrado:
+          type: boolean
+          description: Al cerrarse el trimestre las notas se bloquean (RN-18)
+        version:
+          type: integer
+
+    SolicitudPeriodo:
+      type: object
+      required: [anioLectivoId, numero, inicio, fin]
+      properties:
+        id:
+          type: string
+          format: uuid
+        anioLectivoId:
+          type: string
+          format: uuid
+        numero:
+          type: integer
+          minimum: 1
+          maximum: 3
+        inicio:
+          type: string
+          format: date
+        fin:
+          type: string
+          format: date
+
+    PersonaCreada:
+      description: Respuesta del alta de una persona; `credenciales` solo aparece aquí
+      allOf:
+        - $ref: "#/components/schemas/Persona"
+        - type: object
+          required: [credenciales]
+          properties:
+            credenciales:
+              type: object
+              required: [nombreUsuario, claveTemporal, claveTemporalVence]
+              properties:
+                nombreUsuario:
+                  type: string
+                  example: ana.perez
+                claveTemporal:
+                  type: string
+                  description: Clave temporal de ms-identidad (10 caracteres, un solo uso)
+                  example: Tq7mPz3RkW
+                claveTemporalVence:
+                  type: string
+                  format: date-time
 
     Persona:
       type: object
@@ -1224,6 +1358,19 @@ components:
         area:
           type: [string, "null"]
           description: Área académica (solo para docentes)
+        fechaNacimiento:
+          type: [string, "null"]
+          format: date
+          description: Datos opcionales del diccionario (Taller 2); solo para ADMIN y SECRETARIA
+        sexo:
+          type: [string, "null"]
+          enum: [M, F, null]
+        telefono:
+          type: [string, "null"]
+        correo:
+          type: [string, "null"]
+        direccion:
+          type: [string, "null"]
         version:
           type: integer
 
@@ -1242,9 +1389,24 @@ components:
           type: string
         cedula:
           type: string
-          description: Cédula validada para el registro académico y clave inicial en `ms-identidad`
+          description: Cédula validada (módulo 10) para el registro académico; no se envía a `ms-identidad` ni vuelve en ninguna respuesta
         area:
           type: [string, "null"]
+        fechaNacimiento:
+          type: string
+          format: date
+        sexo:
+          type: string
+          enum: [M, F]
+        telefono:
+          type: string
+          pattern: "^09\\d{8}$"
+          description: Contacto general. El celular para avisos y su autorización se registran en ms-notificaciones (RF-29)
+        correo:
+          type: string
+          format: email
+        direccion:
+          type: string
 
     Representacion:
       type: object
@@ -1345,17 +1507,24 @@ components:
 
     Matricula:
       type: object
-      required: [id, estudianteId, cursoId, estado, version]
+      required: [id, codigoMatricula, estudianteId, cursoId, fechaMatricula, estado, version]
       properties:
         id:
           type: string
           format: uuid
+        codigoMatricula:
+          type: string
+          description: Código visible que genera el servidor (Taller 2, tabla matricula)
+          example: AND-2026-0001
         estudianteId:
           type: string
           format: uuid
         cursoId:
           type: string
           format: uuid
+        fechaMatricula:
+          type: string
+          format: date
         estado:
           $ref: "#/components/schemas/EstadoMatricula"
         version:

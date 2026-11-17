@@ -17,18 +17,23 @@ export interface SolicitudAnioLectivo {
   activo?: boolean;
 }
 
-export interface DiaNoDictado {
+/** Trimestre del año lectivo (RF-07). RF-08, días no dictados, queda fuera de la versión 1.0. */
+export interface Periodo {
   id: string;
   anioLectivoId: string;
-  fecha: string;
-  motivo: string;
+  numero: number;
+  inicio: string;
+  fin: string;
+  cerrado: boolean;
   version: number;
 }
 
-export interface SolicitudDiaNoDictado {
+export interface SolicitudPeriodo {
   id?: string;
-  fecha: string;
-  motivo: string;
+  anioLectivoId: string;
+  numero: number;
+  inicio: string;
+  fin: string;
 }
 
 export interface Curso {
@@ -48,18 +53,22 @@ export interface SolicitudCurso {
 
 export interface Materia {
   id: string;
+  /** Código corto único, por ejemplo MAT (Taller 2, tabla materia). */
+  codigo: string;
   nombre: string;
-  area: string;
+  area: string | null;
   version: number;
 }
 
 export interface SolicitudMateria {
   id?: string;
+  codigo: string;
   nombre: string;
-  area: string;
+  area?: string;
 }
 
 const RUTA_ANIOS_LECTIVOS = '/api/academico/anios-lectivos';
+const RUTA_PERIODOS = '/api/academico/periodos';
 const RUTA_CURSOS = '/api/academico/cursos';
 const RUTA_MATERIAS = '/api/academico/materias';
 
@@ -84,23 +93,14 @@ export class ServicioAcademicoConfigApi {
     });
   }
 
-  public listarDiasNoDictados(anioLectivoId: string): Promise<DiaNoDictado[]> {
-    return this.cliente.get<DiaNoDictado[]>(
-      `${RUTA_ANIOS_LECTIVOS}/${encodeURIComponent(anioLectivoId)}/dias-no-dictados`,
+  public listarPeriodos(anioLectivoId: string): Promise<Periodo[]> {
+    return this.cliente.get<Periodo[]>(
+      `${RUTA_PERIODOS}?anioLectivoId=${encodeURIComponent(anioLectivoId)}`,
     );
   }
 
-  public crearDiaNoDictado(
-    anioLectivoId: string,
-    solicitud: SolicitudDiaNoDictado,
-  ): Promise<DiaNoDictado> {
-    return this.cliente.post<DiaNoDictado>(
-      `${RUTA_ANIOS_LECTIVOS}/${encodeURIComponent(anioLectivoId)}/dias-no-dictados`,
-      {
-        ...solicitud,
-        motivo: solicitud.motivo.trim(),
-      },
-    );
+  public crearPeriodo(solicitud: SolicitudPeriodo): Promise<Periodo> {
+    return this.cliente.post<Periodo>(RUTA_PERIODOS, solicitud);
   }
 
   public listarCursos(anioLectivoId?: string): Promise<Curso[]> {
@@ -123,10 +123,13 @@ export class ServicioAcademicoConfigApi {
   }
 
   public crearMateria(solicitud: SolicitudMateria): Promise<Materia> {
+    const area = solicitud.area?.trim();
     return this.cliente.post<Materia>(RUTA_MATERIAS, {
       ...solicitud,
+      codigo: solicitud.codigo.trim().toUpperCase(),
       nombre: solicitud.nombre.trim(),
-      area: solicitud.area.trim(),
+      // El área es opcional: vacía no se envía
+      area: area || undefined,
     });
   }
 }

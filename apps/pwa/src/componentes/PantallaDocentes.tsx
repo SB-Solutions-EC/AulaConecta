@@ -17,6 +17,7 @@ import {
   type ServicioAcademicoConfigApi,
 } from '../api/academicoConfigApi';
 import { ErrorHttpApi } from '../api/clienteHttp';
+import type { CredencialesTemporales, ServicioCuentasApi } from '../api/cuentasApi';
 import {
   servicioDocentesApi,
   type AsignacionDocente,
@@ -25,6 +26,7 @@ import {
   type HoraBloque,
   type ServicioDocentesApi,
 } from '../api/docentesApi';
+import { BotonClaveTemporal, TarjetaClaveTemporal } from './ClaveTemporal';
 
 export type PestanaDocentes = 'docentes' | 'asignaciones';
 
@@ -37,6 +39,7 @@ export interface PropiedadesPantallaDocentes {
     ServicioAcademicoConfigApi,
     'listarCursos' | 'listarMaterias'
   >;
+  servicioCuentas?: Pick<ServicioCuentasApi, 'generarClaveTemporal'>;
 }
 
 const DIAS_SEMANA: ReadonlyArray<{ valor: number; etiqueta: string; corto: string }> = [
@@ -69,6 +72,7 @@ function etiquetaDia(dia: number): string {
 export function PantallaDocentes({
   servicioDocentes = servicioDocentesApi,
   servicioAcademico = servicioAcademicoConfigApi,
+  servicioCuentas,
 }: Readonly<PropiedadesPantallaDocentes>) {
   const [pestana, setPestana] = useState<PestanaDocentes>('docentes');
 
@@ -80,6 +84,11 @@ export function PantallaDocentes({
   const [cargando, setCargando] = useState(true);
   const [errorGlobal, setErrorGlobal] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  // Clave temporal del docente recién creado: se muestra una vez y no se guarda
+  const [credencialesNuevas, setCredencialesNuevas] = useState<{
+    titulo: string;
+    credenciales: CredencialesTemporales;
+  } | null>(null);
 
   const [busqueda, setBusqueda] = useState('');
   const [nombres, setNombres] = useState('');
@@ -159,6 +168,7 @@ export function PantallaDocentes({
     evento.preventDefault();
     setMensajeExito(null);
     setErrorGlobal(null);
+    setCredencialesNuevas(null);
 
     const nombresLimpios = nombres.trim();
     const apellidosLimpios = apellidos.trim();
@@ -192,6 +202,12 @@ export function PantallaDocentes({
       setMensajeExito(
         `Docente "${creado.apellidos} ${creado.nombres}" registrado correctamente.`,
       );
+      if (creado.credenciales) {
+        setCredencialesNuevas({
+          titulo: `Clave temporal de ${creado.nombres} ${creado.apellidos}`,
+          credenciales: creado.credenciales,
+        });
+      }
       await cargarDatos(busqueda);
     } catch (error) {
       setErrorGlobal(
@@ -339,6 +355,14 @@ export function PantallaDocentes({
         </output>
       ) : null}
 
+      {credencialesNuevas ? (
+        <TarjetaClaveTemporal
+          titulo={credencialesNuevas.titulo}
+          credenciales={credencialesNuevas.credenciales}
+          alCerrar={() => setCredencialesNuevas(null)}
+        />
+      ) : null}
+
       {cargando ? (
         <p className="text-sm text-slate-500 py-8 text-center">
           Cargando información docente...
@@ -476,9 +500,18 @@ export function PantallaDocentes({
                         Área: {docente.area || 'Sin área asignada'}
                       </p>
                     </div>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 w-fit">
-                      DOCENTE
-                    </span>
+                    <div className="flex flex-col items-start sm:items-end gap-2">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 w-fit">
+                        DOCENTE
+                      </span>
+                      {docente.usuarioId ? (
+                        <BotonClaveTemporal
+                          usuarioId={docente.usuarioId}
+                          nombrePersona={`${docente.nombres} ${docente.apellidos}`}
+                          servicio={servicioCuentas}
+                        />
+                      ) : null}
+                    </div>
                   </li>
                 ))}
               </ul>

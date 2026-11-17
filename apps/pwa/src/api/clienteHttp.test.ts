@@ -196,5 +196,29 @@ describe('ClienteHttp — manejo de token JWT en memoria y renovación de sesió
       codigo: 'HTTP_502',
     });
   });
+
+  it('también avisa del cambio de clave con el código CAMBIO_CLAVE_PENDIENTE de ms-academico', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        json: () =>
+          Promise.resolve({
+            codigo: 'CAMBIO_CLAVE_PENDIENTE',
+            mensaje: 'Cambia tu clave inicial para continuar.',
+          }),
+      }),
+    );
+    const oyenteCambioClave = vi.fn();
+    const cancelar = cliente.alRequerirCambioClave(oyenteCambioClave);
+
+    await expect(cliente.get('/api/academico/cursos')).rejects.toMatchObject({
+      estado: 403,
+      codigo: 'CAMBIO_CLAVE_PENDIENTE',
+    });
+    expect(oyenteCambioClave).toHaveBeenCalledTimes(1);
+    cancelar();
+  });
 });
 

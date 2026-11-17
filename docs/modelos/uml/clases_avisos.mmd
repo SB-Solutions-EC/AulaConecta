@@ -12,9 +12,11 @@ classDiagram
     +estado: EstadoNotificacion
     +claveAntiduplicado: string
     +intentos: int
+    +motivoFallo: string
     +marcarEnviada() void
     +marcarEntregada() void
     +marcarFallida(motivo) void
+    +marcarPorRevisar() void
   }
   class Plantilla {
     +codigo: string
@@ -76,7 +78,21 @@ classDiagram
     ENVIADA
     ENTREGADA
     FALLIDA
+    POR_REVISAR
     SIN_AUTORIZACION
+  }
+  class Canal {
+    <<enumeration>>
+    PUSH
+    WHATSAPP_ASISTIDO
+    WHATSAPP_API
+  }
+  class Outbox {
+    +tipoEvento: string
+    +datos: string
+    +estado: string
+    +intentos: int
+    +publicar() void
   }
   ServicioAvisos ..> Notificacion : crea
   ServicioAvisos ..> CanalNotificacion : usa
@@ -86,6 +102,9 @@ classDiagram
   Plantilla "1" -- "0..*" Notificacion
   Representacion "1" -- "0..*" Notificacion : destinataria
   Notificacion --> EstadoNotificacion
+  Notificacion --> Canal
+  Usuario "0..1" -- "0..*" Notificacion : enviadoPor
+  Outbox ..> ServicioAvisos : promedio_bajo, falta_registrada
   PushCanal ..> SuscripcionPush : usa
   Usuario "1" -- "0..*" SuscripcionPush
   Usuario "1" -- "0..*" Comunicado : autor

@@ -74,3 +74,52 @@ def test_restricciones_check_rechazan_valores_invalidos(tmp_path: Path) -> None:
     with engine.connect() as conn:
         with pytest.raises(IntegrityError):
             conn.execute(sentencia_invalida)
+
+
+def test_estados_del_aviso_siguen_el_taller_2(tmp_path: Path) -> None:
+    """La migración 0002 deja los estados del diagrama del aviso (RF-35) y el motivo del fallo (RF-33)."""
+    db_file = tmp_path / "test_estados.db"
+    engine = create_engine(f"sqlite:///{db_file}")
+
+    cfg = Config(str(RUTA_INI))
+    cfg.set_main_option("script_location", str(RUTA_INI.parent / "alembic"))
+    with engine.begin() as conn:
+        cfg.attributes["connection"] = conn
+        command.upgrade(cfg, "head")
+
+    columnas = {c["name"] for c in inspect(engine).get_columns("notificacion")}
+    assert "motivo_fallo" in columnas
+
+    contacto = "33333333-3333-4333-8333-333333333333"
+    plantilla = "11111111-1111-4111-8111-111111111102"
+
+    def insertar(conn, numero: int, estado: str) -> None:
+        conn.execute(
+            text(
+                "INSERT INTO notificacion (id, contacto_id, plantilla_id, canal, motivo, clave_antiduplicado, "
+                "estado, intentos, version) VALUES (:id, :contacto, :plantilla, 'PUSH', 'PROMEDIO_BAJO', :clave, "
+                ":estado, 0, 0)"
+            ),
+            {
+                "id": f"44444444-4444-4444-8444-44444444440{numero}",
+                "contacto": contacto,
+                "plantilla": plantilla,
+                "clave": f"clave-{numero}",
+                "estado": estado,
+            },
+        )
+
+    with engine.begin() as conn:
+        conn.execute(
+            text(
+                "INSERT INTO contacto (id, representante_id, estudiante_id, whatsapp, autoriza_avisos, version) "
+                "VALUES (:id, :id, :id, '+593000000000', 1, 0)"
+            ),
+            {"id": contacto},
+        )
+        for numero, estado in enumerate(["POR_REVISAR", "SIN_AUTORIZACION"], start=1):
+            insertar(conn, numero, estado)
+
+    with engine.connect() as conn:
+        with pytest.raises(IntegrityError):
+            insertar(conn, 9, "ENVIADA_MANUAL")

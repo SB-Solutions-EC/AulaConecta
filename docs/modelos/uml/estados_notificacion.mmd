@@ -5,10 +5,13 @@ stateDiagram-v2
   [*] --> ENVIADA : generar aviso push [autorizado, con conexión]
   [*] --> PREPARADA : generar aviso WhatsApp asistido [autorizado]
   EN_COLA --> ENVIADA : volver la conexión
-  EN_COLA --> FALLIDA : agotar reintentos (24 h)
+  EN_COLA --> POR_REVISAR : agotar reintentos (24 h)
+  POR_REVISAR --> ENVIADA : reenviar tras revisar
   PREPARADA --> ENVIADA : docente pulsa «Avisar por WhatsApp»
   ENVIADA --> ENTREGADA : confirmar entrega
   ENVIADA --> FALLIDA : error del proveedor
+  ENVIADA --> [*] : WhatsApp asistido (sin confirmación de entrega)
   ENTREGADA --> [*]
+  POR_REVISAR --> [*]
   FALLIDA --> [*]
   SIN_AUTORIZACION --> [*]

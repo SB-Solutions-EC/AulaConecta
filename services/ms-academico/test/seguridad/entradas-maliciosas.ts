@@ -1,7 +1,7 @@
 // Catálogo de entradas hostiles para los endpoints académicos.
 // Cada lista se aplica a todos los campos de su tipo en cada endpoint.
 
-export type TipoCampo = 'texto' | 'uuid' | 'fecha' | 'booleano';
+export type TipoCampo = 'texto' | 'uuid' | 'fecha' | 'booleano' | 'trimestre';
 
 export interface Entrada {
   nombre: string;
@@ -79,11 +79,24 @@ const BOOLEANOS_INVALIDOS: Entrada[] = [
   { nombre: 'arreglo', valor: [true] },
 ];
 
+/** Número de trimestre: entero de 1 a 3 (RF-07). */
+const TRIMESTRES_INVALIDOS: Entrada[] = [
+  ...TIPOS_EQUIVOCADOS,
+  { nombre: 'cero', valor: 0 },
+  { nombre: 'cuatro', valor: 4 },
+  { nombre: 'negativo', valor: -1 },
+  { nombre: 'decimal', valor: 1.5 },
+  { nombre: 'texto "1"', valor: '1' },
+  { nombre: 'enorme', valor: 1e12 },
+  { nombre: 'booleano', valor: true },
+];
+
 export const INVALIDOS_POR_TIPO: Record<TipoCampo, Entrada[]> = {
   texto: TEXTOS_INVALIDOS,
   uuid: UUIDS_INVALIDOS,
   fecha: FECHAS_INVALIDAS,
   booleano: BOOLEANOS_INVALIDOS,
+  trimestre: TRIMESTRES_INVALIDOS,
 };
 
 /** Valores en la consulta (?campo=valor) que un filtro UUID debe rechazar. */

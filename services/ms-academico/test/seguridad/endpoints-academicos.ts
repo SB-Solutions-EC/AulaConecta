@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { TipoCampo } from './entradas-maliciosas';
 
-// Endpoints de RF-06 (año lectivo, cursos y paralelos) y RF-07 (materias) según openapi/ms-academico.yaml.
+// Endpoints de RF-06 (cursos, paralelos y materias) y RF-07 (fechas del año lectivo y de sus trimestres)
+// según openapi/ms-academico.yaml.
 // contrato.spec.ts comprueba que estos datos sigan coincidiendo con el contrato.
 
 export const ROLES = ['ADMIN', 'SECRETARIA', 'DOCENTE', 'ESTUDIANTE', 'REPRESENTANTE'];
@@ -115,18 +116,81 @@ export const MATERIAS: EndpointCreacion = {
   rolesPermitidos: ['ADMIN'],
   campos: [
     { nombre: 'id', tipo: 'uuid', requerido: false },
+    { nombre: 'codigo', tipo: 'texto', requerido: true },
     { nombre: 'nombre', tipo: 'texto', requerido: true },
-    { nombre: 'area', tipo: 'texto', requerido: true },
+    { nombre: 'area', tipo: 'texto', requerido: false },
   ],
   rutaListado: '/materias',
-  cuerpoValido: async () => ({ id: randomUUID(), nombre: `Materia ${siguiente()}`, area: 'Ciencias Naturales' }),
-  reglas: [{ nombre: 'la materia ya existe', estados: [400, 409], cuerpo: (crear, valido) => duplicado(crear, valido, '/materias') }],
+  cuerpoValido: async () => {
+    const n = siguiente();
+    return { id: randomUUID(), codigo: `M${n}`, nombre: `Materia ${n}`, area: 'Ciencias Naturales' };
+  },
+  reglas: [
+    { nombre: 'la materia ya existe', estados: [400, 409], cuerpo: (crear, valido) => duplicado(crear, valido, '/materias') },
+    {
+      nombre: 'el código ya lo usa otra materia',
+      estados: [400, 409],
+      cuerpo: async (crear, valido) => {
+        await crear('/materias', valido);
+        return { ...valido, id: randomUUID(), nombre: `${String(valido.nombre)} B` };
+      },
+    },
+  ],
 };
 
-export const CREACIONES: EndpointCreacion[] = [ANIOS_LECTIVOS, CURSOS, MATERIAS];
+/** Primer trimestre de un año lectivo nuevo: del 1 de septiembre al 30 de noviembre. */
+async function trimestreValido(crear: CrearRecurso): Promise<Cuerpo> {
+  const anio = await crear('/anios-lectivos', anioLectivoValido());
+  const inicioAnio = String(anio.inicio);
+  const año = inicioAnio.slice(0, 4);
+  return { id: randomUUID(), anioLectivoId: anio.id, numero: 1, inicio: inicioAnio, fin: `${año}-11-30` };
+}
+
+export const PERIODOS: EndpointCreacion = {
+  operacion: 'crearPeriodo',
+  ruta: '/periodos',
+  esquema: 'SolicitudPeriodo',
+  rolesPermitidos: ['ADMIN'],
+  campos: [
+    { nombre: 'id', tipo: 'uuid', requerido: false },
+    { nombre: 'anioLectivoId', tipo: 'uuid', requerido: true },
+    { nombre: 'numero', tipo: 'trimestre', requerido: true },
+    { nombre: 'inicio', tipo: 'fecha', requerido: true },
+    { nombre: 'fin', tipo: 'fecha', requerido: true },
+  ],
+  rutaListado: '/periodos',
+  cuerpoValido: trimestreValido,
+  reglas: [
+    { nombre: 'la fecha de fin es anterior al inicio', estados: [400], cuerpo: async (_crear, valido) => ({ ...valido, inicio: valido.fin, fin: valido.inicio }) },
+    {
+      // RF-07: un trimestre fuera del año lectivo se rechaza
+      nombre: 'el trimestre termina después del año lectivo',
+      estados: [400],
+      cuerpo: async (_crear, valido) => ({ ...valido, fin: `${Number(String(valido.inicio).slice(0, 4)) + 2}-01-15` }),
+    },
+    {
+      // RF-07: dos trimestres no se superponen
+      nombre: 'se superpone con otro trimestre del mismo año',
+      estados: [400, 409],
+      cuerpo: async (crear, valido) => {
+        await crear('/periodos', valido);
+        return { ...valido, id: randomUUID(), numero: 2 };
+      },
+    },
+    { nombre: 'el trimestre ya existe en el año', estados: [400, 409], cuerpo: (crear, valido) => duplicado(crear, valido, '/periodos') },
+    {
+      nombre: 'el año lectivo no existe',
+      estados: [400, 404, 409, 422],
+      cuerpo: async (_crear, valido) => ({ ...valido, anioLectivoId: randomUUID() }),
+    },
+  ],
+};
+
+export const CREACIONES: EndpointCreacion[] = [ANIOS_LECTIVOS, PERIODOS, CURSOS, MATERIAS];
 
 export const LISTADOS: EndpointListado[] = [
   { operacion: 'listarAniosLectivos', ruta: '/anios-lectivos', filtrosUuid: [] },
+  { operacion: 'listarPeriodos', ruta: '/periodos', filtrosUuid: ['anioLectivoId'] },
   { operacion: 'listarCursos', ruta: '/cursos', filtrosUuid: ['anioLectivoId'] },
   { operacion: 'listarMaterias', ruta: '/materias', filtrosUuid: [] },
 ];

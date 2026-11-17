@@ -4,8 +4,8 @@ import {
   ServicioAcademicoConfigApi,
   type AnioLectivo,
   type Curso,
-  type DiaNoDictado,
   type Materia,
+  type Periodo,
 } from '../api/academicoConfigApi';
 import { ClienteHttp, ErrorHttpApi } from '../api/clienteHttp';
 import { PantallaConfiguracionAcademica } from './PantallaConfiguracionAcademica';
@@ -19,11 +19,13 @@ const ANIO_INICIAL: AnioLectivo = {
   version: 0,
 };
 
-const FERIADO_INICIAL: DiaNoDictado = {
+const TRIMESTRE_INICIAL: Periodo = {
   id: '22222222-2222-2222-2222-222222222222',
   anioLectivoId: ANIO_INICIAL.id,
-  fecha: '2026-11-02',
-  motivo: 'Día de los Difuntos',
+  numero: 1,
+  inicio: '2026-09-01',
+  fin: '2026-11-30',
+  cerrado: false,
   version: 0,
 };
 
@@ -37,6 +39,7 @@ const CURSO_INICIAL: Curso = {
 
 const MATERIA_INICIAL: Materia = {
   id: '44444444-4444-4444-4444-444444444444',
+  codigo: 'MAT',
   nombre: 'Matemática',
   area: 'Matemática',
   version: 0,
@@ -47,7 +50,7 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
     vi.unstubAllGlobals();
   });
 
-  it('ServicioAcademicoConfigApi consulta y crea años lectivos, días no dictados, cursos y materias', async () => {
+  it('ServicioAcademicoConfigApi consulta y crea años lectivos, trimestres, cursos y materias', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce({
@@ -63,12 +66,12 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
-        json: () => Promise.resolve([FERIADO_INICIAL]),
+        json: () => Promise.resolve([TRIMESTRE_INICIAL]),
       })
       .mockResolvedValueOnce({
         ok: true,
         status: 201,
-        json: () => Promise.resolve(FERIADO_INICIAL),
+        json: () => Promise.resolve(TRIMESTRE_INICIAL),
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -102,12 +105,14 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
       inicio: '2026-09-01',
       fin: '2027-06-30',
     });
-    expect(await servicio.listarDiasNoDictados(ANIO_INICIAL.id)).toEqual([
-      FERIADO_INICIAL,
+    expect(await servicio.listarPeriodos(ANIO_INICIAL.id)).toEqual([
+      TRIMESTRE_INICIAL,
     ]);
-    await servicio.crearDiaNoDictado(ANIO_INICIAL.id, {
-      fecha: '2026-11-02',
-      motivo: ' Día de los Difuntos ',
+    await servicio.crearPeriodo({
+      anioLectivoId: ANIO_INICIAL.id,
+      numero: 1,
+      inicio: '2026-09-01',
+      fin: '2026-11-30',
     });
     expect(await servicio.listarCursos(ANIO_INICIAL.id)).toEqual([
       CURSO_INICIAL,
@@ -119,14 +124,23 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
     });
     expect(await servicio.listarMaterias()).toEqual([MATERIA_INICIAL]);
     await servicio.crearMateria({
+      codigo: ' mat ',
       nombre: ' Matemática ',
-      area: ' Matemática ',
+      area: '  ',
     });
 
     expect(fetchMock).toHaveBeenCalledTimes(8);
+    expect(String(fetchMock.mock.calls[2][0])).toContain(
+      `/api/academico/periodos?anioLectivoId=${ANIO_INICIAL.id}`,
+    );
+    // La materia va con el código en mayúsculas y sin área vacía
+    expect(JSON.parse(String(fetchMock.mock.calls[7][1].body))).toEqual({
+      codigo: 'MAT',
+      nombre: 'Matemática',
+    });
   });
 
-  it('valida y permite crear años lectivos, días no dictados, cursos con paralelos y materias', async () => {
+  it('valida y permite crear años lectivos, trimestres, cursos con paralelos y materias', async () => {
     const servicioMock = {
       listarAniosLectivos: vi.fn().mockResolvedValue([ANIO_INICIAL]),
       crearAnioLectivo: vi.fn().mockResolvedValue({
@@ -135,12 +149,13 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
         nombre: '2027-2028',
         activo: false,
       }),
-      listarDiasNoDictados: vi.fn().mockResolvedValue([FERIADO_INICIAL]),
-      crearDiaNoDictado: vi.fn().mockResolvedValue({
-        ...FERIADO_INICIAL,
+      listarPeriodos: vi.fn().mockResolvedValue([TRIMESTRE_INICIAL]),
+      crearPeriodo: vi.fn().mockResolvedValue({
+        ...TRIMESTRE_INICIAL,
         id: '66666666-6666-6666-6666-666666666666',
-        fecha: '2026-12-25',
-        motivo: 'Navidad',
+        numero: 2,
+        inicio: '2026-12-01',
+        fin: '2027-02-28',
       }),
       listarCursos: vi.fn().mockResolvedValue([CURSO_INICIAL]),
       crearCurso: vi.fn().mockResolvedValue({
@@ -153,6 +168,7 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
       crearMateria: vi.fn().mockResolvedValue({
         ...MATERIA_INICIAL,
         id: '88888888-8888-8888-8888-888888888888',
+        codigo: 'LEN',
         nombre: 'Lengua y Literatura',
         area: 'Comunicación',
       }),
@@ -165,8 +181,8 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
         '2026-2027',
       );
     });
-    expect(screen.getByTestId('lista-dias-no-dictados')).toHaveTextContent(
-      'Día de los Difuntos',
+    expect(screen.getByTestId('lista-trimestres')).toHaveTextContent(
+      'Trimestre 1',
     );
 
     // Validación de campos vacíos en año lectivo
@@ -201,18 +217,42 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
       );
     });
 
-    // Crear día no dictado
-    fireEvent.change(screen.getByLabelText(/^Fecha$/i), {
-      target: { value: '2026-12-25' },
+    // Trimestre: fechas obligatorias y dentro del año lectivo (RF-07)
+    fireEvent.click(screen.getByTestId('boton-crear-trimestre'));
+    expect(screen.getByTestId('alerta-error-configuracion')).toHaveTextContent(
+      /Ingrese las fechas de inicio y fin del trimestre/i,
+    );
+    fireEvent.change(screen.getByLabelText(/^Trimestre$/i), {
+      target: { value: '2' },
     });
-    fireEvent.change(screen.getByLabelText(/^Motivo$/i), {
-      target: { value: 'Navidad' },
+    fireEvent.change(screen.getByLabelText(/Inicio del trimestre/i), {
+      target: { value: '2027-12-01' },
     });
-    fireEvent.click(screen.getByTestId('boton-crear-feriado'));
+    fireEvent.change(screen.getByLabelText(/Fin del trimestre/i), {
+      target: { value: '2028-02-28' },
+    });
+    fireEvent.click(screen.getByTestId('boton-crear-trimestre'));
+    expect(screen.getByTestId('alerta-error-configuracion')).toHaveTextContent(
+      /dentro del año lectivo/i,
+    );
+    expect(servicioMock.crearPeriodo).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText(/Inicio del trimestre/i), {
+      target: { value: '2026-12-01' },
+    });
+    fireEvent.change(screen.getByLabelText(/Fin del trimestre/i), {
+      target: { value: '2027-02-28' },
+    });
+    fireEvent.click(screen.getByTestId('boton-crear-trimestre'));
     await waitFor(() => {
-      expect(screen.getByTestId('lista-dias-no-dictados')).toHaveTextContent(
-        'Navidad',
+      expect(screen.getByTestId('lista-trimestres')).toHaveTextContent(
+        'Trimestre 2',
       );
+    });
+    expect(servicioMock.crearPeriodo).toHaveBeenCalledWith({
+      anioLectivoId: '55555555-5555-5555-5555-555555555555',
+      numero: 2,
+      inicio: '2026-12-01',
+      fin: '2027-02-28',
     });
 
     // Pestaña Cursos y paralelos
@@ -243,9 +283,12 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
 
     fireEvent.click(screen.getByTestId('boton-crear-materia'));
     expect(screen.getByTestId('alerta-error-configuracion')).toHaveTextContent(
-      /Ingrese el nombre y el área curricular/i,
+      /Ingrese el código y el nombre/i,
     );
 
+    fireEvent.change(screen.getByLabelText(/^Código$/i), {
+      target: { value: 'len' },
+    });
     fireEvent.change(screen.getByLabelText(/Nombre de la materia/i), {
       target: { value: 'Lengua y Literatura' },
     });
@@ -258,6 +301,11 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
         'Lengua y Literatura',
       );
     });
+    expect(servicioMock.crearMateria).toHaveBeenCalledWith({
+      codigo: 'LEN',
+      nombre: 'Lengua y Literatura',
+      area: 'Comunicación',
+    });
   });
 
   it('muestra el error devuelto por ms-academico cuando falla la carga inicial', async () => {
@@ -268,8 +316,8 @@ describe('Pantallas de configuración académica (T1109-C, RF-06, RF-07)', () =>
           new ErrorHttpApi(403, 'PROHIBIDO', 'Solo el administrador'),
         ),
       crearAnioLectivo: vi.fn(),
-      listarDiasNoDictados: vi.fn(),
-      crearDiaNoDictado: vi.fn(),
+      listarPeriodos: vi.fn(),
+      crearPeriodo: vi.fn(),
       listarCursos: vi.fn(),
       crearCurso: vi.fn(),
       listarMaterias: vi.fn().mockResolvedValue([]),

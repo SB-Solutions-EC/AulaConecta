@@ -70,7 +70,7 @@ Nivel: **A** = alto · **M** = medio · **B** = bajo.
 
 | ID | Dónde | Amenaza | Nivel | Controles | Tarea |
 |---|---|---|---|---|---|
-| S-01 | ms-identidad | Alguien entra con la clave inicial, que es la cédula (RF-03) y la conocen otras personas | A | Cambio obligatorio en el primer ingreso, bloqueo tras 3 intentos fallidos, hash Argon2/BCrypt | T1105-A, T1106-A |
+| S-01 | ms-identidad | Alguien entra con la clave inicial de otra persona (V-06: antes era la cédula, que conocen terceros) | A | Clave temporal aleatoria de un solo uso que vence a las 72 horas (RF-03 v1.1, CR-02); cambio obligatorio en el primer ingreso; bloqueo tras 3 intentos fallidos; hash Argon2id | T1105-A, T1106-A, T1113-A |
 | S-02 | LC1, LC2 | Un JWT robado o falsificado se usa para llamar a la API | A | JWT RS256 con expiración corta; cada servicio lo valida con JWKS; cierre por inactividad en la PWA | T1105-A, T1105-M, T1106-M, T1106-C |
 | S-03 | LC2 | Un servicio interno es suplantado para pedir datos a otro | M | Token de servicio (client credentials) de 5 minutos entre ms-academico y ms-identidad, solo con el alcance `usuarios:crear` y sin roles; secreto de 256 bits que ms-identidad solo conoce por su SHA-256; `/oauth/token` bloqueado en el gateway; emisiones y rechazos en la auditoría; servicios solo en la red interna de Docker. Probado contra servicios reales en el CI | T1110-A |
 | S-04 | ms-notificaciones | Se falsifica el webhook de estado de WhatsApp para alterar el historial | M | Verificar la firma del webhook; registrar el evento antes de procesarlo | T1228-M |

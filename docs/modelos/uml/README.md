@@ -1,6 +1,6 @@
 # Diagramas UML
 
-Diagramas de la guía del segundo parcial, construidos sobre el modelo entidad–relación de 26 tablas ([../bd](../bd)).
+Diagramas de la guía del segundo parcial, construidos sobre el modelo entidad–relación de 27 tablas ([../bd](../bd)).
 
 | Archivo | Diagrama |
 |---|---|
@@ -13,3 +13,5 @@ Diagramas de la guía del segundo parcial, construidos sobre el modelo entidad�
 | `clases_avisos.png` | Clases de avisos, auditoría y sincronización |
 
 Los archivos `.mmd` son la fuente en Mermaid de cada imagen.
+
+> **Pendiente:** los `.mmd` y los textos del `.docx` ya incluyen los cambios (año lectivo y trimestre en las clases, estado `POR_REVISAR` y fin del WhatsApp asistido en el aviso, autocorrección en la planificación, `laura : Persona` en el objeto-estado, token de servicio y outbox en los componentes), pero las imágenes `.png` y las figuras dentro del `.docx` son anteriores. Hay que regenerarlas desde los `.mmd` y reemplazarlas en el `.docx`.

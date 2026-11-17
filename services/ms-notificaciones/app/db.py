@@ -131,7 +131,9 @@ class Notificacion(Base):
             name="ck_notificacion_motivo",
         ),
         CheckConstraint(
-            "estado IN ('EN_COLA', 'ENVIADA', 'ENTREGADA', 'FALLIDA', 'PREPARADA', 'ENVIADA_MANUAL')",
+            # Estados del Taller 2 y RF-35 (migración 0002_estados_taller2)
+            "estado IN ('EN_COLA', 'PREPARADA', 'ENVIADA', 'ENTREGADA', 'FALLIDA', "
+            "'POR_REVISAR', 'SIN_AUTORIZACION')",
             name="ck_notificacion_estado",
         ),
     )
@@ -160,6 +162,8 @@ class Notificacion(Base):
         Uuid(as_uuid=True), nullable=True
     )
     intentos: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Por qué falló o por qué quedó por revisar tras 24 h (RF-33, RF-35)
+    motivo_fallo: Mapped[str | None] = mapped_column(String(255), nullable=True)
     id_mensaje_proveedor: Mapped[str | None] = mapped_column(
         String(150), nullable=True
     )

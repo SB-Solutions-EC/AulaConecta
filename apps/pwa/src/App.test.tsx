@@ -205,7 +205,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     ).toBeInTheDocument();
 
     // Completar el formulario de cambio de clave inicial
-    fireEvent.change(screen.getByLabelText(/Clave actual/i), {
+    fireEvent.change(screen.getByLabelText(/^Clave temporal$/i), {
       target: { value: CLAVE_INICIAL_FICTICIA },
     });
     fireEvent.change(

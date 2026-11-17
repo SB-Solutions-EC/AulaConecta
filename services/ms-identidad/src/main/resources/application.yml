@@ -16,6 +16,10 @@ aulaconecta:
     duracion-token: 5m
     alcances:
       ms-academico: "usuarios:crear"
+  # Clave temporal de las cuentas nuevas (RF-03 v1.1, CR-02): aleatoria, de un solo uso, vence a las 72 horas
+  clave-temporal:
+    vigencia: 72h
+    longitud: 10
   # Tras 3 intentos fallidos seguidos la cuenta se bloquea 15 minutos (taller de riesgos)
   bloqueo:
     intentos-maximos: 3

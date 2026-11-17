@@ -17,7 +17,9 @@ public record Usuario(
         Instant actualizadoEn,
         UUID actualizadoPor,
         int version,
-        List<String> roles) {
+        List<String> roles,
+        Instant claveTemporalVence,
+        boolean claveTemporalUsada) {
 
     public static final String ACTIVO = "ACTIVO";
     public static final String BLOQUEADO = "BLOQUEADO";
@@ -30,5 +32,10 @@ public record Usuario(
 
     public boolean estaInactiva() {
         return INACTIVO.equals(estado);
+    }
+
+    /** La clave actual es una clave temporal (RF-03): sirve una sola vez y hasta su vencimiento. */
+    public boolean tieneClaveTemporal() {
+        return debeCambiarClave && claveTemporalVence != null;
     }
 }

@@ -334,7 +334,8 @@ jobs:
           }
 
       # El servidor de SonarQube solo es accesible desde el runner: deja en el log qué condición falló
-      - name: Condiciones del quality gate
+      # y los problemas nuevos con su archivo y línea, para corregirlos sin entrar al servidor
+      - name: Condiciones del quality gate y problemas nuevos
         if: ${{ failure() }}
         shell: powershell
         env:
@@ -342,11 +343,21 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
         run: |
-          $url = "$($env:SONAR_HOST_URL.TrimEnd('/'))/api/qualitygates/project_status?projectKey=$([uri]::EscapeDataString($env:SONAR_PROJECT_KEY))"
-          $estado = Invoke-RestMethod -Uri $url -Headers @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+          $servidor = $env:SONAR_HOST_URL.TrimEnd('/')
+          $proyecto = [uri]::EscapeDataString($env:SONAR_PROJECT_KEY)
+          $cabeceras = @{ Authorization = "Bearer $env:SONAR_TOKEN" }
+
+          $estado = Invoke-RestMethod -Uri "$servidor/api/qualitygates/project_status?projectKey=$proyecto" -Headers $cabeceras
           $estado.projectStatus.conditions |
             Select-Object status, metricKey, comparator, errorThreshold, actualValue |
             Format-Table -AutoSize | Out-String -Width 200 | Write-Output
+
+          $nuevos = Invoke-RestMethod -Uri "$servidor/api/issues/search?componentKeys=$proyecto&inNewCodePeriod=true&resolved=false&ps=100" -Headers $cabeceras
+          Write-Output "Problemas nuevos sin resolver: $($nuevos.total)"
+          foreach ($problema in $nuevos.issues) {
+            $archivo = $problema.component -replace '^[^:]*:', ''
+            Write-Output "- [$($problema.severity)] $archivo`:$($problema.line) $($problema.rule): $($problema.message)"
+          }
 
   notificar-calidad:
     name: telegram-calidad

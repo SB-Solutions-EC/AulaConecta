@@ -1,5 +1,6 @@
 flowchart TB
   U["<u><b>usrLaura : Usuario</b></u><hr/>nombre_usuario = laura.mendoza<br/>estado = ACTIVO"]
+  L["<u><b>laura : Persona</b></u><hr/>nombres = Laura<br/>apellidos = Mendoza"]
   A["<u><b>asig9A : Asignacion</b></u><hr/>materia = Matemática<br/>curso = 9no EGB «A»"]
   P1["<u><b>plan301 : Planificacion</b></u><hr/>unidad = 3<br/>estado = APROBADA"]
   P2["<u><b>plan302 : Planificacion</b></u><hr/>unidad = 4<br/>estado = CON_OBSERVACIONES"]
@@ -10,7 +11,8 @@ flowchart TB
   R["<u><b>repLucia : Representacion</b></u><hr/>parentesco = MADRE<br/>autoriza_avisos = 1<br/>fecha_baja = (vacía)"]
   N1["<u><b>avi9001 : Notificacion</b></u><hr/>plantilla = PROMEDIO_BAJO<br/>canal = PUSH<br/>estado = ENTREGADA"]
   N2["<u><b>avi9002 : Notificacion</b></u><hr/>plantilla = PROMEDIO_BAJO<br/>canal = WHATSAPP_ASISTIDO<br/>estado = PREPARADA"]
-  U -- "es la cuenta del docente de" --> A
+  L -- "tiene cuenta" --> U
+  L -- "es docente de" --> A
   A -- "se planifica en" --> P1
   A -- "se planifica en" --> P2
   A -- "se planifica en" --> P3

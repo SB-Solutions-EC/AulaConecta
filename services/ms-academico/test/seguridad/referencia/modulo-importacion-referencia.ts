@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, Module, Post, UploadedFile, UseInterceptors
 import { Identificador } from '../../../src/comun/validadores';
 import { ArchivoExcelInterceptor, ArchivoExcelPipe } from '../../../src/importacion/archivo-excel';
 import { LibroValidado } from '../../../src/importacion/libro-excel';
-import { Roles } from './guardia-referencia';
+import { Roles } from '../../../src/autenticacion/guardia-jwt';
 
 // Implementación de referencia de POST /matriculas/importar que usa los controles de carga (T1112-A).
 // El importador real (T1112-M) debe recibir el archivo de la misma forma; aquí no se leen los datos.

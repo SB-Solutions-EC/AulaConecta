@@ -63,10 +63,12 @@ Compilación en dos etapas, usuario sin privilegios (UID 10001), paquetes del si
 ```
 src/
   main.ts              Arranque: puerto, Swagger y cierre ordenado
-  app.module.ts        Módulo raíz: registra la validación y el filtro de errores globales
+  app.module.ts        Módulo raíz: el núcleo más los endpoints
+  nucleo.module.ts     Configuración, guardia JWT, base de datos, validación y filtro de errores globales
   swagger.ts           Configuración de Swagger
   comun/               Validación de entradas, decoradores y formato de errores (ErrorApi)
   config/              Configuración por variables de entorno
+  configuracion-academica/  Año lectivo, trimestres, cursos y materias (RF-06, RF-07)
   identidad/           Cliente de ms-identidad con token de servicio (T1110-A)
   importacion/         Controles de carga de la nómina en Excel (T1112-A)
   salud/               GET /health
@@ -100,7 +102,7 @@ Las migraciones se versionan en `prisma/migrations`; nunca se edita una que ya e
 
 ## Validación de entradas y errores
 
-Todo endpoint queda protegido por lo que registra `app.module.ts`, sin configurar nada en el controlador:
+Todo endpoint queda protegido por lo que registra `nucleo.module.ts`, sin configurar nada en el controlador:
 
 - **Pipe global** (`src/comun/validacion.ts`): rechaza con `400 DATOS_INVALIDOS` los campos que el DTO no declara (evita que alguien envíe `version` o `rol`), no convierte tipos por su cuenta (`"true"` no es un booleano) y nunca devuelve el valor rechazado.
 - **Solo JSON** (`src/comun/solo-json.middleware.ts`): un `POST`, `PUT` o `PATCH` con otro formato recibe `415`; se admite `multipart/form-data` para la importación de nóminas.
@@ -143,8 +145,9 @@ Para crear la cuenta de un docente, estudiante o representante (RF-05, RF-04), m
 ```ts
 constructor(private readonly identidad: ClienteIdentidad) {}   // importar IdentidadModule
 
-const cuenta = await this.identidad.crearCuenta({ id: persona.id, nombres, apellidos, cedulaInicial, roles: ['DOCENTE'] });
-// cuenta.nombreUsuario lo genera ms-identidad; la cédula solo sirve para la clave inicial y no se guarda allá
+const cuenta = await this.identidad.crearCuenta({ id: persona.id, nombres, apellidos, roles: ['DOCENTE'] });
+// ms-identidad genera cuenta.nombreUsuario y cuenta.claveTemporal (un solo uso, 72 horas, RF-03 v1.1).
+// La clave temporal se devuelve a la secretaría en la respuesta del alta y no se guarda; la cédula no viaja a ms-identidad
 ```
 
 | Tema | Comportamiento |
@@ -153,7 +156,7 @@ const cuenta = await this.identidad.crearCuenta({ id: persona.id, nombres, apell
 | Secreto | Se lee del archivo en cada renovación: si rota, no hace falta reiniciar. En local lo genera el servicio `secretos-servicio` de `infra/docker-compose.yml` |
 | 401 | Pide otro token y reintenta una sola vez |
 | 400 y 409 | Se deben a los datos (`NOMBRE_INVALIDO`, `USUARIO_EXISTENTE`): se devuelven con el código de ms-identidad |
-| Otros errores, caída o más de 5 s | `503 IDENTIDAD_NO_DISPONIBLE`; el detalle queda en el registro, sin el secreto, el token ni la cédula |
+| Otros errores, caída o más de 5 s | `503 IDENTIDAD_NO_DISPONIBLE`; el detalle queda en el registro, sin el secreto, el token ni la clave temporal |
 
 ### Prueba de integración
 
@@ -170,20 +173,20 @@ cd ../.. && docker compose -p aulaconecta-ci -f infra/docker-compose.yml -f infr
 
 ## Pruebas de seguridad (`test/seguridad/`)
 
-Suite reutilizable para los endpoints de RF-06 y RF-07 (año lectivo, cursos y paralelos, materias). Por cada endpoint prueba:
+Suite reutilizable para los endpoints de RF-06 (cursos, paralelos y materias) y RF-07 (fechas del año lectivo y de sus trimestres). Por cada endpoint prueba:
 
 - **Autorización:** 13 tokens que deben dar `401` (sin token, `alg: none`, confusión RS256/HS256, firma de otra llave, rol cambiado conservando la firma, vencido, otro emisor u otra audiencia); `403` para los roles sin permiso y para un ADMIN que aún no cambia su clave inicial.
 - **Tipos y formato:** cada campo con valores de otro tipo, operadores NoSQL (`{"$ne": null}`), vacíos, 10 000 caracteres, byte nulo, CRLF, caracteres de control, UUID y fechas inválidas.
 - **Inyección:** SQL (tautología, consulta apilada, `UNION`, `pg_sleep`), XSS, plantillas, recorrido de rutas y fórmulas de hoja de cálculo en cada texto. Se aceptan dos resultados: `400`, o `201` con el texto guardado exactamente igual y la tabla intacta.
 - **Cuerpo:** campos que el contrato no define, `__proto__` y `constructor` (contaminación del prototipo), JSON mal formado, arreglos, cuerpo vacío, formulario `urlencoded` y 200 KB.
-- **Reglas del negocio:** fin antes del inicio, año lectivo inexistente y registros repetidos.
+- **Reglas del negocio:** fin antes del inicio, año lectivo inexistente, registros repetidos (también el código de materia) y, en los trimestres, número de 1 a 3, fechas dentro del año lectivo y sin superponerse.
 - **Consultas:** filtros UUID con inyección y parámetros repetidos.
 
 | Archivo | Qué hace |
 |---|---|
 | `contrato.spec.ts` | Falla si `openapi/ms-academico.yaml` cambia y la suite queda desactualizada |
-| `referencia.spec.ts` | Ejecuta la suite contra `referencia/`, una implementación en memoria que cumple todo: prueba la propia suite y sirve de ejemplo de DTOs |
-| `endpoints-academicos.e2e.spec.ts` | Ejecuta la suite contra los endpoints reales. Los que aún no existen aparecen como omitidos; al montarlos, sus pruebas corren solas |
+| `referencia.spec.ts` | Ejecuta la suite contra `referencia/`, una implementación en memoria que cumple todo: prueba la propia suite. Se monta sobre `NucleoModule` para que los endpoints reales no le tapen las rutas |
+| `endpoints-academicos.e2e.spec.ts` | Ejecuta la suite contra los endpoints reales sobre el PostgreSQL de Testcontainers. `/anios-lectivos`, `/periodos`, `/cursos` y `/materias` ya corren; los que aún no existen aparecen como omitidos y, al montarlos, sus pruebas corren solas |
 
 Los tokens se firman con una llave generada en cada ejecución (`tokens.ts`); el e2e publica su JWKS en un servidor local y pasa la URL en `AULACONECTA_JWKS_URL`. Si la guardia JWT real lee otra variable, se ajusta solo `endpoints-academicos.e2e.spec.ts`.
 
@@ -205,7 +208,8 @@ Luego prueba con el token de cada persona:
 | Nómina del curso (`?cursoId=`) y `GET /personas` | 403, o una lista sin rastro de nadie ajeno (ni ids, ni nombres, ni cédula) |
 | Cabeceras (`X-Usuario-Id`...) o `?usuarioId=` con la identidad de otro | Se ignoran: la identidad sale solo del token |
 | `POST /matriculas`, `/representaciones` y `/personas` por un estudiante, representante o docente | 403, y el intento no le da acceso después |
-| La cédula | No aparece en ninguna respuesta, ni para el administrador |
+| La cédula | No aparece en ninguna respuesta, ni para el administrador, y no viaja a ms-identidad (CR-02) |
+| La clave temporal | Solo en la respuesta del alta, para la secretaría; ningún listado la repite |
 | Un token de servicio (T1110-A) | 401 o 403: no representa a una persona |
 
 Se ejecuta contra `referencia/modulo-matricula-referencia.ts`, que cumple todo y sirve de ejemplo de cómo decidir qué ve cada quien con el `sub` del token. También se ejecuta contra los endpoints reales (`privacidad.e2e.spec.ts`), que se omiten hasta que existan todas las rutas del escenario. Para probar la suite, se debilitó la referencia de 8 maneras: sin filtrar por persona, lista vacía en vez de 403, 404 que revela si el estudiante existe, identidad tomada de una cabecera, representante que puede vincularse, cédula en la respuesta, representante que ve todo el curso y estudiante que ve a todas las personas. En cada caso fallaron entre 1 y 17 pruebas.
@@ -257,7 +261,7 @@ El archivo nunca se escribe en disco ni se usa su nombre para guardar nada. Los 
 | Sprint 4 (04/11) | Pruebas de integración con PostgreSQL real (Testcontainers) | Listo (T1104-M) |
 | Sprint 4 (05/11) | Validación del JWT con JWKS y guardas por rol | Listo (T1105-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
-| Sprint 4 (09/11) | Endpoints de año lectivo, cursos, paralelos y materias | Pendiente (T1109-M) |
+| Sprint 4 (09/11) | Endpoints de año lectivo, trimestres, cursos, paralelos y materias | Listo (T1109-M, adelantado en T1113-A) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |
 | Sprint 4 (11/11) | Validación de cédula y pruebas de privacidad de matrícula y personas (RNF-04) | Listo (T1111-A) |
 | Sprint 4 (11/11) | Endpoints de matrícula individual y personas | Pendiente (T1111-M) |

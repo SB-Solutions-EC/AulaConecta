@@ -17,6 +17,23 @@ describe('FiltroErrores', () => {
     expect(Number.isNaN(Date.parse(cuerpo.timestamp))).toBe(false);
   });
 
+  it('traduce las claves únicas y foráneas de Prisma sin repetir su mensaje', () => {
+    const errorPrisma = (code: string): Error =>
+      Object.assign(new Error('Unique constraint failed on the fields: (`codigo`) in table materia'), {
+        name: 'PrismaClientKnownRequestError',
+        code,
+      });
+
+    const duplicado = filtro.traducir(errorPrisma('P2002'));
+    expect(duplicado.estado).toBe(409);
+    expect(duplicado.cuerpo).toMatchObject({ codigo: 'CONFLICTO' });
+    expect(JSON.stringify(duplicado.cuerpo)).not.toContain('materia');
+
+    expect(filtro.traducir(errorPrisma('P2003'))).toMatchObject({ estado: 400, cuerpo: { codigo: 'DATOS_INVALIDOS' } });
+    vi.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
+    expect(filtro.traducir(errorPrisma('P1001')).estado).toBe(500);
+  });
+
   it('omite detalles vacíos', () => {
     expect(filtro.traducir(new ExcepcionApi(400, 'DATOS_INVALIDOS', 'x', [])).cuerpo).not.toHaveProperty('detalles');
   });

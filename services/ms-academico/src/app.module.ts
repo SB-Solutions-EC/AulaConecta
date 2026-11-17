@@ -1,26 +1,8 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { AutenticacionModule } from './autenticacion/autenticacion.module';
-import { BaseDatosModule } from './base-datos/base-datos.module';
-import { FiltroErrores } from './comun/filtro-errores';
-import { SoloJsonMiddleware } from './comun/solo-json.middleware';
-import { crearPipeValidacion } from './comun/validacion';
-import { cargarConfiguracion } from './config/configuracion';
-import { IdentidadModule } from './identidad/identidad.module';
-import { SaludController } from './salud/salud.controller';
+import { Module } from '@nestjs/common';
+import { ConfiguracionAcademicaModule } from './configuracion-academica/configuracion-academica.module';
+import { NucleoModule } from './nucleo.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, load: [cargarConfiguracion] }), AutenticacionModule, BaseDatosModule, IdentidadModule],
-  controllers: [SaludController],
-  providers: [
-    // Registrados aquí (y no en main.ts) para que las pruebas usen la misma validación que producción
-    { provide: APP_PIPE, useFactory: crearPipeValidacion },
-    { provide: APP_FILTER, useClass: FiltroErrores },
-  ],
+  imports: [NucleoModule, ConfiguracionAcademicaModule],
 })
-export class AppModule implements NestModule {
-  configure(consumidor: MiddlewareConsumer): void {
-    consumidor.apply(SoloJsonMiddleware).forRoutes('{*ruta}');
-  }
-}
+export class AppModule {}

@@ -11,6 +11,16 @@ erDiagram
         varchar(45) ip
         datetime ocurrido_en
     }
+    outbox {
+        char(32) id_outbox PK
+        varchar(30) tipo_evento
+        char(32) id_registro
+        text datos
+        varchar(12) estado
+        tinyint intentos
+        datetime creado_en
+        datetime publicado_en
+    }
     cambio_sincronizado {
         char(32) id_cambio_sincronizado PK
         char(32) id_usuario FK

@@ -34,6 +34,8 @@ export interface Mundo {
   representanteAC: Actor;
   /** Respuestas de las altas, para revisar que ninguna devolvió la cédula. */
   respuestasDeAlta: string[];
+  /** Claves temporales que devolvieron las altas (si el endpoint las entrega a la secretaría). */
+  clavesTemporales: string[];
 }
 
 type Metodo = 'get' | 'post';
@@ -59,6 +61,7 @@ async function crear(servidor: Server, ruta: string, cuerpo: Cuerpo, token = ADM
 /** Crea las personas, representaciones y matrículas del escenario con el personal del colegio. */
 export async function construirMundo(servidor: Server): Promise<Mundo> {
   const respuestasDeAlta: string[] = [];
+  const clavesTemporales: string[] = [];
   const crearRecurso = async (ruta: string, cuerpo: Cuerpo): Promise<Cuerpo> => (await crear(servidor, ruta, cuerpo)).body as Cuerpo;
 
   const cursoX = String((await crearRecurso('/cursos', await CURSOS.cuerpoValido(crearRecurso))).id);
@@ -68,6 +71,10 @@ export async function construirMundo(servidor: Server): Promise<Mundo> {
     const datos = { id: randomUUID(), tipo, nombres: palabraFicticia(), apellidos: palabraFicticia(), cedula: cedulaFicticia() };
     const respuesta = await crear(servidor, '/personas', datos);
     respuestasDeAlta.push(respuesta.text);
+    const clave: unknown = respuesta.body.credenciales?.claveTemporal ?? respuesta.body.claveTemporal;
+    if (typeof clave === 'string') {
+      clavesTemporales.push(clave);
+    }
     const usuarioId = String(respuesta.body.usuarioId);
     return { personaId: String(respuesta.body.id), usuarioId, nombres: datos.nombres, apellidos: datos.apellidos, cedula: datos.cedula, token: `Bearer ${tokenValido([tipo], { sub: usuarioId })}` };
   };
@@ -87,7 +94,7 @@ export async function construirMundo(servidor: Server): Promise<Mundo> {
   await crear(servidor, '/matriculas', { estudianteId: estudianteB.personaId, cursoId: cursoX }, SECRETARIA);
   await crear(servidor, '/matriculas', { estudianteId: estudianteC.personaId, cursoId: cursoY }, SECRETARIA);
 
-  return { cursoX, cursoY, estudianteA, estudianteB, estudianteC, representanteA, representanteB, representanteAC, respuestasDeAlta };
+  return { cursoX, cursoY, estudianteA, estudianteB, estudianteC, representanteA, representanteB, representanteAC, respuestasDeAlta, clavesTemporales };
 }
 
 /** Ningún rastro de esas personas en la respuesta: ni ids, ni nombres, ni cédula. */
@@ -275,6 +282,19 @@ export function verificarPrivacidad(obtener: ObtenerServidor, mundo: () => Mundo
         expect(texto).not.toMatch(/"cedula"/i);
         for (const persona of todos) {
           expect(texto).not.toContain(persona.cedula);
+        }
+      }
+    });
+  });
+
+  describe('Clave temporal (RF-03 v1.1)', () => {
+    it('solo aparece en la respuesta del alta: ningún listado la repite, ni para el administrador', async () => {
+      const m = mundo();
+      const listados = [await get('/personas', ADMIN), await get('/personas', SECRETARIA), await get('/personas', m.estudianteA)];
+      for (const respuesta of listados) {
+        expect(respuesta.text).not.toMatch(/claveTemporal/i);
+        for (const clave of m.clavesTemporales) {
+          expect(respuesta.text).not.toContain(clave);
         }
       }
     });

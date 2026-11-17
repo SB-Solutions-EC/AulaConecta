@@ -3,7 +3,7 @@
 /* DBMS: MySQL 5.0  ·  Uso: ingeniería inversa en PowerDesigner */
 /* Claves primarias: código hexadecimal único CHAR(32)          */
 /* (UUID v4 sin guiones) generado por la aplicación.            */
-/* Generado: 2026-11-12                                         */
+/* Generado: 2026-11-12 · Actualizado: 2026-11-16 (27 tablas)  */
 /*==============================================================*/
 
 drop database if exists aulaconecta;
@@ -47,6 +47,7 @@ create table usuario
    password_hash                varchar(255)   null comment 'Hash seguro de la contraseña (Argon2id). Nunca se almacena en texto plano. Nulo hasta activar la cuenta.',
    clave_temporal_hash          varchar(255)   null comment 'Hash de la clave temporal aleatoria de un solo uso (RF-03).',
    vence_clave_temporal         datetime       null comment 'Vencimiento de la clave temporal: 72 horas después de generarla (RN-13).',
+   clave_temporal_usada         tinyint(1)     not null default 0 comment 'La clave temporal ya se usó en un inicio de sesión: es de un solo uso (RN-13).',
    debe_cambiar_clave           tinyint(1)     not null default 1 comment 'Obliga a crear la contraseña en el primer ingreso.',
    intentos_fallidos            tinyint        not null default 0 comment 'Intentos fallidos seguidos; se reinicia al ingresar.',
    bloqueado_hasta              datetime       null comment 'Fin del bloqueo de 15 minutos tras 3 intentos fallidos (RNF-12).',
@@ -519,6 +520,7 @@ create table notificacion
    clave_antiduplicado          varchar(120)   not null comment 'Representación + motivo + canal + periodo; impide repetir (RF-34).',
    fecha_evento                 date           not null comment 'Fecha de la nota o la falta.',
    intentos                     tinyint        not null default 0 comment 'Reintentos sin conexión (RF-35).',
+   motivo_fallo                 varchar(255)   null comment 'Motivo del fallo o de quedar por revisar tras 24 h (RF-33, RF-35).',
    enviada_en                   datetime       null comment 'Fecha y hora de envío.',
    version                      int            not null default 1 comment 'Versión del registro; sube en 1 con cada cambio. Base de la sincronización sin conexión.',
    creado_en                    datetime       not null comment 'Fecha y hora de creación.',
@@ -572,6 +574,25 @@ create table auditoria
 engine = InnoDB
 default charset = utf8
 comment = 'Quién cambió qué, con el valor anterior y el nuevo (RNF-09), incluidos los cambios de estado de la planificación (RF-14) y los accesos (RNF-12).';
+
+/*==============================================================*/
+/* Tabla: outbox                                               */
+/*==============================================================*/
+create table outbox
+(
+   id_outbox                    char(32)       not null comment 'Código hexadecimal único del evento (UUID v4 sin guiones).',
+   tipo_evento                  varchar(30)    not null comment 'promedio_bajo o falta_registrada.',
+   id_registro                  char(32)       not null comment 'Calificación o asistencia que originó el evento.',
+   datos                        text           not null comment 'Datos del evento, sin la nota exacta (RSK-06).',
+   estado                       varchar(12)    not null comment 'Valores: PENDIENTE, PUBLICADO.',
+   intentos                     tinyint        not null default 0 comment 'Intentos de publicación al bus de eventos.',
+   creado_en                    datetime       not null comment 'Se escribe en la misma transacción que la nota o la falta, así ningún aviso se pierde (RF-35).',
+   publicado_en                 datetime       null comment 'Fecha y hora en que el bus de eventos lo recibió.',
+   primary key (id_outbox)
+)
+engine = InnoDB
+default charset = utf8
+comment = 'Eventos que se guardan antes de enviarse al servicio de notificaciones (documento integrado, sección 8).';
 
 /*==============================================================*/
 /* Tabla: cambio_sincronizado                                  */

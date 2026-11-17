@@ -18,6 +18,7 @@ public class RepositorioUsuarios {
     private static final String SELECCION = """
             SELECT u.id, u.nombre_usuario, u.hash_clave, u.debe_cambiar_clave, u.estado, u.intentos_fallidos,
                    u.bloqueado_hasta, u.ultimo_acceso, u.creado_en, u.actualizado_en, u.actualizado_por, u.version,
+                   u.clave_temporal_vence, u.clave_temporal_usada,
                    array_remove(array_agg(r.codigo ORDER BY r.codigo), NULL) AS roles
             FROM usuario u
             LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id
@@ -102,16 +103,49 @@ public class RepositorioUsuarios {
                 .query(Boolean.class).single();
     }
 
-    public void insertar(UUID id, String nombreUsuario, String hashClave, UUID creadoPor) {
+    /** Cuenta nueva con su clave temporal (RF-03): debe cambiarla en el primer ingreso. */
+    public void insertar(UUID id, String nombreUsuario, String hashClaveTemporal, Instant vence, UUID creadoPor) {
         jdbc.sql("""
-                INSERT INTO usuario (id, nombre_usuario, hash_clave, debe_cambiar_clave, actualizado_por)
-                VALUES (:id, :nombre, :hash, TRUE, :creadoPor)
+                INSERT INTO usuario (id, nombre_usuario, hash_clave, debe_cambiar_clave, clave_temporal_vence,
+                                     actualizado_por)
+                VALUES (:id, :nombre, :hash, TRUE, :vence, :creadoPor)
                 """)
                 .param("id", id)
                 .param("nombre", nombreUsuario)
-                .param("hash", hashClave)
+                .param("hash", hashClaveTemporal)
+                .param("vence", Timestamp.from(vence))
                 .param("creadoPor", creadoPor)
                 .update();
+    }
+
+    /**
+     * Gasta la clave temporal en un inicio de sesión: solo una vez y antes de que venza. La condición se evalúa
+     * en la base en la misma sentencia, así dos inicios simultáneos con la misma clave no pueden entrar los dos.
+     */
+    public boolean consumirClaveTemporal(UUID id) {
+        return jdbc.sql("""
+                UPDATE usuario SET clave_temporal_usada = TRUE
+                WHERE id = :id AND debe_cambiar_clave AND clave_temporal_vence IS NOT NULL
+                  AND NOT clave_temporal_usada AND clave_temporal_vence > now()
+                """)
+                .param("id", id)
+                .update() == 1;
+    }
+
+    /** Reemplaza la clave por una temporal nueva (la pide la secretaría o el administrador). */
+    public boolean asignarClaveTemporal(UUID id, String hashClaveTemporal, Instant vence, UUID responsable) {
+        return jdbc.sql("""
+                UPDATE usuario
+                SET hash_clave = :hash, debe_cambiar_clave = TRUE, clave_temporal_vence = :vence,
+                    clave_temporal_usada = FALSE, version = version + 1, actualizado_en = now(),
+                    actualizado_por = :responsable
+                WHERE id = :id AND estado <> 'INACTIVO'
+                """)
+                .param("id", id)
+                .param("hash", hashClaveTemporal)
+                .param("vence", Timestamp.from(vence))
+                .param("responsable", responsable)
+                .update() == 1;
     }
 
     public void asignarRol(UUID usuarioId, CodigoRol rol, UUID asignadoPor) {
@@ -125,9 +159,10 @@ public class RepositorioUsuarios {
                 .update();
     }
 
-    /** Levanta el bloqueo; si llega un hash, también restablece la clave inicial. Devuelve si se aplicó. */
-    public boolean desbloquear(UUID id, String hashClaveInicial, UUID administrador) {
-        String restablecer = hashClaveInicial == null ? "" : ", hash_clave = :hash, debe_cambiar_clave = TRUE";
+    /** Levanta el bloqueo; si llega un hash, también entrega una clave temporal nueva. Devuelve si se aplicó. */
+    public boolean desbloquear(UUID id, String hashClaveTemporal, Instant vence, UUID administrador) {
+        String restablecer = hashClaveTemporal == null ? "" : ", hash_clave = :hash, debe_cambiar_clave = TRUE,"
+                + " clave_temporal_vence = :vence, clave_temporal_usada = FALSE";
         JdbcClient.StatementSpec sentencia = jdbc.sql("""
                 UPDATE usuario
                 SET estado = 'ACTIVO', intentos_fallidos = 0, bloqueado_hasta = NULL, version = version + 1,
@@ -137,8 +172,8 @@ public class RepositorioUsuarios {
                 """)
                 .param("id", id)
                 .param("administrador", administrador);
-        if (hashClaveInicial != null) {
-            sentencia = sentencia.param("hash", hashClaveInicial);
+        if (hashClaveTemporal != null) {
+            sentencia = sentencia.param("hash", hashClaveTemporal).param("vence", Timestamp.from(vence));
         }
         return sentencia.update() == 1;
     }
@@ -155,8 +190,8 @@ public class RepositorioUsuarios {
     public boolean cambiarClave(UUID id, String hashClave, int versionLeida) {
         return jdbc.sql("""
                 UPDATE usuario
-                SET hash_clave = :hash, debe_cambiar_clave = FALSE, version = version + 1,
-                    actualizado_en = now(), actualizado_por = :id
+                SET hash_clave = :hash, debe_cambiar_clave = FALSE, clave_temporal_vence = NULL,
+                    clave_temporal_usada = FALSE, version = version + 1, actualizado_en = now(), actualizado_por = :id
                 WHERE id = :id AND version = :version
                 """)
                 .param("hash", hashClave)
@@ -179,7 +214,9 @@ public class RepositorioUsuarios {
                 instante(fila.getTimestamp("actualizado_en")),
                 fila.getObject("actualizado_por", UUID.class),
                 fila.getInt("version"),
-                roles(fila.getArray("roles")));
+                roles(fila.getArray("roles")),
+                instante(fila.getTimestamp("clave_temporal_vence")),
+                fila.getBoolean("clave_temporal_usada"));
     }
 
     private static Instant instante(Timestamp momento) {

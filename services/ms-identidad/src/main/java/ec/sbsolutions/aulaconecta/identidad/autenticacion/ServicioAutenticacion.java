@@ -58,6 +58,14 @@ public class ServicioAutenticacion {
         if (!claveCorrecta) {
             registrarFallo(usuario, nombre, ip);
         }
+        // Clave temporal (RF-03, RN-13): sirve para un solo inicio de sesión y hasta su vencimiento. Como la clave
+        // fue correcta, no suma un intento fallido; la secretaría tiene que generar otra.
+        if (usuario.tieneClaveTemporal() && !usuarios.consumirClaveTemporal(usuario.id())) {
+            auditoria.registrar(EventoAcceso.LOGIN_FALLIDO, usuario.id(), nombre, ip);
+            throw usuario.claveTemporalVence().isAfter(Instant.now())
+                    ? ExcepcionApi.claveTemporalUsada()
+                    : ExcepcionApi.claveTemporalVencida();
+        }
 
         if (!usuarios.registrarAccesoExitoso(usuario.id())) {
             // Otro intento la bloqueó entre la lectura y este momento

@@ -107,7 +107,8 @@ export function verificarCreacion(obtener: ObtenerServidor, endpoint: EndpointCr
       }
     });
 
-    describe('inyección en campos de texto', () => {
+    // Un endpoint sin campos de texto (por ejemplo /periodos) no tiene este bloque
+    describe.runIf(endpoint.campos.some((c) => c.tipo === 'texto'))('inyección en campos de texto', () => {
       for (const campo of endpoint.campos.filter((c) => c.tipo === 'texto')) {
         for (const entrada of INYECCIONES_TEXTO) {
           it(`${campo.nombre} con ${entrada.nombre}: se rechaza o se guarda literal`, async () => {

@@ -42,3 +42,6 @@ erDiagram
     usuario ||--o{ suscripcion_push : "1 a N · id_usuario"
     usuario |o--o{ auditoria : "0..1 a N · id_usuario"
     usuario ||--o{ cambio_sincronizado : "1 a N · id_usuario"
+    outbox {
+        char(32) id_outbox PK
+    }

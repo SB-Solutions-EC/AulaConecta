@@ -24,6 +24,16 @@ public class ExcepcionApi extends RuntimeException {
         return new ExcepcionApi(HttpStatus.UNAUTHORIZED, "CLIENTE_INVALIDO", "Credenciales del servicio inválidas");
     }
 
+    public static ExcepcionApi claveTemporalVencida() {
+        return new ExcepcionApi(HttpStatus.UNAUTHORIZED, "CLAVE_TEMPORAL_VENCIDA",
+                "La clave temporal venció: pide una nueva a la secretaría");
+    }
+
+    public static ExcepcionApi claveTemporalUsada() {
+        return new ExcepcionApi(HttpStatus.UNAUTHORIZED, "CLAVE_TEMPORAL_USADA",
+                "La clave temporal ya se usó: pide una nueva a la secretaría");
+    }
+
     public static ExcepcionApi cuentaBloqueada() {
         return new ExcepcionApi(HttpStatus.LOCKED, "CUENTA_BLOQUEADA",
                 "La cuenta está bloqueada temporalmente; intenta más tarde o pide el desbloqueo al administrador");

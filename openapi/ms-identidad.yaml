@@ -7,7 +7,7 @@ info:
 
     **Responsabilidad:** Gestión de credenciales, roles (`ADMIN`, `SECRETARIA`, `DOCENTE`, `ESTUDIANTE`, `REPRESENTANTE`), autenticación mediante JWT RS256, rotación de sesiones (`refresh token` en cookie `HttpOnly`), publicación de claves públicas (`JWKS`), tokens de servicio (`client_credentials`), bloqueo temporal tras intentos fallidos y auditoría inmutable de accesos.
 
-    **Límite de datos (RNF-04):** Este servicio no almacena nombres, cédulas en claro ni datos académicos; únicamente el hash Argon2id de la clave (cuya clave inicial proviene de la cédula en el alta, con `debeCambiarClave = true` según RF-03) y el identificador `usuario_id` compartido como referencia UUID con los demás microservicios.
+    **Límite de datos (RNF-04):** Este servicio no almacena nombres, cédulas en claro ni datos académicos; únicamente el hash Argon2id de la clave (la clave inicial es una **clave temporal aleatoria de un solo uso que vence a las 72 horas**, con `debeCambiarClave = true`, según RF-03 v1.1 y CR-02; la cédula ya no se recibe) y el identificador `usuario_id` compartido como referencia UUID con los demás microservicios.
   contact:
     name: Equipo SB Solutions — AulaConecta
     url: https://github.com/SB-Solutions-EC/AulaConecta
@@ -70,7 +70,7 @@ paths:
       description: |
         Autentica al usuario verificando su hash Argon2id y el estado de la cuenta (RF-01).
         - Si acumula **3 intentos fallidos consecutivos**, la cuenta pasa a `BLOQUEADO` temporalmente y registra el evento en `AUDITORIA_ACCESO` (RNF-12).
-        - Si ingresa con su clave inicial (cédula), devuelve `debeCambiarClave: true` en el token para obligar el cambio antes de acceder a otros módulos (RF-03).
+        - Si ingresa con su clave temporal, devuelve `debeCambiarClave: true` en el token para obligar el cambio antes de acceder a otros módulos (RF-03). La clave temporal sirve para **un solo inicio de sesión** y hasta su vencimiento (RN-13): después responde `401` con `CLAVE_TEMPORAL_USADA` o `CLAVE_TEMPORAL_VENCIDA` (no suma intentos fallidos) y la secretaría genera otra.
         - Emite el `accessToken` JWT (15 min) en el cuerpo y el `refreshToken` (8 h) en una cookie `HttpOnly; Secure; SameSite=Strict`.
       operationId: iniciarSesion
       requestBody:
@@ -247,12 +247,12 @@ paths:
 
     post:
       tags: [Usuarios y Roles]
-      summary: Crear cuenta de usuario con generación automática de nombre de usuario y clave inicial
+      summary: Crear cuenta de usuario con generación automática de nombre de usuario y clave temporal
       description: |
         Invocado por `ms-academico` (con token de servicio `usuarios:crear`) o por un `ADMIN` al registrar personal/estudiantes:
         1. Genera `nombre_usuario` a partir de `nombre.apellido` (agregando sufijo numérico si ya existe, RF-02).
-        2. Toma la `cedulaInicial` únicamente para derivar el hash Argon2id de la clave inicial con `debe_cambiar_clave = true` (RF-03); **no almacena la cédula en `db_identidad`**.
-        3. Asigna los roles indicados y devuelve el `id` (`usuario_id`) para enlazarlo con `PERSONA` en `ms-academico`.
+        2. Genera una **clave temporal aleatoria** de 10 caracteres, de un solo uso y válida por 72 horas (RF-03 v1.1, CR-02, RN-13); guarda solo su hash Argon2id con `debe_cambiar_clave = true`. **No recibe la cédula**: si un cliente antiguo la envía, se ignora.
+        3. Asigna los roles indicados y devuelve el `id` (`usuario_id`) para enlazarlo con `PERSONA` en `ms-academico`, junto con la clave temporal en claro: es la única vez que sale del servicio, para que la secretaría la entregue a la persona (respuesta con `Cache-Control: no-store`).
       operationId: crearUsuario
       security:
         - bearerAuth: []
@@ -265,11 +265,11 @@ paths:
               $ref: "#/components/schemas/SolicitudCrearUsuario"
       responses:
         "201":
-          description: Cuenta creada exitosamente
+          description: Cuenta creada con su clave temporal
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UsuarioIdentidad"
+                $ref: "#/components/schemas/CuentaConClaveTemporal"
         "400":
           $ref: "#/components/responses/SolicitudInvalida"
         "401":
@@ -367,13 +367,46 @@ paths:
         "404":
           $ref: "#/components/responses/NoEncontrado"
 
+  /usuarios/{id}/clave-temporal:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Usuarios y Roles]
+      summary: Generar otra clave temporal (SECRETARIA o ADMIN)
+      description: |
+        Cuando la clave temporal venció, ya se usó o la persona olvidó su clave (RN-13), la secretaría o el administrador generan otra:
+        aleatoria, de un solo uso y válida por 72 horas, con `debe_cambiar_clave = true`. La anterior deja de servir.
+        No levanta un bloqueo (eso es `POST /usuarios/{id}/desbloquear`). Registra `CLAVE_TEMPORAL` en `AUDITORIA_ACCESO`.
+      operationId: generarClaveTemporal
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: "Clave temporal nueva (solo en esta respuesta, con `Cache-Control: no-store`)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CuentaConClaveTemporal"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "404":
+          $ref: "#/components/responses/NoEncontrado"
+        "409":
+          description: La cuenta está inactiva (`CUENTA_INACTIVA`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+
   /usuarios/{id}/desbloquear:
     parameters:
       - $ref: "#/components/parameters/IdRecurso"
     post:
       tags: [Usuarios y Roles]
-      summary: Desbloquear cuenta y/o restablecer clave inicial
-      description: Reinicia `intentos_fallidos = 0`, limpia `bloqueado_hasta`, pasa el estado a `ACTIVO` y registra `DESBLOQUEO` en `AUDITORIA_ACCESO`. Opcionalmente restablece la clave inicial con `debe_cambiar_clave = true`.
+      summary: Desbloquear cuenta y/o entregar una clave temporal nueva
+      description: Reinicia `intentos_fallidos = 0`, limpia `bloqueado_hasta`, pasa el estado a `ACTIVO` y registra `DESBLOQUEO` en `AUDITORIA_ACCESO`. Con `restablecerClaveInicial = true` también genera una clave temporal nueva (`debe_cambiar_clave = true`, 72 horas, un solo uso) que se devuelve en `claveTemporal` y registra `CLAVE_TEMPORAL`. Solo `ADMIN`.
       operationId: desbloquearUsuario
       security:
         - bearerAuth: []
@@ -385,11 +418,11 @@ paths:
               $ref: "#/components/schemas/SolicitudDesbloqueo"
       responses:
         "200":
-          description: Cuenta desbloqueada
+          description: Cuenta desbloqueada (con `claveTemporal` si se pidió restablecerla)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UsuarioIdentidad"
+                $ref: "#/components/schemas/CuentaConClaveTemporal"
         "401":
           $ref: "#/components/responses/NoAutorizado"
         "403":
@@ -618,7 +651,7 @@ components:
 
     SolicitudCrearUsuario:
       type: object
-      required: [nombres, apellidos, cedulaInicial, roles]
+      required: [nombres, apellidos, roles]
       properties:
         id:
           type: string
@@ -632,10 +665,6 @@ components:
           type: string
           description: Se usa solo para construir el `nombreUsuario`; no se persiste en `db_identidad`
           example: Pérez Mora
-        cedulaInicial:
-          type: string
-          description: Se usa una única vez para generar el hash Argon2id de la clave inicial (RF-03) y se descarta
-          example: "0000000000"
         roles:
           type: array
           minItems: 1
@@ -672,9 +701,18 @@ components:
         restablecerClaveInicial:
           type: boolean
           default: false
-        cedulaInicial:
-          type: string
-          description: Requerida únicamente si `restablecerClaveInicial` es `true`
+          description: "`true` entrega una clave temporal nueva en la respuesta (CR-02)"
+
+    CuentaConClaveTemporal:
+      description: La cuenta y, cuando se acaba de generar, su clave temporal en claro (única vez que sale de ms-identidad)
+      allOf:
+        - $ref: "#/components/schemas/UsuarioIdentidad"
+        - type: object
+          properties:
+            claveTemporal:
+              type: string
+              description: Clave temporal aleatoria de 10 caracteres sin símbolos ambiguos (sin 0/O/o ni 1/l/I/i). Solo aparece al generarse
+              example: Tq7mPz3RkW
 
     UsuarioIdentidad:
       type: object
@@ -702,7 +740,11 @@ components:
             $ref: "#/components/schemas/CodigoRol"
         debeCambiarClave:
           type: boolean
-          description: "`true` cuando la cuenta aún conserva la clave inicial (RF-03)"
+          description: "`true` cuando la cuenta aún tiene su clave temporal (RF-03)"
+        claveTemporalVence:
+          type: [string, "null"]
+          format: date-time
+          description: Hasta cuándo sirve la clave temporal pendiente (72 horas); `null` si no tiene
         estado:
           $ref: "#/components/schemas/EstadoUsuario"
         intentosFallidos:

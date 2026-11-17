@@ -5,16 +5,20 @@ import { ExcepcionApi } from '../../../src/comun/excepcion-api';
 import { Cedula, Identificador, Opcional, TextoSeguro } from '../../../src/comun/validadores';
 import { ClienteIdentidad, RolCuenta } from '../../../src/identidad/cliente-identidad';
 import { IdentidadModule } from '../../../src/identidad/identidad.module';
-import { Roles, Usuario, UsuarioActual } from './guardia-referencia';
+import { Rol, Roles, UsuarioActual } from '../../../src/autenticacion/guardia-jwt';
+import { UsuarioToken } from '../../../src/autenticacion/verificador-jwt';
 
 // Implementación de referencia de personas, representaciones y matrícula (RF-04, RF-29) que cumple
 // la suite de privacidad (RNF-04). Guarda en memoria y no forma parte del servicio; muestra cómo:
-//  - crear la cuenta en ms-identidad con ClienteIdentidad (T1110-A) sin devolver nunca la cédula;
+//  - crear la cuenta en ms-identidad con ClienteIdentidad (T1110-A) sin enviarle la cédula (CR-02) y entregar
+//    la clave temporal solo en la respuesta del alta, a la secretaría;
+//  - no devolver nunca la cédula;
 //  - decidir qué ve cada quien SOLO con el usuario del token, nunca con lo que manda el cliente.
 
 const TIPOS = ['DOCENTE', 'ESTUDIANTE', 'REPRESENTANTE'] as const;
 type TipoPersona = (typeof TIPOS)[number];
-const PERSONAL = ['ADMIN', 'SECRETARIA'];
+const PERSONAL: Rol[] = ['ADMIN', 'SECRETARIA'];
+const CON_LECTURA: string[] = [...PERSONAL, 'ESTUDIANTE', 'REPRESENTANTE'];
 
 class SolicitudPersona {
   @Opcional() @Identificador() id?: string;
@@ -57,6 +61,9 @@ interface Persona {
   area: string | null;
   version: number;
 }
+interface PersonaCreada extends Persona {
+  credenciales: { nombreUsuario: string; claveTemporal?: string; claveTemporalVence?: string };
+}
 interface Representacion {
   id: string;
   estudianteId: string;
@@ -86,11 +93,11 @@ class ControladorMatriculaReferencia {
   constructor(private readonly identidad: ClienteIdentidad) {}
 
   /** null = puede ver a todos; si no, los estudiantes cuyos datos le pertenecen. */
-  private estudiantesVisibles(usuario: UsuarioActual): Set<string> | null {
-    if (usuario.roles.some((rol) => PERSONAL.includes(rol))) {
+  private estudiantesVisibles(usuario: UsuarioToken): Set<string> | null {
+    if (usuario.roles.some((rol) => (PERSONAL as string[]).includes(rol))) {
       return null;
     }
-    const propias = [...this.personas.values()].filter((p) => p.usuarioId === usuario.usuarioId);
+    const propias = [...this.personas.values()].filter((p) => p.usuarioId === usuario.id);
     const visibles = new Set<string>();
     for (const persona of propias) {
       if (persona.tipo === 'ESTUDIANTE' && usuario.roles.includes('ESTUDIANTE')) {
@@ -104,30 +111,29 @@ class ControladorMatriculaReferencia {
   }
 
   /** Personas que puede ver: sus estudiantes visibles, él mismo y los representantes de sus estudiantes. */
-  private personasVisibles(usuario: UsuarioActual): Set<string> | null {
+  private personasVisibles(usuario: UsuarioToken): Set<string> | null {
     const estudiantes = this.estudiantesVisibles(usuario);
     if (estudiantes === null) {
       return null;
     }
     const visibles = new Set(estudiantes);
-    [...this.personas.values()].filter((p) => p.usuarioId === usuario.usuarioId).forEach((p) => visibles.add(p.id));
+    [...this.personas.values()].filter((p) => p.usuarioId === usuario.id).forEach((p) => visibles.add(p.id));
     this.representaciones.filter((r) => estudiantes.has(r.estudianteId)).forEach((r) => visibles.add(r.representanteId));
     return visibles;
   }
 
   @Post('personas')
   @Roles(...PERSONAL)
-  async crearPersona(@Body() solicitud: SolicitudPersona): Promise<Persona> {
+  async crearPersona(@Body() solicitud: SolicitudPersona): Promise<PersonaCreada> {
     const id = solicitud.id ?? randomUUID();
     if (this.personas.has(id) || this.cedulas.has(solicitud.cedula)) {
       throw conflicto('La persona ya está registrada.');
     }
-    // ms-identidad genera el usuario; la cédula solo viaja para la clave inicial
+    // ms-identidad genera el usuario y la clave temporal; la cédula se queda en ms-academico (CR-02)
     const cuenta = await this.identidad.crearCuenta({
       id,
       nombres: solicitud.nombres,
       apellidos: solicitud.apellidos,
-      cedulaInicial: solicitud.cedula,
       roles: [solicitud.tipo as RolCuenta],
     });
     const persona: Persona = {
@@ -141,12 +147,16 @@ class ControladorMatriculaReferencia {
     };
     this.personas.set(id, persona);
     this.cedulas.add(solicitud.cedula);
-    return persona;
+    // La clave temporal no se guarda en ms-academico: solo pasa en esta respuesta para entregarla a la persona
+    return {
+      ...persona,
+      credenciales: { nombreUsuario: cuenta.nombreUsuario, claveTemporal: cuenta.claveTemporal, claveTemporalVence: cuenta.claveTemporalVence },
+    };
   }
 
   @Get('personas')
-  listarPersonas(@Usuario() usuario: UsuarioActual, @Query() { tipo, q }: FiltroPersonas): Persona[] {
-    if (!usuario.roles.some((rol) => [...PERSONAL, 'ESTUDIANTE', 'REPRESENTANTE'].includes(rol))) {
+  listarPersonas(@UsuarioActual() usuario: UsuarioToken, @Query() { tipo, q }: FiltroPersonas): Persona[] {
+    if (!usuario.roles.some((rol) => CON_LECTURA.includes(rol))) {
       throw denegado();
     }
     const visibles = this.personasVisibles(usuario);
@@ -188,8 +198,8 @@ class ControladorMatriculaReferencia {
   }
 
   @Get('matriculas')
-  listarMatriculas(@Usuario() usuario: UsuarioActual, @Query() { cursoId, estudianteId }: FiltroMatriculas): Matricula[] {
-    if (!usuario.roles.some((rol) => [...PERSONAL, 'ESTUDIANTE', 'REPRESENTANTE'].includes(rol))) {
+  listarMatriculas(@UsuarioActual() usuario: UsuarioToken, @Query() { cursoId, estudianteId }: FiltroMatriculas): Matricula[] {
+    if (!usuario.roles.some((rol) => CON_LECTURA.includes(rol))) {
       throw denegado();
     }
     const visibles = this.estudiantesVisibles(usuario);

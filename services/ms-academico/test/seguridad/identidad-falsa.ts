@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { CuentaIdentidad, SolicitudCrearCuenta } from '../../src/identidad/cliente-identidad';
 
 /**
@@ -17,6 +17,9 @@ export class IdentidadFalsa {
       roles: solicitud.roles,
       estado: 'ACTIVO',
       debeCambiarClave: true,
+      // Como ms-identidad (RF-03 v1.1): aleatoria, de un solo uso y por 72 horas
+      claveTemporal: randomBytes(5).toString('hex'),
+      claveTemporalVence: new Date(Date.now() + 72 * 3600 * 1000).toISOString(),
     };
   }
 }

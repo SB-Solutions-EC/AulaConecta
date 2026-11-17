@@ -39,7 +39,7 @@ function validarSolicitudCambioClave(
     return 'La nueva contraseña debe tener al menos 8 caracteres.';
   }
   if (claveNueva === claveActual) {
-    return 'La nueva clave debe ser distinta de su clave inicial (cédula).';
+    return 'La nueva clave debe ser distinta de su clave temporal.';
   }
   if (claveNueva.toLowerCase() === nombreUsuario.trim().toLowerCase()) {
     return 'Por seguridad, la nueva clave no puede ser igual a su nombre de usuario.';
@@ -120,8 +120,8 @@ export function PantallaCambioClaveInicial({
             Cambio obligatorio de clave inicial
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
-            La cuenta <strong>{nombreUsuario}</strong> aún conserva la contraseña
-            inicial generada con su número de cédula (
+            La cuenta <strong>{nombreUsuario}</strong> entró con una clave
+            temporal, que sirve una sola vez (
             <code className="font-mono">debeCambiarClave = true</code>).
             {tituloModuloBloqueado ? (
               <>
@@ -157,7 +157,7 @@ export function PantallaCambioClaveInicial({
             htmlFor="campo-clave-actual"
             className="block text-xs font-bold uppercase tracking-wider text-slate-700"
           >
-            Clave actual (cédula inicial)
+            Clave temporal
           </label>
           <div className="relative">
             <Lock
@@ -169,7 +169,7 @@ export function PantallaCambioClaveInicial({
               name="claveActual"
               type="password"
               autoComplete="current-password"
-              placeholder="Ingrese su clave inicial actual"
+              placeholder="La clave temporal que le entregó la secretaría"
               value={claveActual}
               onChange={(e) => setClaveActual(e.target.value)}
               disabled={enviando}
@@ -226,7 +226,7 @@ export function PantallaCambioClaveInicial({
               className="w-3.5 h-3.5 text-emerald-600 shrink-0"
               aria-hidden="true"
             />
-            Mínimo 8 caracteres, distinta de su cédula inicial y de su usuario (
+            Mínimo 8 caracteres, distinta de la clave temporal y de su usuario (
             <code className="font-mono">{nombreUsuario}</code>).
           </li>
           <li className="flex items-center gap-1.5">

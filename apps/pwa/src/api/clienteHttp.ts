@@ -71,6 +71,9 @@ const RUTA_REFRESH_DEFECTO = '/api/identidad/auth/refresh';
  * Bearer, rotación transparente de sesión ante respuestas 401 y notificación
  * cuando la cuenta conserva la clave inicial (debeCambiarClave = true, RF-03).
  */
+// ms-academico responde CAMBIO_CLAVE_PENDIENTE cuando el token aún pide cambiar la clave temporal
+const CODIGOS_CAMBIO_CLAVE = ['CAMBIO_CLAVE_REQUERIDO', 'CAMBIO_CLAVE_PENDIENTE'];
+
 export class ClienteHttp {
   private tokenAcceso: string | null = null;
   private promesaRenovacion: Promise<string | null> | null = null;
@@ -170,7 +173,7 @@ export class ClienteHttp {
       const errorExtraido = await this.extraerErrorApi(respuesta);
       if (
         respuesta.status === 403 &&
-        errorExtraido.codigo === 'CAMBIO_CLAVE_REQUERIDO'
+        CODIGOS_CAMBIO_CLAVE.includes(errorExtraido.codigo)
       ) {
         this.notificarCambioClaveObligatorio();
       }

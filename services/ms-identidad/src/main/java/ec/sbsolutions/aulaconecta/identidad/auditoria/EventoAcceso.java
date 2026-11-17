@@ -12,5 +12,7 @@ public enum EventoAcceso {
     ROL_RETIRADO,
     /** Token de servicio emitido (client credentials); el client_id va en nombre_usuario_intentado. */
     TOKEN_SERVICIO,
-    TOKEN_SERVICIO_FALLIDO
+    TOKEN_SERVICIO_FALLIDO,
+    /** Se generó una clave temporal (alta, desbloqueo con restablecimiento o pedido de la secretaría). */
+    CLAVE_TEMPORAL
 }

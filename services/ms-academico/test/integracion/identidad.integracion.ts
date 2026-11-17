@@ -19,9 +19,6 @@ if (!process.env.IDENTIDAD_URL || !secretoArchivo) {
 
 const cliente = new ClienteIdentidad({ getOrThrow: () => config.identidad } as unknown as ConfigService);
 const secreto = (): string => readFileSync(secretoArchivo, 'utf8').trim();
-// Provincia 99: no existe, no puede ser la cédula de una persona real
-const CEDULA = '9900000001';
-
 async function llamar(metodo: string, ruta: string, cuerpo?: object, token?: string): Promise<{ estado: number; json: Record<string, unknown> }> {
   const respuesta = await fetch(`${url}${ruta}`, {
     method: metodo,
@@ -47,26 +44,38 @@ describe('Integración ms-academico → ms-identidad con token de servicio', () 
     id: randomUUID(),
     nombres: 'Docente',
     apellidos: `Integracion${sufijo}`,
-    cedulaInicial: CEDULA,
     roles: ['DOCENTE'],
   };
   let nombreUsuario: string;
+  let claveTemporal: string;
 
   it('ms-academico pide su token y crea la cuenta de un docente con el mismo id de la persona', async () => {
     const cuenta = await cliente.crearCuenta(docente);
 
     expect(cuenta).toMatchObject({ id: docente.id, roles: ['DOCENTE'], estado: 'ACTIVO', debeCambiarClave: true });
     expect(cuenta.nombreUsuario).toMatch(new RegExp(`^docente\\.integracion${sufijo}\\d*$`));
-    expect(JSON.stringify(cuenta)).not.toContain(CEDULA);
+    // RF-03 v1.1 (CR-02): clave temporal aleatoria que vence a las 72 horas, en lugar de la cédula
+    expect(cuenta.claveTemporal).toMatch(/^[A-Za-z2-9]{10}$/);
+    const horas = (Date.parse(String(cuenta.claveTemporalVence)) - Date.now()) / 3_600_000;
+    expect(horas).toBeGreaterThan(71);
+    expect(horas).toBeLessThanOrEqual(72);
     nombreUsuario = cuenta.nombreUsuario;
+    claveTemporal = String(cuenta.claveTemporal);
   });
 
-  it('el docente entra con su cédula como clave inicial y debe cambiarla (RF-03)', async () => {
-    const { estado, json } = await llamar('POST', '/auth/login', { nombreUsuario, clave: CEDULA });
+  it('el docente entra una vez con la clave temporal y debe cambiarla (RF-03)', async () => {
+    const { estado, json } = await llamar('POST', '/auth/login', { nombreUsuario, clave: claveTemporal });
 
     expect(estado).toBe(200);
     expect(json.usuario).toMatchObject({ id: docente.id, debeCambiarClave: true });
     expect(partes(json.accessToken as string)[1]).toMatchObject({ tipo: 'usuario', roles: ['DOCENTE'] });
+  });
+
+  it('la clave temporal no sirve una segunda vez (RN-13)', async () => {
+    const { estado, json } = await llamar('POST', '/auth/login', { nombreUsuario, clave: claveTemporal });
+
+    expect(estado).toBe(401);
+    expect(json.codigo).toBe('CLAVE_TEMPORAL_USADA');
   });
 
   it('crear otra vez la misma persona devuelve 409 USUARIO_EXISTENTE', async () => {

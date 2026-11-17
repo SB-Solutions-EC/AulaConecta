@@ -12,17 +12,23 @@ export interface SolicitudCrearCuenta {
   id?: string;
   nombres: string;
   apellidos: string;
-  cedulaInicial: string;
   roles: RolCuenta[];
 }
 
-/** Respuesta de ms-identidad (UsuarioIdentidad): sin nombres ni cédula. */
+/**
+ * Respuesta de ms-identidad: sin nombres ni cédula. Al crear la cuenta trae la clave temporal en claro
+ * (RF-03 v1.1, CR-02): es la única vez que existe fuera de ms-identidad y se entrega a la secretaría.
+ */
 export interface CuentaIdentidad {
   id: string;
   nombreUsuario: string;
   roles: RolCuenta[];
   estado: string;
   debeCambiarClave: boolean;
+  /** Clave temporal aleatoria, de un solo uso: solo llega en la respuesta del alta. */
+  claveTemporal?: string;
+  /** Hasta cuándo sirve la clave temporal (72 horas). */
+  claveTemporalVence?: string;
 }
 
 interface TokenVigente {
@@ -39,7 +45,7 @@ const noDisponible = (): ExcepcionApi =>
 
 /**
  * Llamadas de ms-academico a ms-identidad con un token de servicio (client credentials, T1110-A).
- * El secreto, el token y la cédula nunca se escriben en el registro.
+ * El secreto, el token y la clave temporal nunca se escriben en el registro.
  */
 @Injectable()
 export class ClienteIdentidad {
@@ -52,7 +58,10 @@ export class ClienteIdentidad {
     this.config = config.getOrThrow<ConfiguracionIdentidad>('identidad');
   }
 
-  /** Crea la cuenta de una persona (RF-02, RF-03): ms-identidad genera el usuario y la clave inicial es la cédula. */
+  /**
+   * Crea la cuenta de una persona (RF-02, RF-03): ms-identidad genera el nombre de usuario y una clave temporal
+   * aleatoria de un solo uso que vence a las 72 horas. La cédula ya no viaja a ms-identidad (CR-02).
+   */
   async crearCuenta(solicitud: SolicitudCrearCuenta): Promise<CuentaIdentidad> {
     const respuesta = await this.enviarConToken('/usuarios', solicitud);
     if (respuesta.status === 201) {

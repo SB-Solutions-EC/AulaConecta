@@ -3,7 +3,7 @@ import {
   AlertTriangle,
   BookOpen,
   Calendar,
-  CalendarOff,
+  CalendarRange,
   CheckCircle2,
   Layers,
   Plus,
@@ -12,8 +12,8 @@ import {
   servicioAcademicoConfigApi,
   type AnioLectivo,
   type Curso,
-  type DiaNoDictado,
   type Materia,
+  type Periodo,
   type ServicioAcademicoConfigApi,
 } from '../api/academicoConfigApi';
 import { ErrorHttpApi } from '../api/clienteHttp';
@@ -28,8 +28,8 @@ export interface PropiedadesPantallaConfiguracionAcademica {
     ServicioAcademicoConfigApi,
     | 'listarAniosLectivos'
     | 'crearAnioLectivo'
-    | 'listarDiasNoDictados'
-    | 'crearDiaNoDictado'
+    | 'listarPeriodos'
+    | 'crearPeriodo'
     | 'listarCursos'
     | 'crearCurso'
     | 'listarMaterias'
@@ -52,7 +52,7 @@ export function PantallaConfiguracionAcademica({
 
   const [aniosLectivos, setAniosLectivos] = useState<AnioLectivo[]>([]);
   const [anioSeleccionadoId, setAnioSeleccionadoId] = useState<string>('');
-  const [diasNoDictados, setDiasNoDictados] = useState<DiaNoDictado[]>([]);
+  const [periodos, setPeriodos] = useState<Periodo[]>([]);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [materias, setMaterias] = useState<Materia[]>([]);
 
@@ -67,30 +67,32 @@ export function PantallaConfiguracionAcademica({
   const [finAnio, setFinAnio] = useState<string>('');
   const [anioActivoFlag, setAnioActivoFlag] = useState<boolean>(true);
 
-  // Formulario: Día no dictado
-  const [fechaFeriado, setFechaFeriado] = useState<string>('');
-  const [motivoFeriado, setMotivoFeriado] = useState<string>('');
+  // Formulario: Trimestre (RF-07)
+  const [numeroTrimestre, setNumeroTrimestre] = useState<string>('1');
+  const [inicioTrimestre, setInicioTrimestre] = useState<string>('');
+  const [finTrimestre, setFinTrimestre] = useState<string>('');
 
   // Formulario: Curso y paralelo
   const [nivelCurso, setNivelCurso] = useState<string>('');
   const [paraleloCurso, setParaleloCurso] = useState<string>('');
 
   // Formulario: Materia
+  const [codigoMateria, setCodigoMateria] = useState<string>('');
   const [nombreMateria, setNombreMateria] = useState<string>('');
   const [areaMateria, setAreaMateria] = useState<string>('');
 
   const cargarDatosPorAnio = useCallback(
     async (idAnio: string) => {
       if (!idAnio) {
-        setDiasNoDictados([]);
+        setPeriodos([]);
         setCursos([]);
         return;
       }
-      const [dias, listaCursos] = await Promise.all([
-        servicio.listarDiasNoDictados(idAnio),
+      const [listaPeriodos, listaCursos] = await Promise.all([
+        servicio.listarPeriodos(idAnio),
         servicio.listarCursos(idAnio),
       ]);
-      setDiasNoDictados(dias);
+      setPeriodos(listaPeriodos);
       setCursos(listaCursos);
     },
     [servicio],
@@ -185,37 +187,53 @@ export function PantallaConfiguracionAcademica({
     }
   };
 
-  const manejarCrearDiaNoDictado = async (
-    evento: FormEvent<HTMLFormElement>,
-  ) => {
+  const manejarCrearTrimestre = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
     setMensajeExito(null);
 
-    if (!anioSeleccionadoId) {
+    const anio = aniosLectivos.find((a) => a.id === anioSeleccionadoId);
+    if (!anio) {
       setMensajeError(
-        'Seleccione o cree un año lectivo antes de registrar un día no dictado.',
+        'Seleccione o cree un año lectivo antes de registrar un trimestre.',
       );
       return;
     }
-    if (!fechaFeriado || !motivoFeriado.trim()) {
-      setMensajeError('Ingrese la fecha y el motivo del día no dictado.');
+    if (!inicioTrimestre || !finTrimestre) {
+      setMensajeError('Ingrese las fechas de inicio y fin del trimestre.');
+      return;
+    }
+    if (finTrimestre <= inicioTrimestre) {
+      setMensajeError(
+        'La fecha de fin del trimestre debe ser posterior a la fecha de inicio.',
+      );
+      return;
+    }
+    // RF-07: el trimestre queda dentro del año lectivo (ms-academico también lo valida)
+    if (inicioTrimestre < anio.inicio || finTrimestre > anio.fin) {
+      setMensajeError(
+        `El trimestre debe quedar dentro del año lectivo (${anio.inicio} — ${anio.fin}).`,
+      );
       return;
     }
 
     setEnviando(true);
     setMensajeError(null);
     try {
-      const creado = await servicio.crearDiaNoDictado(anioSeleccionadoId, {
-        fecha: fechaFeriado,
-        motivo: motivoFeriado,
+      const creado = await servicio.crearPeriodo({
+        anioLectivoId: anio.id,
+        numero: Number(numeroTrimestre),
+        inicio: inicioTrimestre,
+        fin: finTrimestre,
       });
-      setDiasNoDictados((previos) => [...previos, creado]);
-      setFechaFeriado('');
-      setMotivoFeriado('');
-      setMensajeExito(`Día no dictado (${creado.fecha}) registrado.`);
+      setPeriodos((previos) =>
+        [...previos, creado].sort((a, b) => a.numero - b.numero),
+      );
+      setInicioTrimestre('');
+      setFinTrimestre('');
+      setMensajeExito(`Trimestre ${creado.numero} registrado.`);
     } catch (error) {
       setMensajeError(
-        extraerMensajeError(error, 'No se pudo registrar el día no dictado.'),
+        extraerMensajeError(error, 'No se pudo registrar el trimestre.'),
       );
     } finally {
       setEnviando(false);
@@ -264,8 +282,14 @@ export function PantallaConfiguracionAcademica({
     evento.preventDefault();
     setMensajeExito(null);
 
-    if (!nombreMateria.trim() || !areaMateria.trim()) {
-      setMensajeError('Ingrese el nombre y el área curricular de la materia.');
+    if (!codigoMateria.trim() || !nombreMateria.trim()) {
+      setMensajeError('Ingrese el código y el nombre de la materia.');
+      return;
+    }
+    if (!/^[A-Z0-9]{2,10}$/.test(codigoMateria.trim().toUpperCase())) {
+      setMensajeError(
+        'El código de la materia debe tener de 2 a 10 letras o números (ej. MAT).',
+      );
       return;
     }
 
@@ -273,10 +297,12 @@ export function PantallaConfiguracionAcademica({
     setMensajeError(null);
     try {
       const creada = await servicio.crearMateria({
+        codigo: codigoMateria,
         nombre: nombreMateria,
         area: areaMateria,
       });
       setMaterias((previas) => [...previas, creada]);
+      setCodigoMateria('');
       setNombreMateria('');
       setAreaMateria('');
       setMensajeExito(`Materia "${creada.nombre}" registrada correctamente.`);
@@ -302,13 +328,13 @@ export function PantallaConfiguracionAcademica({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-accent-light text-accent-dark">
-              Sprint 4 · RF-06, RF-07 y RF-08
+              RF-06 y RF-07
             </span>
             <h2 className="font-display text-2xl font-bold text-primary mt-2">
               Configuración académica
             </h2>
             <p className="text-sm text-slate-600 mt-1">
-              Administre años lectivos, días no dictados, cursos con paralelos y
+              Administre años lectivos con sus trimestres, cursos con paralelos y
               catálogo de materias institucionales.
             </p>
           </div>
@@ -361,7 +387,7 @@ export function PantallaConfiguracionAcademica({
             }`}
           >
             <Calendar className="w-4 h-4" aria-hidden="true" />
-            Años lectivos y feriados ({aniosLectivos.length})
+            Años lectivos y trimestres ({aniosLectivos.length})
           </button>
 
           <button
@@ -559,48 +585,70 @@ export function PantallaConfiguracionAcademica({
             </ul>
           </div>
 
-          {/* Panel: Días no dictados (RF-08) */}
+          {/* Panel: Trimestres (RF-07) */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-5">
             <h3 className="font-display text-lg font-bold text-primary flex items-center gap-2">
-              <CalendarOff className="w-5 h-5 text-accent" aria-hidden="true" />
-              Días no dictados {anioActual ? `(${anioActual.nombre})` : ''}
+              <CalendarRange className="w-5 h-5 text-accent" aria-hidden="true" />
+              Trimestres {anioActual ? `(${anioActual.nombre})` : ''}
             </h3>
 
             <form
-              onSubmit={manejarCrearDiaNoDictado}
+              onSubmit={manejarCrearTrimestre}
               className="space-y-3 bg-surface rounded-xl p-4 border border-slate-200/70"
               noValidate
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label
-                    htmlFor="campo-fecha-feriado"
+                    htmlFor="campo-numero-trimestre"
                     className="block text-xs font-bold uppercase tracking-wider text-slate-700"
                   >
-                    Fecha
+                    Trimestre
+                  </label>
+                  <select
+                    id="campo-numero-trimestre"
+                    value={numeroTrimestre}
+                    onChange={(e) => setNumeroTrimestre(e.target.value)}
+                    disabled={enviando}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm"
+                  >
+                    <option value="1">Primero</option>
+                    <option value="2">Segundo</option>
+                    <option value="3">Tercero</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label
+                    htmlFor="campo-inicio-trimestre"
+                    className="block text-xs font-bold uppercase tracking-wider text-slate-700"
+                  >
+                    Inicio del trimestre
                   </label>
                   <input
-                    id="campo-fecha-feriado"
+                    id="campo-inicio-trimestre"
                     type="date"
-                    value={fechaFeriado}
-                    onChange={(e) => setFechaFeriado(e.target.value)}
+                    value={inicioTrimestre}
+                    min={anioActual?.inicio}
+                    max={anioActual?.fin}
+                    onChange={(e) => setInicioTrimestre(e.target.value)}
                     disabled={enviando}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm"
                   />
                 </div>
                 <div className="space-y-1">
                   <label
-                    htmlFor="campo-motivo-feriado"
+                    htmlFor="campo-fin-trimestre"
                     className="block text-xs font-bold uppercase tracking-wider text-slate-700"
                   >
-                    Motivo
+                    Fin del trimestre
                   </label>
                   <input
-                    id="campo-motivo-feriado"
-                    type="text"
-                    placeholder="Ej. Feriado nacional"
-                    value={motivoFeriado}
-                    onChange={(e) => setMotivoFeriado(e.target.value)}
+                    id="campo-fin-trimestre"
+                    type="date"
+                    value={finTrimestre}
+                    min={anioActual?.inicio}
+                    max={anioActual?.fin}
+                    onChange={(e) => setFinTrimestre(e.target.value)}
                     disabled={enviando}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm"
                   />
@@ -611,33 +659,33 @@ export function PantallaConfiguracionAcademica({
                 <button
                   type="submit"
                   disabled={enviando}
-                  data-testid="boton-crear-feriado"
+                  data-testid="boton-crear-trimestre"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark disabled:opacity-60 text-white text-xs sm:text-sm font-semibold cursor-pointer"
                 >
                   <Plus className="w-4 h-4" aria-hidden="true" />
-                  Agregar día no dictado
+                  Agregar trimestre
                 </button>
               </div>
             </form>
 
-            <ul
-              data-testid="lista-dias-no-dictados"
-              className="divide-y divide-slate-100"
-            >
-              {diasNoDictados.length === 0 ? (
+            <ul data-testid="lista-trimestres" className="divide-y divide-slate-100">
+              {periodos.length === 0 ? (
                 <li className="py-4 text-xs text-slate-500">
-                  No hay días no dictados registrados para este año lectivo.
+                  No hay trimestres registrados para este año lectivo.
                 </li>
               ) : (
-                diasNoDictados.map((dia) => (
+                periodos.map((periodo) => (
                   <li
-                    key={dia.id}
+                    key={periodo.id}
                     className="py-3 flex items-center justify-between gap-2 text-sm"
                   >
-                    <span className="font-mono text-xs font-semibold text-primary">
-                      {dia.fecha}
+                    <span className="font-semibold text-primary">
+                      Trimestre {periodo.numero}
+                      {periodo.cerrado ? ' · cerrado' : ''}
                     </span>
-                    <span className="text-xs text-slate-600">{dia.motivo}</span>
+                    <span className="font-mono text-xs text-slate-600">
+                      {periodo.inicio} — {periodo.fin}
+                    </span>
                   </li>
                 ))
               )}
@@ -742,9 +790,28 @@ export function PantallaConfiguracionAcademica({
 
           <form
             onSubmit={manejarCrearMateria}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface rounded-xl p-4 border border-slate-200/70 items-end"
+            className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-surface rounded-xl p-4 border border-slate-200/70 items-end"
             noValidate
           >
+            <div className="space-y-1">
+              <label
+                htmlFor="campo-codigo-materia"
+                className="block text-xs font-bold uppercase tracking-wider text-slate-700"
+              >
+                Código
+              </label>
+              <input
+                id="campo-codigo-materia"
+                type="text"
+                placeholder="Ej. MAT"
+                maxLength={10}
+                value={codigoMateria}
+                onChange={(e) => setCodigoMateria(e.target.value.toUpperCase())}
+                disabled={enviando}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white text-sm font-mono uppercase"
+              />
+            </div>
+
             <div className="space-y-1">
               <label
                 htmlFor="campo-nombre-materia"
@@ -768,7 +835,7 @@ export function PantallaConfiguracionAcademica({
                 htmlFor="campo-area-materia"
                 className="block text-xs font-bold uppercase tracking-wider text-slate-700"
               >
-                Área curricular
+                Área curricular (opcional)
               </label>
               <input
                 id="campo-area-materia"
@@ -807,9 +874,14 @@ export function PantallaConfiguracionAcademica({
                   className="p-4 rounded-xl border border-slate-200 bg-surface/50 space-y-1"
                 >
                   <p className="font-display font-bold text-primary">
+                    <span className="font-mono text-xs text-accent-dark mr-2">
+                      {materia.codigo}
+                    </span>
                     {materia.nombre}
                   </p>
-                  <p className="text-xs text-slate-600">{materia.area}</p>
+                  {materia.area && (
+                    <p className="text-xs text-slate-600">{materia.area}</p>
+                  )}
                 </li>
               ))
             )}

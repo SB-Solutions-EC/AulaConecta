@@ -1,28 +1,24 @@
-import { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 import request from 'supertest';
-import { AppModule } from '../../src/app.module';
+import { AplicacionReal, crearAplicacionReal } from './aplicacion-real';
 import { nominaValida } from './archivos-invalidos';
 import { ModuloImportacionReferencia } from './referencia/modulo-importacion-referencia';
 import { ModuloReferencia } from './referencia/modulo-referencia';
 import { tokenValido } from './tokens';
 import { verificarCargaNomina } from './verificar-carga';
 
-// Los controles de carga contra la implementación de referencia, sobre AppModule.
+// Los controles de carga contra la implementación de referencia, sobre NucleoModule (la guardia JWT real, sin los endpoints reales).
 describe('Controles de carga de la nómina (RF-04): implementación de referencia', () => {
-  let app: INestApplication;
-  const servidor = (): Server => app.getHttpServer() as Server;
+  let real: AplicacionReal;
+  const servidor = (): Server => real.servidor();
 
   beforeAll(async () => {
-    const modulo = await Test.createTestingModule({ imports: [AppModule, ModuloReferencia, ModuloImportacionReferencia] }).compile();
-    app = modulo.createNestApplication({ logger: false });
-    await app.init();
+    real = await crearAplicacionReal([ModuloReferencia, ModuloImportacionReferencia]);
   });
 
   afterAll(async () => {
-    await app.close();
+    await real.cerrar();
   });
 
   it('una nómina válida llega al importador con sus filas contadas', async () => {

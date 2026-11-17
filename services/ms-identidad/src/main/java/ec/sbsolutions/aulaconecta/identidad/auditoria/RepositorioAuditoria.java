@@ -10,7 +10,11 @@ import java.util.regex.Pattern;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
-/** Bitácora de accesos: solo inserta y consulta. La tabla rechaza cambios y borrados con un trigger (V1). */
+/**
+ * Bitácora de accesos: solo inserta y consulta. La tabla rechaza cambios y borrados con un trigger (V1).
+ * Cada evento lleva la hora real (clock_timestamp): now() repetiría la hora del inicio de la transacción y
+ * varios eventos de una misma operación quedarían sin orden.
+ */
 @Repository
 public class RepositorioAuditoria {
 
@@ -25,8 +29,8 @@ public class RepositorioAuditoria {
 
     public void registrar(EventoAcceso evento, UUID usuarioId, String nombreUsuarioIntentado, String ip) {
         jdbc.sql("""
-                INSERT INTO auditoria_acceso (usuario_id, nombre_usuario_intentado, evento, ip)
-                VALUES (:usuario, :nombre, :evento, CAST(:ip AS inet))
+                INSERT INTO auditoria_acceso (usuario_id, nombre_usuario_intentado, evento, ip, ocurrido_en)
+                VALUES (:usuario, :nombre, :evento, CAST(:ip AS inet), clock_timestamp())
                 """)
                 .param("usuario", usuarioId)
                 .param("nombre", recortar(nombreUsuarioIntentado))

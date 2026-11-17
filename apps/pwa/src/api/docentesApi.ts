@@ -1,4 +1,5 @@
 import { clienteHttp, type ClienteHttp } from './clienteHttp';
+import type { CredencialesTemporales } from './cuentasApi';
 
 export type HoraBloque = 'h1' | 'h2' | 'h3' | 'h4' | 'h5';
 
@@ -10,6 +11,11 @@ export interface DocentePersona {
   apellidos: string;
   area?: string | null;
   version: number;
+}
+
+/** Respuesta del alta: la clave temporal de la cuenta llega solo aquí (CR-02). */
+export interface DocenteCreado extends DocentePersona {
+  credenciales?: CredencialesTemporales;
 }
 
 export interface SolicitudCrearDocente {
@@ -66,8 +72,8 @@ export class ServicioDocentesApi {
     return this.http.get<DocentePersona[]>(`/api/academico/personas?${params.toString()}`);
   }
 
-  async crearDocente(solicitud: Omit<SolicitudCrearDocente, 'tipo'>): Promise<DocentePersona> {
-    return this.http.post<DocentePersona>('/api/academico/personas', {
+  async crearDocente(solicitud: Omit<SolicitudCrearDocente, 'tipo'>): Promise<DocenteCreado> {
+    return this.http.post<DocenteCreado>('/api/academico/personas', {
       ...solicitud,
       tipo: 'DOCENTE',
     });

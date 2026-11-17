@@ -21,6 +21,21 @@ const POR_ESTADO: Record<number, Traduccion> = {
 };
 const ERROR_INTERNO: Traduccion = { codigo: 'ERROR_INTERNO', mensaje: 'Ocurrió un error inesperado.' };
 
+// Errores conocidos de Prisma que son culpa de los datos enviados, no del servidor
+const POR_CODIGO_PRISMA: Record<string, { estado: number } & Traduccion> = {
+  // Clave única: dos altas a la vez del mismo registro
+  P2002: { estado: 409, codigo: 'CONFLICTO', mensaje: 'El registro ya existe.' },
+  // Llave foránea: apunta a un registro que no existe
+  P2003: { estado: 400, codigo: 'DATOS_INVALIDOS', mensaje: 'Un registro relacionado no existe.' },
+};
+
+function codigoPrisma(error: unknown): string | undefined {
+  if (error instanceof Error && error.name === 'PrismaClientKnownRequestError' && 'code' in error) {
+    return String(error.code);
+  }
+  return undefined;
+}
+
 @Catch()
 export class FiltroErrores implements ExceptionFilter {
   private readonly registro = new Logger('Errores');
@@ -40,6 +55,12 @@ export class FiltroErrores implements ExceptionFilter {
         cuerpo.detalles = error.detalles;
       }
       return { estado: error.getStatus(), cuerpo };
+    }
+
+    const prisma = POR_CODIGO_PRISMA[codigoPrisma(error) ?? ''];
+    if (prisma) {
+      // El mensaje de Prisma nombra la tabla y la restricción: no se reenvía
+      return { estado: prisma.estado, cuerpo: { codigo: prisma.codigo, mensaje: prisma.mensaje, timestamp } };
     }
 
     // Nest ya convierte en HttpException los errores del lector de JSON (JSON mal formado,

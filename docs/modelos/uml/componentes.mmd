@@ -17,7 +17,7 @@ flowchart TB
   end
   subgraph DAT["Datos"]
     DBI[("BD identidad")]
-    DBA[("BD académica")]
+    DBA[("BD académica<br/><i>incluye outbox de eventos</i>")]
     DBN[("BD notificaciones")]
   end
   subgraph EXT["Integraciones externas"]
@@ -31,11 +31,13 @@ flowchart TB
   GW -- "REST /academico" --> AC
   GW -- "REST /notificaciones" --> NO
   AC -- "valida JWT (claves públicas)" --> ID
+  AC -- "crea cuentas<br/>(token de servicio)" --> ID
+  NO -- "valida JWT (claves públicas)" --> ID
   AC -. "importa" .-> CALC
   ID -- "SQL" --> DBI
   AC -- "SQL" --> DBA
   NO -- "SQL" --> DBN
-  AC -- "evento: promedio_bajo,<br/>falta_registrada" --> BUS
+  AC -- "evento por outbox: promedio_bajo,<br/>falta_registrada" --> BUS
   BUS -- "entrega el evento" --> NO
   NO -- "Web Push" --> PUSH
   NO -- "HTTPS / enlace" --> WA

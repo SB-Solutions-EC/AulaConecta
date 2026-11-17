@@ -72,6 +72,24 @@ function traducirErrorLogin(error: unknown): EstadoErrorAcceso {
       };
     }
 
+    // RF-03 v1.1 (CR-02): la clave temporal sirve una vez y vence a las 72 horas
+    if (error.codigo === 'CLAVE_TEMPORAL_USADA') {
+      return {
+        titulo: 'La clave temporal ya se usó',
+        mensaje:
+          'La clave temporal sirve para un solo inicio de sesión. Si no alcanzó a crear su clave personal, pida otra a la secretaría.',
+        esBloqueoTemporal: false,
+      };
+    }
+    if (error.codigo === 'CLAVE_TEMPORAL_VENCIDA') {
+      return {
+        titulo: 'La clave temporal venció',
+        mensaje:
+          'La clave temporal dura 72 horas desde que se generó. Pida otra a la secretaría.',
+        esBloqueoTemporal: false,
+      };
+    }
+
     if (error.estado === 401 || error.codigo === 'CREDENCIALES_INVALIDAS') {
       return {
         titulo: 'Credenciales inválidas (RF-01)',
@@ -123,7 +141,7 @@ export function PantallaInicioSesion({
       setErrorAcceso({
         titulo: 'Campos obligatorios',
         mensaje:
-          'Ingrese su nombre de usuario institucional (ej. ana.perez) y su contraseña o cédula inicial.',
+          'Ingrese su nombre de usuario institucional (ej. ana.perez) y su contraseña o la clave temporal que le entregó la secretaría.',
         esBloqueoTemporal: false,
       });
       return;
@@ -242,7 +260,7 @@ export function PantallaInicioSesion({
             htmlFor="campo-clave-acceso"
             className="block text-xs font-bold uppercase tracking-wider text-slate-700"
           >
-            Contraseña o clave inicial (cédula)
+            Contraseña o clave temporal
           </label>
           <div className="relative">
             <Lock

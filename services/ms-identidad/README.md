@@ -9,6 +9,7 @@ Microservicio de usuarios, roles y autenticación de AulaConecta, en **Spring Bo
 | Sprint 4 (05/11) | Inicio de sesión, JWT RS256, JWKS, Argon2id y cambio obligatorio de la clave inicial |
 | Sprint 4 (06/11) | Creación de usuarios, bloqueo tras 3 intentos y auditoría de accesos |
 | Sprint 4 (10/11) | Token de servicio (client credentials) para que ms-academico cree cuentas (T1110-A) |
+| Sprint 4 (16/11) | Clave temporal aleatoria de un solo uso por 72 horas en lugar de la cédula (RF-03 v1.1, CR-02) |
 
 ## Endpoints implementados
 
@@ -22,11 +23,12 @@ Por el gateway llevan el prefijo `/api/identidad`.
 | `GET /auth/me` | Token | Datos de la cuenta de la sesión |
 | `POST /auth/cambiar-clave` | Token | Cambia la clave y devuelve un token nuevo |
 | `POST /oauth/token` | Credenciales del servicio | Token de servicio de 5 minutos (client credentials). Solo por la red interna: el gateway responde 403 |
-| `POST /usuarios` | Administrador o servicio con `usuarios:crear` | Crea la cuenta: genera el nombre de usuario (RF-02) y usa la cédula como clave inicial (RF-03) |
-| `POST /usuarios/{id}/desbloquear` | Administrador | Levanta el bloqueo; opcionalmente restablece la clave inicial |
+| `POST /usuarios` | Administrador o servicio con `usuarios:crear` | Crea la cuenta: genera el nombre de usuario (RF-02) y una clave temporal que devuelve una sola vez (RF-03) |
+| `POST /usuarios/{id}/clave-temporal` | Secretaría o Administrador | Otra clave temporal cuando la anterior venció, ya se usó o se olvidó la clave (RN-13) |
+| `POST /usuarios/{id}/desbloquear` | Administrador | Levanta el bloqueo; opcionalmente entrega una clave temporal nueva |
 | `GET /auditoria-accesos` | Administrador | Bitácora de accesos, con filtros por usuario, evento, fechas y límite (máximo 200) |
 
-"Administrador" significa el rol `ADMIN` con la clave inicial ya cambiada. "Token" es un token de usuario: un token de servicio no sirve en `/auth/*`, el desbloqueo ni la bitácora (403).
+"Administrador" y "Secretaría" significan esos roles con la clave temporal ya cambiada. "Token" es un token de usuario: un token de servicio no sirve en `/auth/*`, el desbloqueo ni la bitácora (403).
 
 ## Seguridad
 
@@ -37,9 +39,10 @@ Por el gateway llevan el prefijo `/api/identidad`.
 | Secretos de servicio | 256 bits al azar; ms-identidad solo recibe su SHA-256 (`AULACONECTA_CLIENTES_SERVICIO_HASHES`) y al iniciar deja `cliente_servicio` igual a `aulaconecta.clientes-servicio`: registra, rota o desactiva. Se comparan en tiempo constante, y un cliente inexistente, inactivo o con el secreto equivocado recibe el mismo 401 |
 | Clave de firma | RSA de 2048 bits o más, leída de un archivo-secreto (`AULACONECTA_JWT_CLAVE_PRIVADA`), nunca de la base ni del repositorio. El `kid` es la huella de la clave |
 | Claves de usuario | Argon2id con los parámetros mínimos de OWASP. Un hash BCrypt heredado sigue funcionando y se migra a Argon2id en el siguiente inicio de sesión |
-| Clave inicial (RF-03) | Con `debe_cambiar_clave = true` el token solo sirve para `/auth/me` y `/auth/cambiar-clave`; cualquier otra ruta responde 403 |
+| Clave temporal (RF-03 v1.1, CR-02, RN-13) | Aleatoria, de 10 caracteres sin símbolos ambiguos (unos 57 bits), guardada solo como hash. Sirve para **un solo** inicio de sesión y vence a las 72 horas (`aulaconecta.clave-temporal`): después responde `401 CLAVE_TEMPORAL_USADA` o `CLAVE_TEMPORAL_VENCIDA` sin sumar intentos fallidos, y la secretaría genera otra. Sale del servicio una única vez, en la respuesta que la genera (`Cache-Control: no-store`). La cédula ya no se recibe |
+| Clave pendiente de cambio | Con `debe_cambiar_clave = true` el token solo sirve para `/auth/me` y `/auth/cambiar-clave`; cualquier otra ruta responde 403 |
 | Errores | Usuario inexistente, clave incorrecta y cuenta inactiva responden igual y tardan lo mismo; una cuenta bloqueada responde 423 con o sin la clave correcta |
-| Nombre de usuario (RF-02) | Primer nombre y primer apellido sin tildes ni símbolos (`ana.perez`); los apellidos compuestos se conservan (`camila.delatorre`). Si ya existe, se agrega un número: `ana.perez2`. Los nombres y la cédula no se guardan en `db_identidad` |
+| Nombre de usuario (RF-02) | Primer nombre y primer apellido sin tildes ni símbolos (`ana.perez`); los apellidos compuestos se conservan (`camila.delatorre`). Si ya existe, se agrega un número: `ana.perez2`. Los nombres no se guardan en `db_identidad` |
 | Bloqueo | Tras 3 intentos fallidos seguidos, la cuenta se bloquea 15 minutos (`aulaconecta.bloqueo`). El conteo se hace en una sola sentencia SQL: intentos simultáneos no pueden saltarse ni deshacer el bloqueo. Un acceso correcto reinicia el contador |
 | Auditoría | Cada acceso, fallo, bloqueo, desbloqueo, cambio de clave, asignación de rol y token de servicio (emitido o rechazado) queda en `auditoria_acceso` con la IP del cliente. Los fallos se registran aunque la respuesta sea un error, porque el inicio de sesión no corre en una transacción que se deshaga. La tabla no admite cambios ni borrados (trigger de V1) |
 | IP del cliente | La pone el gateway: Traefik descarta los `X-Forwarded-For` que manda el cliente, y ms-identidad solo confía en proxies de redes privadas (`server.forward-headers-strategy: native`) |

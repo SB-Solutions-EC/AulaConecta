@@ -3,6 +3,7 @@ package ec.sbsolutions.aulaconecta.identidad.seguridad;
 import com.nimbusds.jose.jwk.JWKSet;
 import ec.sbsolutions.aulaconecta.identidad.autenticacion.PropiedadesBloqueo;
 import ec.sbsolutions.aulaconecta.identidad.servicio.PropiedadesClientesServicio;
+import ec.sbsolutions.aulaconecta.identidad.usuario.PropiedadesClaveTemporal;
 import ec.sbsolutions.aulaconecta.identidad.usuario.CodigoRol;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import java.util.List;
@@ -39,7 +40,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
 @Configuration
-@EnableConfigurationProperties({PropiedadesJwt.class, PropiedadesBloqueo.class, PropiedadesClientesServicio.class})
+@EnableConfigurationProperties({PropiedadesJwt.class, PropiedadesBloqueo.class, PropiedadesClientesServicio.class,
+        PropiedadesClaveTemporal.class})
 public class ConfiguracionSeguridad {
 
     // Parámetros mínimos recomendados por OWASP para Argon2id: 19 MiB de memoria, 2 iteraciones, 1 hilo
@@ -56,6 +58,10 @@ public class ConfiguracionSeguridad {
         AuthorizationManager<RequestAuthorizationContext> sinClaveInicial = ConfiguracionSeguridad::sinClaveInicial;
         AuthorizationManager<RequestAuthorizationContext> administrador = AuthorizationManagers.allOf(
                 AuthorityAuthorizationManager.hasRole(CodigoRol.ADMIN.name()), sinClaveInicial);
+        // La secretaría entrega la clave temporal a la persona y genera otra si venció o ya se usó (RN-13)
+        AuthorizationManager<RequestAuthorizationContext> personalDelColegio = AuthorizationManagers.allOf(
+                AuthorityAuthorizationManager.hasAnyRole(CodigoRol.ADMIN.name(), CodigoRol.SECRETARIA.name()),
+                sinClaveInicial);
         AuthorizationManager<RequestAuthorizationContext> servicioQueCreaUsuarios = AuthorizationManagers.allOf(
                 (autenticacion, contexto) -> new AuthorizationDecision(
                         esDeTipo(autenticacion.get(), EmisorTokens.TIPO_SERVICIO)),
@@ -75,6 +81,7 @@ public class ConfiguracionSeguridad {
                         // Altas: el administrador o un servicio con el alcance usuarios:crear (T1110-A)
                         .requestMatchers(HttpMethod.POST, "/usuarios")
                                 .access(AuthorizationManagers.anyOf(administrador, servicioQueCreaUsuarios))
+                        .requestMatchers(HttpMethod.POST, "/usuarios/*/clave-temporal").access(personalDelColegio)
                         // Desbloqueo y bitácora: solo el administrador
                         .requestMatchers(HttpMethod.POST, "/usuarios/*/desbloquear").access(administrador)
                         .requestMatchers(HttpMethod.GET, "/auditoria-accesos").access(administrador)

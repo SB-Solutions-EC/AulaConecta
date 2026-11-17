@@ -1,4 +1,5 @@
 import { clienteHttp, type ClienteHttp } from './clienteHttp';
+import type { CredencialesTemporales } from './cuentasApi';
 
 export type TipoPersonaMatricula = 'ESTUDIANTE' | 'REPRESENTANTE';
 export type EstadoMatricula = 'ACTIVA' | 'RETIRADA';
@@ -11,6 +12,11 @@ export interface PersonaAcademica {
   apellidos: string;
   area?: string | null;
   version: number;
+}
+
+/** Respuesta del alta: la clave temporal de la cuenta llega solo aquí (CR-02). */
+export interface PersonaCreada extends PersonaAcademica {
+  credenciales?: CredencialesTemporales;
 }
 
 export interface SolicitudPersonaAcademica {
@@ -115,8 +121,8 @@ export class ServicioMatriculasApi {
 
   async crearPersona(
     solicitud: SolicitudPersonaAcademica,
-  ): Promise<PersonaAcademica> {
-    return this.http.post<PersonaAcademica>('/api/academico/personas', solicitud);
+  ): Promise<PersonaCreada> {
+    return this.http.post<PersonaCreada>('/api/academico/personas', solicitud);
   }
 
   async crearRepresentacion(

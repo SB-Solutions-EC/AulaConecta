@@ -14,6 +14,8 @@ import {
   type ServicioAcademicoConfigApi,
 } from '../api/academicoConfigApi';
 import { ErrorHttpApi } from '../api/clienteHttp';
+import type { CredencialesTemporales, ServicioCuentasApi } from '../api/cuentasApi';
+import { BotonClaveTemporal, TarjetaClaveTemporal } from './ClaveTemporal';
 import {
   servicioMatriculasApi,
   type ContactoNotificacion,
@@ -38,6 +40,12 @@ export interface PropiedadesPantallaMatricula {
     | 'actualizarConsentimiento'
   >;
   servicioAcademico?: Pick<ServicioAcademicoConfigApi, 'listarCursos'>;
+  servicioCuentas?: Pick<ServicioCuentasApi, 'generarClaveTemporal'>;
+}
+
+interface CredencialesMostradas {
+  titulo: string;
+  credenciales: CredencialesTemporales;
 }
 
 const PATRON_CEDULA_10 = /^\d{10}$/;
@@ -61,6 +69,7 @@ function extraerMensajeError(error: unknown, respaldo: string): string {
 export function PantallaMatricula({
   servicioMatriculas = servicioMatriculasApi,
   servicioAcademico = servicioAcademicoConfigApi,
+  servicioCuentas,
 }: Readonly<PropiedadesPantallaMatricula>) {
   const [pestana, setPestana] = useState<PestanaMatricula>('matricula');
 
@@ -73,6 +82,8 @@ export function PantallaMatricula({
   const [cargando, setCargando] = useState(true);
   const [errorGlobal, setErrorGlobal] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  // Claves temporales de las cuentas creadas en esta matrícula: se muestran una vez y no se guardan
+  const [credencialesNuevas, setCredencialesNuevas] = useState<CredencialesMostradas[]>([]);
 
   const [modoEstudiante, setModoEstudiante] = useState<'nuevo' | 'existente'>('nuevo');
   const [estudianteSeleccionadoId, setEstudianteSeleccionadoId] = useState('');
@@ -184,6 +195,13 @@ export function PantallaMatricula({
       apellidos,
       cedula,
     });
+    if (creado.credenciales) {
+      const credenciales = creado.credenciales;
+      setCredencialesNuevas((previas) => [
+        ...previas,
+        { titulo: `Clave temporal del estudiante ${nombres} ${apellidos}`, credenciales },
+      ]);
+    }
     return creado.id;
   };
 
@@ -219,6 +237,13 @@ export function PantallaMatricula({
       apellidos,
       cedula,
     });
+    if (creado.credenciales) {
+      const credenciales = creado.credenciales;
+      setCredencialesNuevas((previas) => [
+        ...previas,
+        { titulo: `Clave temporal del representante ${nombres} ${apellidos}`, credenciales },
+      ]);
+    }
     return creado.id;
   };
 
@@ -226,6 +251,7 @@ export function PantallaMatricula({
     evento.preventDefault();
     setMensajeExito(null);
     setErrorGlobal(null);
+    setCredencialesNuevas([]);
 
     if (!cursoSeleccionadoId) {
       setErrorGlobal('Selecciona un curso para matricular al estudiante.');
@@ -351,6 +377,11 @@ export function PantallaMatricula({
     return curso ? `${curso.nivel} "${curso.paralelo}"` : cursoId;
   };
 
+  const obtenerUsuarioId = (
+    lista: PersonaAcademica[],
+    personaId: string,
+  ): string | undefined => lista.find((item) => item.id === personaId)?.usuarioId;
+
   const obtenerContactoPorEstudiante = (
     estudianteId: string,
   ): ContactoNotificacion | undefined =>
@@ -434,6 +465,14 @@ export function PantallaMatricula({
           <span>{mensajeExito}</span>
         </output>
       ) : null}
+
+      {credencialesNuevas.map((mostradas) => (
+        <TarjetaClaveTemporal
+          key={mostradas.titulo}
+          titulo={mostradas.titulo}
+          credenciales={mostradas.credenciales}
+        />
+      ))}
 
       {cargando ? (
         <p className="text-sm text-slate-500 py-8 text-center">
@@ -820,6 +859,13 @@ export function PantallaMatricula({
                             : 'Sin autorización de avisos'}
                         </p>
                       ) : null}
+                      {obtenerUsuarioId(estudiantes, matricula.estudianteId) ? (
+                        <BotonClaveTemporal
+                          usuarioId={obtenerUsuarioId(estudiantes, matricula.estudianteId) ?? ''}
+                          nombrePersona={obtenerNombrePersona(estudiantes, matricula.estudianteId)}
+                          servicio={servicioCuentas}
+                        />
+                      ) : null}
                     </li>
                   );
                 })}
@@ -860,6 +906,13 @@ export function PantallaMatricula({
                     <p className="text-xs text-slate-600">
                       WhatsApp: <strong>{contacto.whatsapp}</strong>
                     </p>
+                    {obtenerUsuarioId(representantes, contacto.representanteId) ? (
+                      <BotonClaveTemporal
+                        usuarioId={obtenerUsuarioId(representantes, contacto.representanteId) ?? ''}
+                        nombrePersona={obtenerNombrePersona(representantes, contacto.representanteId)}
+                        servicio={servicioCuentas}
+                      />
+                    ) : null}
                   </div>
 
                   <div className="flex items-center gap-2.5">

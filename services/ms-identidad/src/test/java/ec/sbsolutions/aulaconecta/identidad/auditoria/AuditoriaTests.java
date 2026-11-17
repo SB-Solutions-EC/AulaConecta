@@ -105,21 +105,32 @@ class AuditoriaTests extends PruebaApi {
     }
 
     @Test
-    void alDesbloquearPuedeRestablecerLaClaveInicial() throws Exception {
+    void alDesbloquearPuedeEntregarUnaClaveTemporalNueva() throws Exception {
         UUID id = crearCuenta("olvido.clave", "DOCENTE");
 
         JsonNode cuenta = enviar(post("/usuarios/" + id + "/desbloquear"), admin,
-                Map.of("restablecerClaveInicial", true, "cedulaInicial", CEDULA_FICTICIA), 200);
+                Map.of("restablecerClaveInicial", true), 200);
 
         assertThat(cuenta.get("debeCambiarClave").asBoolean()).isTrue();
+        assertThat(cuenta.get("claveTemporal").asString()).hasSize(10);
         login("olvido.clave", CLAVE, 401);
-        login("olvido.clave", CEDULA_FICTICIA, 200);
+        login("olvido.clave", cuenta.get("claveTemporal").asString(), 200);
+        assertThat(eventos(id)).containsSubsequence("DESBLOQUEO", "CLAVE_TEMPORAL", "LOGIN_OK");
+    }
+
+    @Test
+    void sinRestablecerNoEntregaNingunaClave() throws Exception {
+        UUID id = crearCuenta("solo.desbloqueo", "DOCENTE");
+
+        JsonNode cuenta = enviar(post("/usuarios/" + id + "/desbloquear"), admin, null, 200);
+
+        assertThat(cuenta.has("claveTemporal")).isFalse();
+        login("solo.desbloqueo", CLAVE, 200);
     }
 
     @Test
     void elDesbloqueoValidaLaSolicitud() throws Exception {
         UUID id = crearCuenta("validar.desbloqueo", "DOCENTE");
-        enviar(post("/usuarios/" + id + "/desbloquear"), admin, Map.of("restablecerClaveInicial", true), 400);
         enviar(post("/usuarios/" + UUID.randomUUID() + "/desbloquear"), admin, null, 404);
 
         jdbc.sql("UPDATE usuario SET estado = 'INACTIVO' WHERE id = :id").param("id", id).update();

@@ -10,7 +10,9 @@ import { PrismaService } from '../../src/base-datos/prisma.service';
 const prisma = new PrismaService(new ConfigService({ baseDatosUrl: inject('urlBaseDatos') }));
 const fecha = (texto: string): Date => new Date(`${texto}T00:00:00Z`);
 let secuencia = 0;
-const base = 2100 + Math.floor(Math.random() * 6000); // años de 4 dígitos, distintos en cada ejecución
+// Años de 4 dígitos entre 7500 y 9500: no se cruzan con los de test/seguridad (2100 a 7100 aprox.),
+// que usan la misma base de Testcontainers, ni con los datos de prueba (2026-2027)
+const base = 7500 + Math.floor(Math.random() * 2000);
 const unico = (): number => base + ++secuencia;
 
 async function crearAnio(): Promise<string> {

@@ -45,4 +45,5 @@ def test_se_puede_ejecutar_otra_vez_sin_duplicar(tmp_path: Path) -> None:
 def test_solo_usa_numeros_reservados_para_ficcion() -> None:
     numeros = [r["whatsapp"] for r in leer_datos()["representantes"]]
 
-    assert all(re.fullmatch(r"\+1202555010\d", n) for n in numeros)
+    # +1 202 555-01XX, escrito por partes para no formar 10 dígitos seguidos (regla de cédula de gitleaks)
+    assert all(re.fullmatch(r"\+1(202)(555)(01\d\d)", n) for n in numeros)

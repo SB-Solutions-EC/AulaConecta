@@ -1,0 +1,6 @@
+# Falsos positivos de gitleaks ya revisados. Cada línea es la huella exacta de UN hallazgo
+# (commit:archivo:regla:línea): no ignora la regla ni el archivo en otros commits.
+#
+# a42f864 (T1116-M): la expresión regular de la prueba de números de WhatsApp ficticios
+# (+1 202 555-01XX) tenía 10 dígitos seguidos con forma de cédula. Se corrigió en 7734e75.
+a42f864f0ad1aa31e9cfbb0e0563c0b050308c38:services/ms-notificaciones/tests/test_semilla.py:cedula-ecuador:48

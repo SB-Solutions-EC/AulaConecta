@@ -11,6 +11,7 @@ Microservicio de notificaciones y consentimiento de AulaConecta en **FastAPI + P
 | Sprint 3 (27/10) | Esqueleto en FastAPI con `/health` y pruebas con `pytest` |
 | Sprint 3 (28/10) | `db_notificaciones` con Alembic (`alembic/versions/0001_init.py`) y RabbitMQ en `docker-compose.yml` |
 | Sprint 4 (06/11) | Validación del JWT de ms-identidad, roles y pruebas `pytest` de autorización (T1106-M) |
+| Sprint 5 (16/11) | Datos de prueba ficticios: `python -m app.semilla` crea los contactos de [infra/datos-prueba](../../infra/datos-prueba) (T1116-M) |
 | Sprint 8 | Contactos, consentimiento, consumidor de RabbitMQ, canales Push/WhatsApp e historial |
 
 ## Autenticación y roles

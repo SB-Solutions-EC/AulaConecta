@@ -94,6 +94,8 @@ npx prisma migrate dev --name <cambio> --create-only   # nueva migración, revis
 
 Las migraciones se versionan en `prisma/migrations`; nunca se edita una que ya está en `dev`.
 
+Datos de prueba ficticios (T1116-M): `npm run datos-prueba` carga en la base de `DATABASE_URL` el año lectivo, los trimestres, las materias, los cursos, las personas y las matrículas de [infra/datos-prueba](../../infra/datos-prueba). Se niega a correr con `NODE_ENV=production`.
+
 ### Pruebas con PostgreSQL real (Testcontainers)
 
 `npm test` levanta un contenedor `postgres:16.15-alpine3.24` (la misma versión del docker-compose), aplica las migraciones con `prisma migrate deploy` y pasa la URL a las pruebas con `inject('urlBaseDatos')` ([test/postgres-global.ts](test/postgres-global.ts)). Cada ejecución empieza con una base vacía y el contenedor se borra al terminar. Necesita Docker en marcha.
@@ -260,6 +262,7 @@ El archivo nunca se escribe en disco ni se usa su nombre para guardar nada. Los 
 | Sprint 3 (28/10) | Esquema inicial en `db_academico` con Prisma Migrate | Listo (T1028-M) |
 | Sprint 4 (04/11) | Pruebas de integración con PostgreSQL real (Testcontainers) | Listo (T1104-M) |
 | Sprint 4 (05/11) | Validación del JWT con JWKS y guardas por rol | Listo (T1105-M) |
+| Sprint 5 (16/11) | Datos de prueba ficticios (seed) | Listo (T1116-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, trimestres, cursos, paralelos y materias | Listo (T1109-M, adelantado en T1113-A) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |

@@ -10,6 +10,7 @@
   "scripts": {
     "build": "nest build",
     "start": "node dist/main.js",
+    "datos-prueba": "nest build && prisma db seed",
     "start:dev": "nest start --watch",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -40,6 +40,7 @@ Un servidor con tres bases y un usuario por servicio (`usr_identidad`, `usr_acad
 | Autenticación | Toda conexión exige contraseña (SCRAM-SHA-256), incluso dentro del contenedor |
 | Migraciones | Las aplica cada servicio al arrancar, con su propio usuario: Flyway en ms-identidad, Prisma en ms-academico y Alembic en ms-notificaciones |
 | Prisma | `usr_academico` no puede crear bases, así que `prisma migrate dev` necesita una `shadowDatabaseUrl`; `prisma migrate deploy` funciona sin cambios |
+| Datos de prueba | Ficticios, para el ambiente de pruebas y las demostraciones: [datos-prueba/](datos-prueba/README.md) (T1116-M). Nunca en producción |
 
 Para abrir una consola en una base:
 

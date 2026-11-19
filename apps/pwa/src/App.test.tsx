@@ -169,7 +169,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     // Verifica que el menú lateral de Docente incluye Calificaciones y asistencia
     fireEvent.click(screen.getByTestId('nav-item-calificaciones-asistencia'));
     expect(
-      screen.getByTestId('vista-modulo-calificaciones-asistencia'),
+      screen.getByTestId('pantalla-calculo-notas'),
     ).toBeInTheDocument();
 
     // Verifica funciones utilitarias de permisos por ruta

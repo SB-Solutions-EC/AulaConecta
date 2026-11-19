@@ -26,6 +26,7 @@ import { PantallaConfiguracionAcademica } from './componentes/PantallaConfigurac
 import { PantallaDocentes } from './componentes/PantallaDocentes';
 import { PantallaMatricula } from './componentes/PantallaMatricula';
 import { PantallaImportacion } from './componentes/PantallaImportacion';
+import { PantallaCalculoNotas } from './componentes/PantallaCalculoNotas';
 import {
   CATALOGO_MODULOS,
   METADATOS_ROLES,
@@ -280,6 +281,8 @@ export default function App({
           <PantallaMatricula />
         ) : moduloActual.ruta === '/importacion' ? (
           <PantallaImportacion />
+        ) : moduloActual.ruta === '/calificaciones' ? (
+          <PantallaCalculoNotas />
         ) : (
           <section
             aria-label={`Contenido del módulo ${moduloActual.etiqueta}`}

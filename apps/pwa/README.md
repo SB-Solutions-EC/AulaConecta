@@ -25,6 +25,16 @@ npm run typecheck
 npm test
 ```
 
+Ejecutar la prueba E2E de login con Playwright (modo local con mocks o contra el ambiente de pruebas):
+
+```bash
+# Modo local (levanta Vite y simula las respuestas de ms-identidad)
+npm run test:e2e:login
+
+# Contra el ambiente de pruebas desplegado (cuentas sembradas en infra/datos-prueba/)
+E2E_BASE_URL=https://localhost E2E_CLAVE_PRUEBA=<clave-de-pruebas> npm run test:e2e:login
+```
+
 Construir para producción:
 
 ```bash

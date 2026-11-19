@@ -19,11 +19,13 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
         const esCatalogoAcademico =
           typeof url === 'string' &&
           (url.includes('/anios-lectivos') ||
+            url.includes('/periodos') ||
             url.includes('/cursos') ||
             url.includes('/materias') ||
             url.includes('/personas') ||
             url.includes('/asignaciones') ||
             url.includes('/matriculas') ||
+            url.includes('/calificaciones') ||
             url.includes('/contactos'));
         return Promise.resolve({
           ok: true,
@@ -168,9 +170,11 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
 
     // Verifica que el menú lateral de Docente incluye Calificaciones y asistencia
     fireEvent.click(screen.getByTestId('nav-item-calificaciones-asistencia'));
-    expect(
-      screen.getByTestId('pantalla-calculo-notas'),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('pantalla-libreta-calificaciones'),
+      ).toBeInTheDocument();
+    });
 
     // Verifica funciones utilitarias de permisos por ruta
     expect(obtenerModulosPorRol('ESTUDIANTE').map((m) => m.ruta)).toEqual([

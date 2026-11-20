@@ -8,7 +8,7 @@ Archivos para levantar y desplegar AulaConecta.
 | `traefik/` | Configuración del gateway: TLS, rutas y límite de peticiones (sprint 3) |
 | `postgres/init.sql` | Crea las tres bases y un usuario por servicio |
 | `rabbitmq/` | Configuración e inicialización de RabbitMQ (`aulaconecta.eventos`, `notificaciones.avisos` y DLQ) |
-| `despliegue/` | Ambiente de pruebas con despliegue continuo desde `test` (sprint 5) |
+| [`despliegue/`](despliegue/README.md) | Ambiente de pruebas con despliegue continuo desde `test`: VM por SSH, imágenes de GHCR, datos de prueba y e2e (T1116-A) |
 
 ## Levantar el stack local
 

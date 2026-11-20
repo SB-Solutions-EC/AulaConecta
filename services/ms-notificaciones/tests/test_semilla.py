@@ -1,7 +1,10 @@
 """Pruebas de los datos de prueba ficticios de db_notificaciones (T1116-M)."""
 
+import json
 import re
 from pathlib import Path
+
+import pytest
 
 from alembic import command
 from alembic.config import Config
@@ -9,6 +12,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
 from app.db import Contacto
+from app import semilla
 from app.semilla import leer_datos, sembrar
 
 RUTA_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
@@ -47,3 +51,21 @@ def test_solo_usa_numeros_reservados_para_ficcion() -> None:
 
     # +1 202 555-01XX, escrito por partes para no formar 10 dígitos seguidos (regla de cédula de gitleaks)
     assert all(re.fullmatch(r"\+1(202)(555)(01\d\d)", n) for n in numeros)
+
+
+def test_lee_el_archivo_de_datos_prueba_archivo(tmp_path: Path, monkeypatch) -> None:
+    """En la imagen no hay carpeta del repositorio: los datos llegan por DATOS_PRUEBA_ARCHIVO (T1116-A)."""
+    copia = tmp_path / "datos.json"
+    copia.write_text(json.dumps(leer_datos()), encoding="utf-8")
+    monkeypatch.setenv("DATOS_PRUEBA_ARCHIVO", str(copia))
+
+    assert len(leer_datos()["estudiantes"]) == 12
+
+
+def test_sin_repositorio_ni_variable_pide_datos_prueba_archivo(monkeypatch) -> None:
+    """Como dentro de la imagen (/app/app/semilla.py): importar el módulo no falla, pero sí pedir la ruta."""
+    monkeypatch.delenv("DATOS_PRUEBA_ARCHIVO", raising=False)
+    monkeypatch.setattr(semilla, "__file__", "/app/semilla.py")
+
+    with pytest.raises(FileNotFoundError, match="DATOS_PRUEBA_ARCHIVO"):
+        semilla.leer_datos()

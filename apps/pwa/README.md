@@ -31,7 +31,8 @@ Ejecutar la prueba E2E de login con Playwright (modo local con mocks o contra el
 # Modo local (levanta Vite y simula las respuestas de ms-identidad)
 npm run test:e2e:login
 
-# Contra el ambiente de pruebas desplegado (cuentas sembradas en infra/datos-prueba/)
+# Contra el ambiente de pruebas desplegado (cuentas sembradas en infra/datos-prueba/).
+# El CI la ejecuta sola después de cada despliegue a test (infra/despliegue/README.md, T1116-A)
 E2E_BASE_URL=https://localhost E2E_CLAVE_PRUEBA=<clave-de-pruebas> npm run test:e2e:login
 ```
 

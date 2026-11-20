@@ -25,6 +25,8 @@ Las pruebas automáticas revisan estas reglas. Los datos reales del colegio nunc
 
 ## Cómo cargarlos
 
+En el ambiente de pruebas se cargan solos en cada despliegue ([infra/despliegue](../despliegue/README.md), T1116-A). A mano:
+
 Primero se aplican las migraciones de cada servicio. Los tres scripts se pueden ejecutar varias veces: crean o actualizan cada registro por su id.
 
 ```bash

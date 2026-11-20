@@ -4,6 +4,10 @@ dist/
 build/
 coverage/
 reportes/
+# Salidas de Playwright (el CI las guarda como artefacto)
+playwright-report/
+test-results/
+resultados-e2e.json
 .turbo/
 *.tsbuildinfo
 __pycache__/

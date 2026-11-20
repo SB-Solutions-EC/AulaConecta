@@ -206,6 +206,26 @@ jobs:
           for (const grupo of new Set([...tareasRef.keys(), ...tareasReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(tareasRef.get(grupo) ?? [])} | ${celda(tareasReal.get(grupo) ?? [])} |`);
           }
+          // Acceso a notas (RF-20, RNF-04, T1120-A): reporte de pruebas 403 por persona
+          const notasRef = porGrupo(/^test\/seguridad\/referencia-acceso-notas\./, 'Escenario');
+          const notasReal = porGrupo(/^test\/seguridad\/acceso-notas\.e2e\./, 'Escenario');
+          const es403 = (p) => p.title.startsWith('403');
+          const todas403 = (grupos) => [...grupos.values()].flat().filter(es403);
+          const celda403 = (pruebas) => (pruebas.length ? `${cuenta(pruebas, 'passed')}/${pruebas.length}${cuenta(pruebas, 'failed') ? ` · ${cuenta(pruebas, 'failed')} ❌` : ''}${cuenta(pruebas, 'skipped') ? ` · ${cuenta(pruebas, 'skipped')} ⏭️` : ''}` : '—');
+          lineas.push(
+            '',
+            '### Acceso a notas: el estudiante solo ve sus notas (RF-20, RNF-04)',
+            '',
+            `Pruebas de **403**: **${cuenta(todas403(notasRef), 'passed')} de ${todas403(notasRef).length}** en la referencia y **${cuenta(todas403(notasReal), 'passed')}** en los endpoints reales (${cuenta(todas403(notasReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Quién pide | 403 (referencia) | Ve solo lo suyo (referencia) | 403 (reales) | Ve solo lo suyo (reales) |',
+            '|---|---|---|---|---|',
+          );
+          for (const grupo of new Set([...notasRef.keys(), ...notasReal.keys()])) {
+            const ref = notasRef.get(grupo) ?? [];
+            const real = notasReal.get(grupo) ?? [];
+            lineas.push(`| ${grupo} | ${celda403(ref.filter(es403))} | ${celda403(ref.filter((p) => !es403(p)))} | ${celda403(real.filter(es403))} | ${celda403(real.filter((p) => !es403(p)))} |`);
+          }
           const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
           if (fallidas.length) {
             lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));

@@ -132,6 +132,15 @@ export const CATALOGO_MODULOS: DefinicionModuloNavegacion[] = [
     sprintObjetivo: 'Sprint 5 (RF-17 a RF-27)',
   },
   {
+    id: 'tareas-evaluaciones',
+    ruta: '/tareas',
+    etiqueta: 'Tareas, pruebas y proyectos',
+    descripcion:
+      'Publicación de tareas, pruebas y proyectos por curso, entrega estudiantil y revisión con puntaje.',
+    rolesPermitidos: ['DOCENTE', 'ESTUDIANTE'],
+    sprintObjetivo: 'Sprint 5 (RF-19)',
+  },
+  {
     id: 'seguimiento-estudiantil',
     ruta: '/seguimiento',
     etiqueta: 'Rendimiento y asistencia',

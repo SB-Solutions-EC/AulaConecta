@@ -26,6 +26,8 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
             url.includes('/asignaciones') ||
             url.includes('/matriculas') ||
             url.includes('/calificaciones') ||
+            url.includes('/tareas') ||
+            url.includes('/entregas') ||
             url.includes('/contactos'));
         return Promise.resolve({
           ok: true,
@@ -176,9 +178,16 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
       ).toBeInTheDocument();
     });
 
+    // Verifica que el menú lateral de Docente incluye Tareas, pruebas y proyectos
+    fireEvent.click(screen.getByTestId('nav-item-tareas-evaluaciones'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-tareas')).toBeInTheDocument();
+    });
+
     // Verifica funciones utilitarias de permisos por ruta
     expect(obtenerModulosPorRol('ESTUDIANTE').map((m) => m.ruta)).toEqual([
       '/panel',
+      '/tareas',
       '/seguimiento',
     ]);
     expect(tienePermisoRuta('SECRETARIA', '/matriculas')).toBe(true);

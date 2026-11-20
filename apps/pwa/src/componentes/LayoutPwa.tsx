@@ -5,6 +5,7 @@ import {
   CalendarCog,
   ClipboardCheck,
   FileSpreadsheet,
+  FileText,
   GraduationCap,
   LayoutDashboard,
   LogOut,
@@ -55,6 +56,8 @@ function IconoModulo({ idModulo }: Readonly<{ idModulo: string }>) {
     case 'calificaciones-asistencia':
     case 'seguimiento-estudiantil':
       return <ClipboardCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
+    case 'tareas-evaluaciones':
+      return <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'avisos-notificaciones':
       return <Bell className="w-4 h-4 shrink-0" aria-hidden="true" />;
     default:

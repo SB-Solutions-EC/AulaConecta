@@ -181,7 +181,7 @@ erDiagram
         decimal refuerzo
         decimal nota_proyecto
         decimal nota_examen
-        decimal nota_final "packages/calculo, truncada a 2 decimales"
+        decimal nota_final "packages/calculo-notas, truncada a 2 decimales"
         string cualitativo "A+ a E-"
         int version
     }
@@ -345,7 +345,7 @@ sequenceDiagram
 | El celular para avisos y su consentimiento se guardan en `CONTACTO` (ms-notificaciones), no en `REPRESENTACION` | Solo el servicio que envía mensajes ve los teléfonos (RNF-04). En el modelo lógico se dibujan en `representacion` |
 | `ADMIN` es el código técnico del rol Administrador | Ya lo usan los tokens, las guardas y los contratos; el nombre visible sigue siendo "Administrador" |
 | PERIODO con 3 trimestres por año lectivo; calificaciones, tareas, comportamiento y planificaciones apuntan al trimestre | Sustituye el entero `trimestre`: las fechas del trimestre se validan una sola vez (RF-07) y se puede cerrar un trimestre |
-| `CALIFICACION` guarda la nota final ya calculada | Se calcula con `packages/calculo` al guardar; los reportes no recalculan (RNF-02) |
+| `CALIFICACION` guarda la nota final ya calculada | Se calcula con `packages/calculo-notas` al guardar; los reportes no recalculan (RNF-02) |
 | Calificaciones, asistencia y comportamiento cuelgan de `MATRICULA` | Conservan el historial si el estudiante cambia de curso o se retira (RF-24) |
 
 ## 6. En qué sprint se crea cada tabla

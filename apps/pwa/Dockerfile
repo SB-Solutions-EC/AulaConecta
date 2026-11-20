@@ -6,6 +6,8 @@ RUN npm install --no-audit --no-fund
 COPY tsconfig.json vite.config.ts tailwind.config.js postcss.config.js index.html ./
 COPY public ./public
 COPY src ./src
+# Cálculo de notas compartido (T1117-A): contexto adicional "calculo-notas" (ver ci-imagen.yml e infra/docker-compose.yml)
+COPY --from=calculo-notas src /packages/calculo-notas/src
 RUN npm run build
 
 # Etapa de ejecución con Nginx sin privilegios sobre Alpine 3.24

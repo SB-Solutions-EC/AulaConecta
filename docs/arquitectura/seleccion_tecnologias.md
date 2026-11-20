@@ -12,7 +12,7 @@
 > | Gateway | Traefik (TLS y límite de peticiones) | — | Abner |
 > | Mensajería entre servicios | RabbitMQ (patrón outbox) | — | Christian |
 >
-> El cálculo de notas (`packages/calculo`) sigue en TypeScript y lo comparten ms-academico y la PWA. El modelo de datos por servicio está en [modelo_datos.md](modelo_datos.md).
+> El cálculo de notas (`packages/calculo-notas`) sigue en TypeScript y lo comparten ms-academico y la PWA. El modelo de datos por servicio está en [modelo_datos.md](modelo_datos.md).
 
 ## 1. Criterios de selección
 
@@ -119,7 +119,7 @@ Se programa con un **adaptador**: una interfaz común con dos implementaciones, 
 | Gateway | Traefik (TLS y límite de peticiones) |
 | Frontend | React · Vite · TypeScript · Tailwind · Workbox · Dexie |
 | Interfaz y gráficos | Framer Motion (animaciones) · Recharts (gráficos) · lucide-react (íconos); ver [guia_visual.md](guia_visual.md) |
-| Código compartido | `packages/calculo` (TypeScript) |
+| Código compartido | `packages/calculo-notas` (TypeScript) |
 | Contratos API | OpenAPI 3.1 (`openapi/`) |
 | Contenedores | Docker · docker-compose · Nginx |
 | CI/CD | GitHub Actions · Telegram |
@@ -129,7 +129,7 @@ Se programa con un **adaptador**: una interfaz común con dos implementaciones, 
 
 ## 5. Estructura del monorepo (T1026-C)
 
-Un **monorepo** es un solo repositorio que agrupa las aplicaciones, microservicios, paquetes compartidos, contratos, infraestructura y pruebas del sistema. Se eligió porque `ms-academico`, la PWA y `packages/calculo` comparten tipos y lógica, los contratos OpenAPI se versionan junto con los servicios y el pipeline de CI/CD verifica todo en conjunto.
+Un **monorepo** es un solo repositorio que agrupa las aplicaciones, microservicios, paquetes compartidos, contratos, infraestructura y pruebas del sistema. Se eligió porque `ms-academico`, la PWA y `packages/calculo-notas` comparten tipos y lógica, los contratos OpenAPI se versionan junto con los servicios y el pipeline de CI/CD verifica todo en conjunto.
 
 ```
 apps/
@@ -139,7 +139,7 @@ services/
   ms-academico/          Microservicio académico (NestJS + TypeScript + Prisma)
   ms-notificaciones/     Microservicio de notificaciones (FastAPI + Python + Alembic)
 packages/
-  calculo/               Motor de cálculo de notas compartido en TypeScript
+  calculo-notas/         Cálculo de notas compartido en TypeScript (PWA y ms-academico)
 openapi/
   ms-identidad.yaml      Contrato OpenAPI 3.1 v0 de ms-identidad
   ms-academico.yaml      Contrato OpenAPI 3.1 v0 de ms-academico

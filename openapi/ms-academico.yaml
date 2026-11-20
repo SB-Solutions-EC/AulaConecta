@@ -5,7 +5,7 @@ info:
   description: |
     Contrato OpenAPI inicial (v0) del microservicio académico (`ms-academico`) para la **Unidad Educativa "Andoas"**.
 
-    **Responsabilidad:** Gestión del año lectivo, cursos y paralelos, materias, docentes y estudiantes (`PERSONA`), representación familiar (`REPRESENTACION`), asignaciones y horarios, matrícula individual e importación/exportación Excel, planificación curricular ERCA con estados y observaciones por campo, calificaciones recalculadas en el servidor con `packages/calculo`, tareas y entregas, asistencia y comportamiento, reportes (estándares DA/AA/PA/NA, valoración de logros, tableros), parámetros configurables, auditoría académica y sincronización offline (`/sync/pull` y `/sync/push`).
+    **Responsabilidad:** Gestión del año lectivo, cursos y paralelos, materias, docentes y estudiantes (`PERSONA`), representación familiar (`REPRESENTACION`), asignaciones y horarios, matrícula individual e importación/exportación Excel, planificación curricular ERCA con estados y observaciones por campo, calificaciones recalculadas en el servidor con `packages/calculo-notas`, tareas y entregas, asistencia y comportamiento, reportes (estándares DA/AA/PA/NA, valoración de logros, tableros), parámetros configurables, auditoría académica y sincronización offline (`/sync/pull` y `/sync/push`).
 
     **Reglas de modelo y sincronización (RNF-01, RNF-09):**
     - Todas las entidades usan `id` UUID (generable por la PWA sin conexión) y campo entero `version` que se incrementa en cada cambio.
@@ -655,9 +655,12 @@ paths:
           $ref: "#/components/responses/Prohibido"
     put:
       tags: [Calificaciones y Tareas]
-      summary: Registrar o actualizar aportes y recalcular nota final con packages/calculo (RF-17, RF-18)
+      summary: Registrar o actualizar aportes y recalcular nota final con packages/calculo-notas (RF-17, RF-18)
       description: |
-        Recalcula `notaFinal` (70 % bloques con refuerzo, 15 % proyecto, 15 % examen, truncado a 2 decimales) y `cualitativo` (`A+` a `E-`) usando `packages/calculo`.
+        Recalcula `notaFinal` (70 % bloques con refuerzo, 15 % proyecto, 15 % examen, truncado a 2 decimales) y `cualitativo` (`A+` a `E-`) usando `packages/calculo-notas`, el mismo cálculo que la PWA y que el libro oficial. El servidor no acepta una nota final enviada por el cliente.
+        - Solo califica el `DOCENTE` asignado a esa materia en ese curso (lo decide el usuario del token). Otro docente, el administrador, la secretaría, el estudiante y el representante reciben `403`; una asignación ajena y una inexistente responden el mismo `403`.
+        - La matrícula debe ser del curso de la asignación (`400 MATRICULA_FUERA_DEL_CURSO`).
+        - Cada bloque admite hasta 5 aportes de 0 a 10; las celdas vacías se omiten del arreglo.
         - Registra el cambio en `AUDITORIA` (valor anterior y nuevo, RNF-09).
         - Si `notaFinal < 7.00`, inserta en la misma transacción un evento `academico.promedio_bajo` en `OUTBOX` para `ms-notificaciones` (RF-30).
       operationId: guardarCalificacion
@@ -674,6 +677,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Calificacion"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
         "403":
           $ref: "#/components/responses/Prohibido"
         "409":
@@ -1764,7 +1771,7 @@ components:
           type: number
           minimum: 0
           maximum: 10
-          description: Calculada con `packages/calculo` y truncada a 2 decimales
+          description: Calculada en el servidor con `packages/calculo-notas` y truncada a 2 decimales
           example: 8.45
         cualitativo:
           type: string
@@ -1800,12 +1807,14 @@ components:
           maximum: 3
         aportesBloque1:
           type: array
+          maxItems: 5
           items:
             type: number
             minimum: 0
             maximum: 10
         aportesBloque2:
           type: array
+          maxItems: 5
           items:
             type: number
             minimum: 0
@@ -1825,6 +1834,7 @@ components:
         version:
           type: integer
           minimum: 0
+          description: Versión vigente de la calificación (0 si todavía no existe); con una versión vieja responde 409
 
     Tarea:
       type: object

@@ -25,7 +25,7 @@ export interface AplicacionReal {
   servidor: () => Server;
   identidad: IdentidadFalsa;
   /** Una ruta sin controlador responde 404 aun sin token ni cuerpo. */
-  montado: (metodo: 'get' | 'post', ruta: string) => Promise<boolean>;
+  montado: (metodo: 'get' | 'post' | 'put', ruta: string) => Promise<boolean>;
   cerrar: () => Promise<void>;
 }
 

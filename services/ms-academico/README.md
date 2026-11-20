@@ -292,6 +292,40 @@ Se ejecuta contra la referencia (`referencia/modulo-calificaciones-referencia.ts
 
 `tsconfig.json` ya tiene `rootDir: ../..` para el typecheck.
 
+## Pruebas de asistencia y de quién puede justificar (RF-21)
+
+`test/seguridad/verificar-asistencia.ts` (T1123-A) arma por la API este escenario:
+- **curso A:** M1 con el docente D1 y M2 con D2; estudiantes E1 (con representante) y E2;
+- **curso B**, de otro año lectivo: M1 con D3; estudiante F.
+
+**Regla acordada con el equipo.** El documento solo dice que el Inspector justifica, y ese rol no existe en el sistema. Se decidió:
+- el **docente de esa materia en ese curso** registra la asistencia y es el **único que aprueba** una justificación (estado `JUSTIFICADA`);
+- el **estudiante** dueño de la falta solo la **solicita** (`POST /asistencias/{id}/justificacion`, CU-19);
+- el representante, la secretaría, el administrador y los demás docentes no la cambian.
+
+| Grupo | Qué comprueba |
+|---|---|
+| Registrar | Solo D1. Responden 403: D2, D3, el administrador, la secretaría, el estudiante, el representante, un docente sin persona y D1 con la clave temporal pendiente. Los 13 tokens inválidos responden 401, y la asignación ajena y la inventada dan el mismo 403. Una matrícula de otro curso se rechaza. **Fecha fuera del año lectivo → 400** (falla de RF-21). Versión vieja → 409 |
+| Justificar | E1 solicita y queda `SOLICITADA`, sin dejar de ser `FALTA`. D1 aprueba con el motivo del estudiante o con el suyo. **Nadie más aprueba**: E1, el representante, otros docentes, la secretaría y el administrador reciben 403 y la falta sigue igual. No solicitan un compañero, otro curso, el representante, el docente, la secretaría ni el administrador. Mandar `estado: JUSTIFICADA` en la solicitud no aprueba nada. Sin nada que justificar, o con una solicitud pendiente → 409. **Volver a `FALTA` una falta justificada pide `confirmar: true`** (excepción de RF-21). El motivo pasa por los textos inválidos y las cargas de XSS |
+| Consultar | D1 ve la asistencia de su asignación; el estudiante, la suya; el representante, la de su representado. Lo ajeno responde 403, también para la secretaría, igual para una matrícula ajena que para una inventada |
+
+Se ejecuta contra la referencia (`referencia/modulo-asistencia-referencia.ts`) y contra los endpoints reales (`asistencia.e2e.spec.ts`), que se omiten hasta que existan.
+
+**Comprobación de la suite.** Se debilitó la referencia de 10 maneras, una por vez, y cada una hizo fallar pruebas:
+
+| Debilidad | Pruebas que fallan |
+|---|---|
+| El estudiante se aprueba a sí mismo al solicitar | 7 |
+| Cualquier docente registra y aprueba en cualquier asignación | 6 |
+| El estudiante ve la asistencia de todo el curso | 5 |
+| Cualquier estudiante solicita por la falta de otro | 3 |
+| El administrador también aprueba | 2 |
+| Acepta fechas fuera del año lectivo | 2 |
+| La secretaría consulta la asistencia | 2 |
+| El representante también solicita | 1 |
+| No pide confirmar al volver a marcar FALTA una falta justificada | 1 |
+| Acepta JUSTIFICADA sin motivo | 1 |
+
 ## Pruebas de tareas: autorización y XSS (RF-19, RF-20)
 
 `test/seguridad/verificar-tareas.ts` (T1119-A) arma por la API este escenario:

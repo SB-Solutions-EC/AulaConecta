@@ -119,6 +119,8 @@ Para los DTOs se usan los decoradores de `src/comun/validadores.ts`:
 | `@Identificador()` | UUID |
 | `@Cedula()` | Cédula ecuatoriana: provincia 01–24 o 30, tercer dígito 0–5 y verificador del módulo 10. Nunca se devuelve en una respuesta |
 | `@Opcional()` | Campo que se puede omitir. Usarlo en lugar de `@IsOptional()`, que también deja pasar un `null` explícito |
+| `@TextoLibre(max, { minimo, multilinea })` | Texto que se guarda **literal** (título de una tarea, retroalimentación): admite `: ¿? ¡! # < >`, porque la PWA lo muestra como texto. Rechaza caracteres de control, de dirección (U+202E) e invisibles, y los saltos de línea salvo con `multilinea` |
+| `@EnlaceSeguro()` | Enlace que la PWA puede convertir en vínculo: solo `https://` o `http://`, sin usuario ni clave, sin espacios, hasta 255 caracteres (T1119-A) |
 
 Para errores propios del negocio: `throw new ExcepcionApi(409, 'CONFLICTO', 'El paralelo ya existe.')`. La validación no reemplaza a las consultas parametrizadas: con Prisma nunca se usa `$queryRawUnsafe` ni `$executeRawUnsafe` con texto armado a mano.
 
@@ -290,6 +292,43 @@ Se ejecuta contra la referencia (`referencia/modulo-calificaciones-referencia.ts
 
 `tsconfig.json` ya tiene `rootDir: ../..` para el typecheck.
 
+## Pruebas de tareas: autorización y XSS (RF-19, RF-20)
+
+`test/seguridad/verificar-tareas.ts` (T1119-A) arma por la API este escenario:
+- **curso A**, con su trimestre: M1 con el docente D1, que crea y califica, y M2 con D2; estudiantes E1 (con representante) y E2;
+- **curso B**, de otro año lectivo: M1 con D3; estudiante F.
+
+| Grupo | Qué comprueba |
+|---|---|
+| Crear tareas | Solo D1 crea en su asignación. Responden **403**: D2, D3, el administrador, la secretaría, el estudiante, el representante, un docente sin persona y D1 con la clave temporal pendiente. Los 13 tokens inválidos responden 401, y la asignación ajena y la inventada dan el mismo 403. **RF-19:** una fecha fuera del trimestre se rechaza, igual que un trimestre de otro año lectivo |
+| Saneamiento de texto | 20 cargas (SQL, `<script>`, atributos `on…`, SVG, iframe, Markdown, entidades, plantillas, fórmulas) en el título y la descripción: **se rechazan o se guardan literales** y vuelven idénticas al listar, siempre como JSON. Los caracteres de control, de dirección (U+202E), invisibles y los saltos de línea en el título responden 400 |
+| Saneamiento de enlaces | `enlaceRecurso` solo admite `https://` y `http://`. Responden 400: `javascript:` (también con mayúsculas, espacios o tabuladores), `data:`, `vbscript:`, `file:`, `//host`, `usuario@host`, saltos de línea y más de 255 caracteres |
+| Calificar entregas | Solo D1. El estudiante no se pone su nota ni actúa a nombre de otro con `estudianteId`. Una matrícula de otro curso se rechaza. **RF-20:** una nota negativa o mayor que 10 responde 400. La versión vieja responde 409, y la retroalimentación pasa por las mismas cargas de XSS |
+| Lectura | El curso ve sus tareas, y otro curso, otro docente y la secretaría reciben 403. Cada estudiante ve solo su nota y su comentario; el representante, solo los de su representado |
+
+Para el texto libre y los enlaces hay dos validadores en `src/comun/validadores.ts` (ver la tabla de arriba). Se ejecuta contra la referencia (`referencia/modulo-tareas-referencia.ts`) y contra los endpoints reales (`tareas.e2e.spec.ts`), que se omiten hasta que existan.
+
+**Comprobación de la suite.** Se debilitó la referencia de 9 maneras, una por vez, y cada una hizo fallar pruebas:
+
+| Debilidad | Pruebas que fallan |
+|---|---|
+| Acepta cualquier enlace (`javascript:`, `data:`, `file:`) | 12 |
+| "Limpia" el HTML del título en vez de guardarlo literal | 7 |
+| No revisa los caracteres del título | 5 |
+| Cualquier docente crea tareas en cualquier asignación | 4 |
+| Cualquier docente califica cualquier tarea | 3 |
+| Cualquiera con sesión ve las tareas de cualquier asignación | 3 |
+| No revisa la fecha contra el trimestre | 2 |
+| No revisa el curso de la matrícula | 2 |
+| El estudiante ve las notas y comentarios de todo el curso | 2 |
+
+**En la PWA**, `PantallaTareas.xss.test.tsx` muestra títulos, descripciones, comentarios, nombres y un enlace `javascript:` hostiles, como docente y como estudiante, y comprueba tres cosas:
+- que no aparece ningún `<script>`, `<img>`, `<iframe>` ni atributo de evento;
+- que ningún `href` o `src` usa `javascript:` o `data:`;
+- que el texto se ve literal.
+
+Si alguien usa `dangerouslySetInnerHTML` o convierte el adjunto en `<a href>` sin revisar el protocolo, la prueba falla (se comprobó con las dos cosas).
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -309,6 +348,8 @@ Se ejecuta contra la referencia (`referencia/modulo-calificaciones-referencia.ts
 | Sprint 4 (12/11) | Importador de nóminas | Pendiente (T1112-M) |
 | Sprint 5 (18/11) | Pruebas de exactitud contra la hoja oficial y de que solo el docente de la materia califica | Listo (T1118-A) |
 | Sprint 5 (18/11) | Endpoints de calificaciones que recalculan con `packages/calculo-notas` | Pendiente (T1118-M) |
+| Sprint 5 (19/11) | Pruebas de autorización de tareas y saneamiento de texto (XSS) | Listo (T1119-A) |
+| Sprint 5 (19/11) | Endpoints de tareas con fecha de entrega | Pendiente (T1119-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

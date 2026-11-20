@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Module, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Module, Post, Query } from '@nestjs/common';
 import { IsBoolean, IsInt, IsString, Matches, Max, Min } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { ExcepcionApi } from '../../../src/comun/excepcion-api';
@@ -43,11 +43,11 @@ class FiltroPorAnio {
   @Opcional() @Identificador() anioLectivoId?: string;
 }
 
-type Registro = Record<string, unknown> & { id: string };
+export type Registro = Record<string, unknown> & { id: string };
 
 const conflicto = (mensaje: string): ExcepcionApi => new ExcepcionApi(409, 'CONFLICTO', mensaje);
 
-class Tabla {
+export class Tabla {
   private readonly filas = new Map<string, Registro>();
 
   todas(): Registro[] {
@@ -72,12 +72,25 @@ class Tabla {
   }
 }
 
+/** Datos en memoria de la configuración académica. Lo usan otras referencias (tareas, T1119-A). */
+@Injectable()
+export class AlmacenConfiguracionReferencia {
+  readonly anios = new Tabla();
+  readonly periodos = new Tabla();
+  readonly cursos = new Tabla();
+  readonly materias = new Tabla();
+}
+
 @Controller()
 class ControladorReferencia {
-  private readonly anios = new Tabla();
-  private readonly periodos = new Tabla();
-  private readonly cursos = new Tabla();
-  private readonly materias = new Tabla();
+  private readonly anios: Tabla;
+  private readonly periodos: Tabla;
+  private readonly cursos: Tabla;
+  private readonly materias: Tabla;
+
+  constructor(almacen: AlmacenConfiguracionReferencia) {
+    ({ anios: this.anios, periodos: this.periodos, cursos: this.cursos, materias: this.materias } = almacen);
+  }
 
   @Get('anios-lectivos')
   listarAnios(): Registro[] {
@@ -156,5 +169,5 @@ class ControladorReferencia {
 }
 
 // La autenticación la pone la guardia global real de ms-academico (AutenticacionModule, T1105-M)
-@Module({ controllers: [ControladorReferencia] })
+@Module({ controllers: [ControladorReferencia], providers: [AlmacenConfiguracionReferencia], exports: [AlmacenConfiguracionReferencia] })
 export class ModuloReferencia {}

@@ -690,10 +690,14 @@ paths:
     get:
       tags: [Calificaciones y Tareas]
       summary: Listar tareas, pruebas y proyectos por asignación (RF-19)
+      description: |
+        Las ven el `DOCENTE` de la asignación y los `ESTUDIANTE` y `REPRESENTANTE` del curso (calendario del estudiante).
+        Cualquier otra persona recibe `403`, igual para una asignación ajena que para una inexistente.
       operationId: listarTareas
       parameters:
         - name: asignacionId
           in: query
+          required: true
           schema:
             type: string
             format: uuid
@@ -706,9 +710,20 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Tarea"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
     post:
       tags: [Calificaciones y Tareas]
       summary: Crear tarea, prueba o proyecto con fecha de entrega (DOCENTE, RF-19)
+      description: |
+        Solo el `DOCENTE` asignado a esa materia en ese curso (lo decide el usuario del token); los demás reciben `403`.
+        - La fecha de entrega debe caer dentro del trimestre (`400 FUERA_DEL_TRIMESTRE`, excepción de RF-19) y el trimestre debe ser del año lectivo del curso.
+        - Título y descripción son texto: se guardan tal cual y la PWA los muestra como texto, nunca como HTML. Se rechazan los caracteres de control.
+        - `enlaceRecurso` solo admite direcciones `https://` o `http://` (nunca `javascript:`, `data:` ni `file:`).
       operationId: crearTarea
       requestBody:
         required: true
@@ -723,13 +738,48 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Tarea"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          description: Ya existe una tarea con ese id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
 
   /tareas/{id}/entregas:
     parameters:
       - $ref: "#/components/parameters/IdRecurso"
+    get:
+      tags: [Calificaciones y Tareas]
+      summary: Consultar las notas y la retroalimentación de una tarea (RF-20)
+      description: |
+        El `DOCENTE` de la tarea ve todas las entregas; el `ESTUDIANTE`, solo la suya; el `REPRESENTANTE`, las de sus representados.
+        Una tarea ajena o inexistente responde el mismo `403`.
+      operationId: listarEntregasTarea
+      responses:
+        "200":
+          description: Entregas visibles para quien consulta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entrega"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
     put:
       tags: [Calificaciones y Tareas]
       summary: Registrar nota y retroalimentación de una entrega (DOCENTE, RF-20)
+      description: |
+        Solo el `DOCENTE` de la asignación de la tarea; los demás reciben `403` (una tarea ajena o inexistente, el mismo).
+        La matrícula debe ser del curso de la tarea. Nota de 0 a 10 (excepción de RF-20). Con una versión vieja responde `409`.
       operationId: calificarEntregaTarea
       requestBody:
         required: true
@@ -744,6 +794,14 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Entrega"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
 
   /asistencias:
     get:
@@ -1838,7 +1896,7 @@ components:
 
     Tarea:
       type: object
-      required: [id, asignacionId, tipo, titulo, fechaEntrega, version]
+      required: [id, asignacionId, periodoId, tipo, titulo, fechaEntrega, version]
       properties:
         id:
           type: string
@@ -1846,21 +1904,34 @@ components:
         asignacionId:
           type: string
           format: uuid
+        periodoId:
+          type: string
+          format: uuid
+          description: Trimestre (Taller 2, tarea.id_periodo)
         tipo:
           $ref: "#/components/schemas/TipoTarea"
+        bloque:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 2
+          description: Bloque de aportes al que suma (RF-17); nulo si no es aporte
         titulo:
           type: string
+          description: Texto literal; la PWA lo muestra como texto, nunca como HTML
+        descripcion:
+          type: [string, "null"]
         fechaEntrega:
           type: string
           format: date
         enlaceRecurso:
           type: [string, "null"]
+          format: uri
         version:
           type: integer
 
     SolicitudTarea:
       type: object
-      required: [asignacionId, tipo, titulo, fechaEntrega]
+      required: [asignacionId, periodoId, tipo, titulo, fechaEntrega]
       properties:
         id:
           type: string
@@ -1868,15 +1939,33 @@ components:
         asignacionId:
           type: string
           format: uuid
+        periodoId:
+          type: string
+          format: uuid
         tipo:
           $ref: "#/components/schemas/TipoTarea"
+        bloque:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 2
         titulo:
           type: string
+          minLength: 2
+          maxLength: 150
+        descripcion:
+          type: [string, "null"]
+          maxLength: 2000
+          description: Indicaciones; admite saltos de línea, no otros caracteres de control
         fechaEntrega:
           type: string
           format: date
+          description: Dentro de las fechas del trimestre (RF-19)
         enlaceRecurso:
           type: [string, "null"]
+          format: uri
+          maxLength: 255
+          pattern: "^https?://"
+          description: Solo `https://` o `http://`, sin usuario ni clave en la dirección
 
     Entrega:
       type: object
@@ -1916,9 +2005,12 @@ components:
           maximum: 10
         retroalimentacion:
           type: [string, "null"]
+          maxLength: 1000
+          description: Comentario del docente; texto literal, admite saltos de línea
         version:
           type: integer
           minimum: 0
+          description: Versión vigente de la entrega (0 si todavía no existe); con una versión vieja responde 409
 
     Asistencia:
       type: object

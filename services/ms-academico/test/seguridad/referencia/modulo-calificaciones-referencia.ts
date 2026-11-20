@@ -6,7 +6,7 @@ import { Roles, UsuarioActual } from '../../../src/autenticacion/guardia-jwt';
 import { UsuarioToken } from '../../../src/autenticacion/verificador-jwt';
 import { ExcepcionApi } from '../../../src/comun/excepcion-api';
 import { Identificador, Opcional } from '../../../src/comun/validadores';
-import { AlmacenReferencia, ModuloMatriculaReferencia } from './modulo-matricula-referencia';
+import { AlmacenReferencia, Asignacion, ModuloMatriculaReferencia } from './modulo-matricula-referencia';
 
 // Implementación de referencia de asignaciones (RF-05) y calificaciones (RF-17, RF-18) que cumple la suite
 // de exactitud y permisos (T1118-A). Guarda en memoria y no forma parte del servicio; muestra cómo:
@@ -70,14 +70,6 @@ class FiltroCalificaciones {
   @Opcional() @Matches(/^[1-3]$/, { message: 'trimestre va de 1 a 3' }) trimestre?: string;
 }
 
-interface Asignacion {
-  id: string;
-  docenteId: string;
-  materiaId: string;
-  cursoId: string;
-  version: number;
-}
-
 interface Calificacion {
   id: string;
   asignacionId: string;
@@ -97,10 +89,12 @@ const denegado = (): ExcepcionApi => new ExcepcionApi(403, 'ACCESO_DENEGADO', 'N
 
 @Controller()
 class ControladorCalificacionesReferencia {
-  private readonly asignaciones = new Map<string, Asignacion>();
+  private readonly asignaciones: Map<string, Asignacion>;
   private readonly calificaciones = new Map<string, Calificacion>();
 
-  constructor(private readonly almacen: AlmacenReferencia) {}
+  constructor(private readonly almacen: AlmacenReferencia) {
+    this.asignaciones = almacen.asignaciones;
+  }
 
   /** Ids de persona docente de la cuenta del token: el docente se identifica solo con el token. */
   private docentesDe(usuario: UsuarioToken): Set<string> {

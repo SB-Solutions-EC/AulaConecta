@@ -807,6 +807,9 @@ paths:
     get:
       tags: [Calificaciones y Tareas]
       summary: Consultar registros de asistencia por asignación, matrícula o fecha (RF-21)
+      description: |
+        El `DOCENTE` ve la asistencia de sus asignaciones; el `ESTUDIANTE`, solo la suya; el `REPRESENTANTE`, la de sus representados.
+        La `SECRETARIA` recibe `403` (matriz de permisos). Pedir una asignación o matrícula ajena o inexistente responde el mismo `403`.
       operationId: listarAsistencias
       parameters:
         - name: asignacionId
@@ -833,10 +836,23 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Asistencia"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
     put:
       tags: [Calificaciones y Tareas]
-      summary: Registrar asistencia o justificación (RF-21, RF-31)
-      description: Si el estado es `FALTA` (sin justificar), inserta en la misma transacción un evento `academico.falta_registrada` en `OUTBOX` para `ms-notificaciones`.
+      summary: Registrar asistencia o aprobar una justificación (DOCENTE, RF-21, RF-31)
+      description: |
+        Solo el `DOCENTE` asignado a esa materia en ese curso (lo decide el usuario del token) registra la asistencia y **es el único que
+        aprueba una justificación** (estado `JUSTIFICADA`). El estudiante solo la solicita (`POST /asistencias/{id}/justificacion`) y nadie más
+        la cambia: los demás reciben `403`, igual para una asignación ajena que para una inexistente.
+        - La matrícula debe ser del curso de la asignación (`400 MATRICULA_FUERA_DEL_CURSO`) y la fecha, del año lectivo del curso (`400 FUERA_DEL_ANIO_LECTIVO`, falla de RF-21).
+        - `JUSTIFICADA` necesita el motivo: el de la solicitud del estudiante o el que escribe el docente en `justificacion`.
+        - Volver a marcar `FALTA` una falta ya justificada pide `confirmar: true`; sin él responde `409 CONFIRMACION_REQUERIDA` (excepción de RF-21).
+        - Si el estado es `FALTA` (sin justificar), inserta en la misma transacción un evento `academico.falta_registrada` en `OUTBOX` para `ms-notificaciones`.
       operationId: guardarAsistencia
       requestBody:
         required: true
@@ -851,8 +867,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Asistencia"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
         "409":
-          $ref: "#/components/responses/ConflictoVersion"
+          description: Versión vieja (`CONFLICTO_VERSION`) o falta justificada que se marca de nuevo como falta sin confirmar (`CONFIRMACION_REQUERIDA`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
+
+  /asistencias/{id}/justificacion:
+    parameters:
+      - $ref: "#/components/parameters/IdRecurso"
+    post:
+      tags: [Calificaciones y Tareas]
+      summary: Solicitar la justificación de una falta o un atraso (ESTUDIANTE, CU-19)
+      description: |
+        Solo el `ESTUDIANTE` dueño de esa asistencia (matriz de permisos: el representante no la solicita). Deja `estadoJustificacion = SOLICITADA`
+        con el motivo; el estado sigue siendo `FALTA` o `ATRASO` hasta que el docente la apruebe con `PUT /asistencias`.
+        Una asistencia ajena o inexistente responde el mismo `403`. Sobre `PRESENTE` o `JUSTIFICADA`, o con una solicitud pendiente, responde `409`.
+      operationId: solicitarJustificacion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolicitudJustificacion"
+      responses:
+        "200":
+          description: Solicitud registrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Asistencia"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          description: No hay una falta o un atraso que justificar, o ya hay una solicitud pendiente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorApi"
 
   /comportamientos:
     get:
@@ -2032,6 +2095,11 @@ components:
           $ref: "#/components/schemas/EstadoAsistencia"
         justificacion:
           type: [string, "null"]
+          description: Motivo de la justificación (Taller 2, asistencia.justificacion)
+        estadoJustificacion:
+          type: [string, "null"]
+          enum: [SOLICITADA, APROBADA, null]
+          description: Trámite pedido por el estudiante (CU-19); APROBADA cuando el docente marca JUSTIFICADA
         version:
           type: integer
 
@@ -2055,9 +2123,24 @@ components:
           $ref: "#/components/schemas/EstadoAsistencia"
         justificacion:
           type: [string, "null"]
+          maxLength: 255
+          description: Motivo; obligatorio para JUSTIFICADA si el estudiante no lo pidió antes. Texto literal, sin caracteres de control
+        confirmar:
+          type: boolean
+          description: Necesario para volver a marcar FALTA una falta ya justificada (excepción de RF-21)
         version:
           type: integer
           minimum: 0
+
+    SolicitudJustificacion:
+      type: object
+      required: [motivo]
+      properties:
+        motivo:
+          type: string
+          minLength: 3
+          maxLength: 255
+          description: Texto literal; admite saltos de línea, no otros caracteres de control
 
     Comportamiento:
       type: object

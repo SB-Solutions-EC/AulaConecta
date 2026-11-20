@@ -174,6 +174,22 @@ jobs:
           for (const grupo of new Set([...califRef.keys(), ...califReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(califRef.get(grupo) ?? [])} | ${celda(califReal.get(grupo) ?? [])} |`);
           }
+          // Asistencia y justificación (RF-21, CU-19, T1123-A): solo el docente de la materia aprueba
+          const asisRef = porGrupo(/^test\/seguridad\/referencia-asistencia\./, 'Escenario');
+          const asisReal = porGrupo(/^test\/seguridad\/asistencia\.e2e\./, 'Escenario');
+          const asis403 = (grupos) => [...grupos.values()].flat().filter((p) => p.title.startsWith('403'));
+          lineas.push(
+            '',
+            '### Asistencia: quién registra y quién puede justificar (RF-21)',
+            '',
+            `Pruebas de 403: **${cuenta(asis403(asisRef), 'passed')} de ${asis403(asisRef).length}** en la referencia y **${cuenta(asis403(asisReal), 'passed')}** en los endpoints reales (${cuenta(asis403(asisReal), 'skipped')} omitidas hasta que existan). Regla: el docente de la materia registra y es el único que aprueba; el estudiante solo solicita.`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...asisRef.keys(), ...asisReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(asisRef.get(grupo) ?? [])} | ${celda(asisReal.get(grupo) ?? [])} |`);
+          }
           // Tareas (RF-19, RF-20, T1119-A): autorización y saneamiento de texto contra XSS
           const tareasRef = porGrupo(/^test\/seguridad\/referencia-tareas\./, 'Escenario');
           const tareasReal = porGrupo(/^test\/seguridad\/tareas\.e2e\./, 'Escenario');

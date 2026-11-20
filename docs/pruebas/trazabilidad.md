@@ -23,7 +23,9 @@ Corte: 16/11/2026, inicio del sprint 5.
 | CP-17 | RF-17 · registro de aportes por el docente de la materia | Parcial | `verificar-calificaciones.ts` (T1118-A) contra la referencia: solo el docente asignado a esa materia en ese curso califica (403 para los demás roles y docentes), versión vieja 409 y validación de aportes. Se aplica sola a los endpoints de T1118-M (`calificaciones.e2e.spec.ts`) |
 | CP-18 | RF-18 · cálculo de la nota final en el servidor | Parcial | Exactitud del servidor contra la hoja oficial anonimizada: 143 de 143 casos en la referencia, que calcula con `packages/calculo-notas`. Falta el endpoint real (T1118-M) |
 | CP-38 | RF-38 · el representante ve solo a sus representados | Parcial | `verificar-privacidad.ts` contra la referencia (`referencia-privacidad.spec.ts`); se aplica sola a los endpoints de T1111-M (`privacidad.e2e.spec.ts`) |
-| CP-08 a CP-16, CP-19 a CP-37 y CP-39 | RF-08 a RF-16, RF-19 a RF-37 y RF-39 | Pendiente | Sprints 5 a 8 según la sección 9.2 del documento |
+| CP-19 | RF-19 · tareas con fecha dentro del trimestre | Parcial | `verificar-tareas.ts` (T1119-A) contra la referencia: solo el docente de la asignación crea; fecha fuera del trimestre o de otro año lectivo se rechaza; el curso ve sus tareas. Se aplica sola a los endpoints de T1119-M (`tareas.e2e.spec.ts`). PWA: `PantallaTareas.test.tsx` y `e2e/tareas.spec.ts` |
+| CP-20 | RF-20 · nota y retroalimentación de cada tarea | Parcial | `verificar-tareas.ts`: solo el docente de la tarea califica, nota de 0 a 10, versión vieja 409, cada estudiante ve solo su nota y comentario. Falta el endpoint real (T1119-M) |
+| CP-08 a CP-16, CP-21 a CP-37 y CP-39 | RF-08 a RF-16, RF-21 a RF-37 y RF-39 | Pendiente | Sprints 5 a 8 según la sección 9.2 del documento |
 
 ## Requisitos no funcionales
 
@@ -32,7 +34,7 @@ Corte: 16/11/2026, inicio del sprint 5.
 | CP-N04 | RNF-04 · 0 accesos a datos ajenos | Parcial | Suite de privacidad: 34 pruebas, 19 de ellas de 403, contra la referencia. Se aplica a los endpoints reales cuando existan. El resumen del job `academico / ms-academico` cuenta las pruebas de 403 |
 | CP-N09 | RNF-09 · registro inalterable | Parcial | Bitácora de accesos: `AuditoriaTests.laBitacoraNoSePuedeAlterarNiDesdeElServicio` y `MigracionFlywayTests`. La auditoría de notas es T1126-M |
 | CP-N12 | RNF-12 · hash, bloqueo e inactividad | Automatizado | `AutenticacionTests` (Argon2id y migración desde BCrypt), `BloqueoTests` (3 intentos, 15 min, intentos simultáneos) y `apps/pwa/src/sesion/useCierrePorInactividad.test.tsx` |
-| CP-N13 | RNF-13 · validación en el servidor e inyección | Parcial | Suite de T1109-A (unas 350 pruebas por implementación), controles de carga de T1112-A y validación de ms-identidad (`UsuariosTests.rechazaDatosInvalidos`, `TokenServicioTests.validaLaSolicitud`). Falta el análisis dinámico con OWASP ZAP (sprint 7) |
+| CP-N13 | RNF-13 · validación en el servidor e inyección | Parcial | Suite de T1109-A (unas 350 pruebas por implementación), controles de carga de T1112-A y validación de ms-identidad (`UsuariosTests.rechazaDatosInvalidos`, `TokenServicioTests.validaLaSolicitud`). Falta el análisis dinámico con OWASP ZAP (sprint 7). Texto libre y enlaces de tareas (T1119-A): `@TextoLibre`, `@EnlaceSeguro`, suite de XSS (69 pruebas por implementación) y `PantallaTareas.xss.test.tsx` en la PWA |
 | CP-N14 | RNF-14 · HTTPS con TLS 1.2 o superior | Parcial | `infra/traefik/dinamico.yml` (`minVersion: VersionTLS12`, HSTS y cabeceras). Falta el escaneo dinámico con OWASP ZAP (informe de seguridad del sprint 7, 18/12) |
 | CP-N15 | RNF-15 · 0 secretos y 0 vulnerabilidades altas | Automatizado | Jobs `gitleaks`, `identidad` (Dependency-Check), `academico` (`npm audit`), `notificaciones` (`pip-audit`), `imagen-*` (Trivy) y `quality-pr` (SonarQube); ver [checklist_ci.md](../seguridad/checklist_ci.md) |
 | CP-N01 | RNF-01 · sin conexión | Pendiente | Sprint 9 |

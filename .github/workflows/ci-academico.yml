@@ -174,6 +174,22 @@ jobs:
           for (const grupo of new Set([...califRef.keys(), ...califReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(califRef.get(grupo) ?? [])} | ${celda(califReal.get(grupo) ?? [])} |`);
           }
+          // Tareas (RF-19, RF-20, T1119-A): autorización y saneamiento de texto contra XSS
+          const tareasRef = porGrupo(/^test\/seguridad\/referencia-tareas\./, 'Escenario');
+          const tareasReal = porGrupo(/^test\/seguridad\/tareas\.e2e\./, 'Escenario');
+          const deXss = (grupos) => [...grupos.entries()].filter(([g]) => g.startsWith('Saneamiento')).flatMap(([, p]) => p);
+          lineas.push(
+            '',
+            '### Tareas: autorización y saneamiento de texto (RF-19, RF-20)',
+            '',
+            `Pruebas de XSS (texto y enlaces): **${cuenta(deXss(tareasRef), 'passed')} de ${deXss(tareasRef).length}** en la referencia y **${cuenta(deXss(tareasReal), 'passed')}** en los endpoints reales (${cuenta(deXss(tareasReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...tareasRef.keys(), ...tareasReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(tareasRef.get(grupo) ?? [])} | ${celda(tareasReal.get(grupo) ?? [])} |`);
+          }
           const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
           if (fallidas.length) {
             lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));

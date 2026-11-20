@@ -71,6 +71,14 @@ export interface Representacion {
   parentesco: string;
   version: number;
 }
+export interface Asignacion {
+  id: string;
+  docenteId: string;
+  materiaId: string;
+  cursoId: string;
+  version: number;
+}
+
 export interface Matricula {
   id: string;
   estudianteId: string;
@@ -90,6 +98,8 @@ export class AlmacenReferencia {
   readonly cedulas = new Set<string>();
   readonly representaciones: Representacion[] = [];
   readonly matriculas: Matricula[] = [];
+  /** Asignaciones docente–materia–curso (las crea la referencia de calificaciones, T1118-A). */
+  readonly asignaciones = new Map<string, Asignacion>();
 
   /** Personas de la cuenta del token con ese tipo (una cuenta puede tener varias, por ejemplo docente y representante). */
   personasDe(usuarioId: string, tipo: TipoPersona): Persona[] {

@@ -146,6 +146,19 @@ jobs:
       contexto: apps/pwa
       publicar: ${{ github.event_name == 'push' }}
 
+  # Despliegue continuo al ambiente de pruebas (T1116-A): solo en push a test, con las imágenes que
+  # este mismo CI acaba de escanear y publicar. Después corre la prueba e2e de login contra el ambiente.
+  # No espera a quality-pr: ese check ya se exigió en el PR hacia test y su runner puede estar apagado.
+  desplegar-pruebas:
+    name: desplegar-pruebas
+    needs: [integracion, imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/test' }}
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/cd-pruebas.yml
+    secrets: inherit
+
   notificar-pruebas:
     name: telegram-pruebas
     needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,

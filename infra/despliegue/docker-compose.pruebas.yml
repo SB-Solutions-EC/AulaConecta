@@ -1,0 +1,124 @@
+# Ambiente de pruebas (T1116-A). Se aplica sobre infra/docker-compose.yml:
+#   docker compose -f docker-compose.yml -f despliegue/docker-compose.pruebas.yml --env-file <.env> up -d
+# Las rutas son relativas a infra/, la carpeta del primer archivo.
+#
+# Diferencias con el stack local:
+#  - Los servicios usan las imágenes que el CI escaneó con Trivy y publicó en GHCR, no se construyen aquí.
+#  - Las migraciones de Prisma corren en una imagen mínima con la CLI (la imagen del servicio no la trae).
+#  - Con el perfil datos-prueba se cargan los datos ficticios de infra/datos-prueba (T1116-M).
+
+services:
+  certificados:
+    environment:
+      # El certificado autofirmado incluye el nombre público del servidor
+      DOMINIO: ${DOMINIO:-}
+
+  ms-identidad:
+    build: !reset null
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/ms-identidad:${VERSION:?Falta VERSION, por ejemplo sha-1a2b3c4}
+    restart: unless-stopped
+
+  ms-academico:
+    build: !reset null
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/ms-academico:${VERSION:?Falta VERSION}
+    restart: unless-stopped
+
+  ms-notificaciones:
+    build: !reset null
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/ms-notificaciones:${VERSION:?Falta VERSION}
+    restart: unless-stopped
+
+  pwa:
+    build: !reset null
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/pwa:${VERSION:?Falta VERSION}
+    restart: unless-stopped
+
+  gateway:
+    restart: unless-stopped
+
+  postgres:
+    restart: unless-stopped
+
+  rabbitmq:
+    restart: unless-stopped
+
+  # Solo package.json, el lockfile y prisma/: la imagen no contiene el código del servicio
+  migraciones-academico:
+    build:
+      context: ../services/ms-academico
+      dockerfile: ../../infra/despliegue/migraciones-academico.Dockerfile
+      target: !reset null
+    image: aulaconecta-migraciones-academico:${VERSION:?Falta VERSION}
+
+  # ---- Datos de prueba ficticios (perfil datos-prueba): se ejecutan con docker compose run ----
+
+  semilla-identidad:
+    profiles: [datos-prueba]
+    # La misma base que ms-notificaciones
+    image: python:3.12-alpine3.24
+    # Sin root; las dependencias van a un /tmp temporal que sí permite cargar la librería de PostgreSQL
+    user: "65534:65534"
+    read_only: true
+    tmpfs:
+      - /tmp:exec
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        pip install --quiet --no-cache-dir --disable-pip-version-check --target /tmp/dependencias
+        "psycopg[binary]==3.2.3" "argon2-cffi==23.1.0"
+        && PYTHONPATH=/tmp/dependencias python /datos/sembrar_identidad.py
+    environment:
+      DATABASE_URL: postgresql://usr_identidad:${POSTGRES_IDENTIDAD_PASSWORD:?Falta POSTGRES_IDENTIDAD_PASSWORD}@postgres:5432/db_identidad
+      CLAVE_DATOS_PRUEBA: ${CLAVE_DATOS_PRUEBA:?Falta CLAVE_DATOS_PRUEBA}
+      HOME: /tmp
+    volumes:
+      - ./datos-prueba:/datos:ro
+    networks:
+      - interna
+      # pip descarga las dos dependencias; la red interna no tiene salida a Internet
+      - salida
+
+  semilla-academico:
+    profiles: [datos-prueba]
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/ms-academico:${VERSION:?Falta VERSION}
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    entrypoint: ["node", "dist/semilla/sembrar.js"]
+    environment:
+      # El script se niega a correr con NODE_ENV=production
+      NODE_ENV: pruebas
+      DATABASE_URL: postgresql://usr_academico:${POSTGRES_ACADEMICO_PASSWORD:?Falta POSTGRES_ACADEMICO_PASSWORD}@postgres:5432/db_academico
+      DATOS_PRUEBA_ARCHIVO: /datos/datos.json
+    volumes:
+      - ./datos-prueba:/datos:ro
+    networks:
+      - interna
+
+  semilla-notificaciones:
+    profiles: [datos-prueba]
+    image: ${REGISTRO:-ghcr.io/sb-solutions-ec/aulaconecta}/ms-notificaciones:${VERSION:?Falta VERSION}
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    entrypoint: ["python", "-m", "app.semilla"]
+    environment:
+      ENTORNO: pruebas
+      DATABASE_URL: postgresql+psycopg://usr_notificaciones:${POSTGRES_NOTIFICACIONES_PASSWORD:?Falta POSTGRES_NOTIFICACIONES_PASSWORD}@postgres:5432/db_notificaciones
+      DATOS_PRUEBA_ARCHIVO: /datos/datos.json
+    volumes:
+      - ./datos-prueba:/datos:ro
+    networks:
+      - interna
+
+networks:
+  salida:

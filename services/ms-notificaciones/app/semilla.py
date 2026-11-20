@@ -21,12 +21,22 @@ from sqlalchemy.orm import Session
 
 from app.db import Contacto
 
-RUTA_POR_DEFECTO = Path(__file__).resolve().parents[3] / "infra" / "datos-prueba" / "datos.json"
+def ruta_por_defecto() -> Path:
+    """infra/datos-prueba/datos.json de una copia del repositorio.
+
+    Se calcula al usarla y no al importar el módulo: dentro de la imagen (/app/app/semilla.py) no existe
+    la carpeta del repositorio y los datos llegan por DATOS_PRUEBA_ARCHIVO (ambiente de pruebas, T1116-A).
+    """
+    carpetas = Path(__file__).resolve().parents
+    if len(carpetas) < 4:
+        raise FileNotFoundError("Define DATOS_PRUEBA_ARCHIVO con la ruta de datos.json")
+    return carpetas[3] / "infra" / "datos-prueba" / "datos.json"
 
 
 def leer_datos(ruta: Path | None = None) -> dict[str, Any]:
     """Lee el archivo compartido de datos de prueba."""
-    archivo = ruta or Path(os.getenv("DATOS_PRUEBA_ARCHIVO") or RUTA_POR_DEFECTO)
+    variable = os.getenv("DATOS_PRUEBA_ARCHIVO")
+    archivo = ruta or (Path(variable) if variable else ruta_por_defecto())
     return json.loads(archivo.read_text(encoding="utf-8"))
 
 

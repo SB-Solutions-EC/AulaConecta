@@ -1,13 +1,32 @@
-# Modelo de datos por servicio v2
+# Modelo de datos por servicio v3
 
-**Tarea:** T1026-M · **Responsable:** Christian Marcelo Acuña Gamboa · **Fecha:** 26/10/2026 · **Sprint 3**
-**Cambia respecto a la v1 (23/10):** la arquitectura pasó de un solo backend a **3 microservicios** (planificación v2). Cada servicio tiene su propia base de datos y no lee las tablas de los otros.
+**Tarea:** T1026-M (v2) · T1113-A (v3) · **Fecha:** 16/11/2026 · **Sprint 5**
+**Cambia respecto a la v2 (26/10):** se alinea con el modelo entidad–relación y el diccionario de datos del Taller 2 ([docs/modelos/bd](../modelos/bd), `docs/analisis/Grupo01_Taller2_2.pdf`): tabla `PERIODO` (trimestres), código de materia, código y fecha de matrícula, datos personales opcionales, estados del aviso del diagrama de estados y `motivo_fallo`. Se quitan `DIA_NO_DICTADO` (RF-08 queda fuera de la versión 1.0) y `HORARIO` (el horario es el texto `horario_resumen` de la asignación, RF-37).
+**Desde la v2:** la arquitectura tiene **3 microservicios**. Cada servicio tiene su propia base de datos y no lee las tablas de los otros.
 
 | Servicio | Tecnología | Base de datos | Modelo de datos |
 |---|---|---|---|
-| ms-identidad | Spring Boot (Java 21) | `db_identidad` (Flyway) | Abner (T1026-A) |
+| ms-identidad | Spring Boot (Java 21) | `db_identidad` (Flyway) | [c4.md, sección 5](c4.md#5-modelo-de-datos-de-ms-identidad-db_identidad) (T1026-A) |
 | **ms-academico** | NestJS (TypeScript) | `db_academico` (Prisma) | Este documento |
 | **ms-notificaciones** | FastAPI (Python) | `db_notificaciones` (SQLAlchemy + Alembic) | Este documento |
+
+## 0. Modelo lógico y su reparto en las tres bases
+
+El **modelo lógico de referencia** es el del Taller 2: 27 tablas en un solo esquema MySQL 5.0 para PowerDesigner ([aulaconecta_mysql50.sql](../modelos/bd/aulaconecta_mysql50.sql)), con las reglas obligatorias de la guía (persona 1 a 1 usuario, rol N a N usuario, claves `id_<tabla>` hexadecimales). La implementación lo reparte en tres bases PostgreSQL; las relaciones que cruzan de una base a otra se guardan como UUID **sin llave foránea**.
+
+| Tabla lógica (Taller 2) | Base física | Tabla física | Nota |
+|---|---|---|---|
+| `persona` | `db_academico` | `persona` | El celular para avisos y su autorización están además en `contacto` de `db_notificaciones` |
+| `usuario` | `db_identidad` | `usuario` | `usuario.id_persona` del modelo lógico se guarda al revés: `persona.usuario_id` (único) en `db_academico`, así ms-identidad no conoce datos personales. El estado PENDIENTE es `debe_cambiar_clave = true` |
+| `rol`, `usuario_rol` | `db_identidad` | `rol`, `usuario_rol` | El código técnico de Administrador es `ADMIN` |
+| `anio_lectivo`, `periodo`, `curso`, `materia`, `matricula` | `db_academico` | mismas | Ya implementadas (Prisma) |
+| `asignacion`, `representacion`, `planificacion`, `semana_planificacion`, `observacion`, `tarea`, `entrega`, `calificacion`, `asistencia`, `comportamiento`, `parametro` | `db_academico` | mismas | Se crean en los sprints 5 a 7 (sección 6) |
+| `plantilla`, `notificacion`, `suscripcion_push` | `db_notificaciones` | mismas | Más `contacto` y `evento_recibido`, propias de la implementación (sección 3) |
+| `comunicado` | `db_notificaciones` | — | RF-32; se crea con los avisos (sprint 8) |
+| `auditoria` | `db_academico` y `db_identidad` | `auditoria` y `auditoria_acceso` | Cada servicio audita sus propios cambios (RNF-09) |
+| `outbox`, `cambio_sincronizado` | `db_academico` | mismas | Eventos de avisos y sincronización sin conexión |
+
+ms-identidad tiene además `sesion`, `cliente_servicio` y `clave_firma`, que son técnicas (tokens y firma) y no forman parte del modelo lógico.
 
 ## 1. Reglas comunes a todas las tablas
 
@@ -26,14 +45,14 @@ En los diagramas, `ref` marca un UUID que apunta a otro servicio.
 ```mermaid
 erDiagram
     ANIO_LECTIVO ||--o{ CURSO : "organiza"
-    ANIO_LECTIVO ||--o{ DIA_NO_DICTADO : "registra"
+    ANIO_LECTIVO ||--|{ PERIODO : "se divide en trimestres"
+    PERSONA ||--o{ CURSO : "es tutor de"
     CURSO ||--o{ MATRICULA : "recibe"
     PERSONA ||--o{ MATRICULA : "se matricula"
     PERSONA ||--o{ REPRESENTACION : "representa o es representado"
     MATERIA ||--o{ ASIGNACION : "se dicta en"
     CURSO ||--o{ ASIGNACION : "incluye"
     PERSONA ||--o{ ASIGNACION : "dicta"
-    ASIGNACION ||--o{ HORARIO : "ocupa"
     ASIGNACION ||--o{ PLANIFICACION : "se planifica"
     PLANIFICACION ||--o{ SEMANA_PLANIFICACION : "contiene"
     PLANIFICACION ||--o{ OBSERVACION : "recibe"
@@ -45,14 +64,25 @@ erDiagram
     ASIGNACION ||--o{ ASISTENCIA : "registra"
     MATRICULA ||--o{ ASISTENCIA : "tiene"
     MATRICULA ||--o{ COMPORTAMIENTO : "tiene"
+    PERIODO ||--o{ PLANIFICACION : "agrupa"
+    PERIODO ||--o{ TAREA : "agrupa"
+    PERIODO ||--o{ CALIFICACION : "agrupa"
+    PERIODO ||--o{ COMPORTAMIENTO : "agrupa"
 
     PERSONA {
         uuid id PK
         uuid usuario_id UK "ref: ms-identidad"
         string tipo "DOCENTE, ESTUDIANTE, REPRESENTANTE"
+        string cedula UK
         string nombres
         string apellidos
         string area "solo docentes"
+        date fecha_nacimiento "opcional"
+        string sexo "M o F, opcional"
+        string telefono "09XXXXXXXX, opcional"
+        string correo UK "opcional"
+        string direccion "opcional"
+        boolean activo
         int version
     }
     REPRESENTACION {
@@ -70,24 +100,28 @@ erDiagram
         boolean activo
         int version
     }
-    DIA_NO_DICTADO {
+    PERIODO {
         uuid id PK
         uuid anio_lectivo_id FK
-        date fecha
-        string motivo "RF-08 (opcional)"
+        int numero "trimestre 1 a 3, único por año"
+        date fecha_inicio "dentro del año lectivo, sin superponerse (RF-07)"
+        date fecha_fin
+        boolean cerrado
         int version
     }
     CURSO {
         uuid id PK
         uuid anio_lectivo_id FK
+        uuid tutor_id FK "docente tutor"
         string nivel
         string paralelo
         int version
     }
     MATERIA {
         uuid id PK
+        string codigo UK "p. ej. MAT"
         string nombre
-        string area
+        string area "opcional"
         int version
     }
     ASIGNACION {
@@ -95,25 +129,22 @@ erDiagram
         uuid docente_id FK
         uuid materia_id FK
         uuid curso_id FK
-        int version
-    }
-    HORARIO {
-        uuid id PK
-        uuid asignacion_id FK
-        int dia "1 a 5"
-        string hora "h1 a h5"
+        string horario_resumen "días y horas de clase (RF-37)"
         int version
     }
     MATRICULA {
         uuid id PK
         uuid estudiante_id FK
         uuid curso_id FK
+        string codigo_matricula UK "p. ej. AND-2026-0001"
+        date fecha_matricula
         string estado "ACTIVA, RETIRADA"
         int version
     }
     PLANIFICACION {
         uuid id PK
         uuid asignacion_id FK
+        uuid periodo_id FK
         int unidad
         string titulo
         string estado "BORRADOR, EN_REVISION, APROBADA, CON_OBSERVACIONES"
@@ -144,19 +175,20 @@ erDiagram
         uuid id PK
         uuid asignacion_id FK
         uuid matricula_id FK
-        int trimestre
+        uuid periodo_id FK
         jsonb aportes_bloque1
         jsonb aportes_bloque2
         decimal refuerzo
         decimal nota_proyecto
         decimal nota_examen
-        decimal nota_final "packages/calculo, truncada a 2 decimales"
+        decimal nota_final "packages/calculo-notas, truncada a 2 decimales"
         string cualitativo "A+ a E-"
         int version
     }
     TAREA {
         uuid id PK
         uuid asignacion_id FK
+        uuid periodo_id FK
         string tipo "TAREA, PRUEBA, PROYECTO"
         string titulo
         date fecha_entrega
@@ -183,7 +215,7 @@ erDiagram
     COMPORTAMIENTO {
         uuid id PK
         uuid matricula_id FK
-        int trimestre
+        uuid periodo_id FK
         jsonb indicadores "9 indicadores"
         decimal nota
         string cualitativo
@@ -252,9 +284,10 @@ erDiagram
         string canal "PUSH, WHATSAPP_ASISTIDO, WHATSAPP_API"
         string motivo "CONFIRMACION_AUTORIZACION, PROMEDIO_BAJO, FALTA_SIN_JUSTIFICAR"
         string clave_antiduplicado UK "contacto + motivo + canal + periodo (RF-34)"
-        string estado "EN_COLA, ENVIADA, ENTREGADA, FALLIDA, PREPARADA, ENVIADA_MANUAL"
+        string estado "EN_COLA, PREPARADA, ENVIADA, ENTREGADA, FALLIDA, POR_REVISAR, SIN_AUTORIZACION"
         uuid enviada_por_usuario_id "ref: ms-identidad, solo WhatsApp asistido"
         int intentos
+        string motivo_fallo "por qué falló o quedó por revisar (RF-33, RF-35)"
         string id_mensaje_proveedor
         datetime creada_en
         datetime enviada_en
@@ -267,8 +300,10 @@ erDiagram
 | Nivel | Canal | Costo | Cómo funciona |
 |---|---|---|---|
 | 1 | **Push de la PWA** | Gratis | Notificación en el celular o la computadora del representante con Web Push (estándar del navegador, claves VAPID). Automático |
-| 2 | **WhatsApp asistido** | Gratis | La notificación queda `PREPARADA`; el docente o la secretaría ve el botón "Avisar por WhatsApp", que abre `https://wa.me/<número>?text=<mensaje>` con la plantilla ya llenada. Al presionar "Enviar" se marca `ENVIADA_MANUAL` con quién la envió |
+| 2 | **WhatsApp asistido** | Gratis | La notificación queda `PREPARADA`; el docente o la secretaría ve el botón "Avisar por WhatsApp", que abre `https://wa.me/<número>?text=<mensaje>` con la plantilla ya llenada. Al presionar "Enviar" se marca `ENVIADA` y `enviada_por_usuario_id` guarda quién la envió (no hay confirmación de entrega) |
 | 3 | **WhatsApp Cloud API** | Pago por mensaje | Envío automático con plantillas aprobadas por Meta. Se usa con el número de prueba gratuito en el desarrollo y se activa en producción solo si el colegio decide pagarlo |
+
+Estados del aviso (diagrama de estados del Taller 2, migración `0002_estados_taller2`): `EN_COLA` → `ENVIADA` → `ENTREGADA`; `PREPARADA` para el WhatsApp asistido; `FALLIDA` con `motivo_fallo`; `POR_REVISAR` cuando se agotan los reintentos en 24 h (RF-35); `SIN_AUTORIZACION` cuando el representante no autorizó los avisos o se dio de baja (RF-29).
 
 Los tres canales usan el **mismo adaptador** (`CanalNotificacion` con las implementaciones `PushCanal`, `WhatsAppAsistidoCanal`, `WhatsAppApiCanal` y `SimuladoCanal` para las pruebas). Qué canales están activos es una configuración, no un cambio de código.
 
@@ -292,7 +327,7 @@ sequenceDiagram
     N->>P: Nivel 1: notificación push (gratis, automática)
     N->>N: Nivel 2: deja la notificación PREPARADA para WhatsApp
     S->>W: Presiona "Avisar por WhatsApp" (wa.me con el mensaje ya escrito)
-    S->>N: Marca ENVIADA_MANUAL
+    S->>N: Marca ENVIADA (con quién la envió)
     N-->>W: Nivel 3 (solo si el colegio lo activa): envío por WhatsApp Cloud API
     N->>N: Actualiza NOTIFICACION (historial, RF-33)
 ```
@@ -305,16 +340,21 @@ sequenceDiagram
 | Avisos por niveles: push gratuito, WhatsApp asistido gratuito y WhatsApp Cloud API opcional de pago | Cumple RF-30 y RF-31 sin costo obligatorio para el colegio; el canal se elige por configuración (SRS 2.3, riesgo R10) |
 | El número de WhatsApp, las suscripciones push y el consentimiento viven en ms-notificaciones | Solo el servicio que envía mensajes ve los teléfonos (principio de mínimo privilegio, RNF-04) |
 | Patrón *outbox* + tabla de eventos recibidos | Garantiza que cada aviso se envíe una sola vez aunque fallen la red o RabbitMQ (RF-34, RF-35) |
-| `CALIFICACION` guarda la nota final ya calculada | Se calcula con `packages/calculo` al guardar; los reportes no recalculan (RNF-02) |
+| El modelo lógico del Taller 2 es la referencia y la implementación lo reparte en tres bases (sección 0) | La guía pide un solo modelo ER; los microservicios piden bases separadas. Las relaciones entre bases se guardan como UUID sin llave foránea |
+| `usuario.id_persona` del modelo lógico se implementa como `persona.usuario_id` | ms-identidad no guarda datos personales; la relación sigue siendo 1 a 1 (clave única) |
+| El celular para avisos y su consentimiento se guardan en `CONTACTO` (ms-notificaciones), no en `REPRESENTACION` | Solo el servicio que envía mensajes ve los teléfonos (RNF-04). En el modelo lógico se dibujan en `representacion` |
+| `ADMIN` es el código técnico del rol Administrador | Ya lo usan los tokens, las guardas y los contratos; el nombre visible sigue siendo "Administrador" |
+| PERIODO con 3 trimestres por año lectivo; calificaciones, tareas, comportamiento y planificaciones apuntan al trimestre | Sustituye el entero `trimestre`: las fechas del trimestre se validan una sola vez (RF-07) y se puede cerrar un trimestre |
+| `CALIFICACION` guarda la nota final ya calculada | Se calcula con `packages/calculo-notas` al guardar; los reportes no recalculan (RNF-02) |
 | Calificaciones, asistencia y comportamiento cuelgan de `MATRICULA` | Conservan el historial si el estudiante cambia de curso o se retira (RF-24) |
 
 ## 6. En qué sprint se crea cada tabla
 
 | Sprint | ms-academico | ms-notificaciones |
 |---|---|---|
-| 3 (28/10) | ANIO_LECTIVO, CURSO, MATERIA, MATRICULA (migración inicial) | Base vacía con Alembic |
-| 4 | PERSONA, REPRESENTACION, ASIGNACION, HORARIO, DIA_NO_DICTADO, AUDITORIA | — |
-| 5 | CALIFICACION, TAREA, ENTREGA, ASISTENCIA, COMPORTAMIENTO, PARAMETRO, OUTBOX | — |
+| 3 (28/10) | ANIO_LECTIVO, PERIODO, CURSO, MATERIA, PERSONA, MATRICULA (migración inicial) | `0001_init`: CONTACTO, SUSCRIPCION_PUSH, PLANTILLA, EVENTO_RECIBIDO, NOTIFICACION |
+| 4 | — (la migración inicial se aplica y se valida en CI) | — |
+| 5 | Alineación con el Taller 2 (`materia.codigo`, `matricula.codigo_matricula`, datos de persona); REPRESENTACION, ASIGNACION, AUDITORIA, CALIFICACION, TAREA, ENTREGA, ASISTENCIA, COMPORTAMIENTO, PARAMETRO, OUTBOX | `0002_estados_taller2`: estados del aviso y `motivo_fallo` |
 | 7 | PLANIFICACION, SEMANA_PLANIFICACION, OBSERVACION | — |
-| 8 | — | CONTACTO, SUSCRIPCION_PUSH, PLANTILLA, EVENTO_RECIBIDO, NOTIFICACION |
+| 8 | — | COMUNICADO y envío de avisos |
 | 9 | CAMBIO_SINCRONIZADO | — |

@@ -1,0 +1,236 @@
+erDiagram
+    anio_lectivo {
+        char(32) id_anio_lectivo PK
+        varchar(20) nombre UK
+        date fecha_inicio
+        date fecha_fin
+        tinyint(1) activo
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    periodo {
+        char(32) id_periodo PK
+        char(32) id_anio_lectivo FK
+        tinyint numero
+        date fecha_inicio
+        date fecha_fin
+        tinyint(1) cerrado
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    curso {
+        char(32) id_curso PK
+        char(32) id_anio_lectivo FK
+        char(32) id_tutor FK
+        varchar(20) nivel
+        char(1) paralelo
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    materia {
+        char(32) id_materia PK
+        varchar(10) codigo UK
+        varchar(80) nombre
+        varchar(60) area
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    asignacion {
+        char(32) id_asignacion PK
+        char(32) id_docente FK
+        char(32) id_materia FK
+        char(32) id_curso FK
+        varchar(150) horario_resumen
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    matricula {
+        char(32) id_matricula PK
+        char(32) id_estudiante FK
+        char(32) id_curso FK
+        varchar(15) codigo_matricula UK
+        date fecha_matricula
+        varchar(10) estado
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    representacion {
+        char(32) id_representacion PK
+        char(32) id_representante FK
+        char(32) id_estudiante FK
+        varchar(20) parentesco
+        tinyint(1) es_principal
+        varchar(10) telefono_whatsapp
+        tinyint(1) verificado
+        tinyint(1) autoriza_avisos
+        datetime fecha_autorizacion
+        datetime fecha_baja
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    planificacion {
+        char(32) id_planificacion PK
+        char(32) id_asignacion FK
+        char(32) id_periodo FK
+        char(32) id_revisor FK
+        tinyint unidad
+        varchar(150) titulo
+        text objetivos
+        text ejes_transversales
+        text estandar
+        text adaptaciones_dua
+        varchar(20) estado
+        datetime enviada_en
+        datetime revisada_en
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    semana_planificacion {
+        char(32) id_semana_planificacion PK
+        char(32) id_planificacion FK
+        tinyint numero
+        date fecha_inicio
+        date fecha_fin
+        text destrezas
+        text actividades_erca
+        text recursos
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    observacion {
+        char(32) id_observacion PK
+        char(32) id_planificacion FK
+        char(32) id_semana_planificacion FK
+        char(32) id_autor FK
+        tinyint ronda
+        varchar(60) campo
+        text texto
+        tinyint(1) resuelta
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    tarea {
+        char(32) id_tarea PK
+        char(32) id_asignacion FK
+        char(32) id_periodo FK
+        varchar(15) tipo
+        tinyint bloque
+        varchar(150) titulo
+        text descripcion
+        date fecha_entrega
+        varchar(255) enlace_recurso
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    entrega {
+        char(32) id_entrega PK
+        char(32) id_tarea FK
+        char(32) id_matricula FK
+        varchar(12) estado
+        decimal(4_2) nota
+        text retroalimentacion
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    calificacion {
+        char(32) id_calificacion PK
+        char(32) id_matricula FK
+        char(32) id_asignacion FK
+        char(32) id_periodo FK
+        decimal(4_2) promedio_aportes
+        decimal(4_2) refuerzo
+        decimal(4_2) nota_proyecto
+        decimal(4_2) nota_examen
+        decimal(4_2) nota_final
+        char(2) cualitativo
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    asistencia {
+        char(32) id_asistencia PK
+        char(32) id_matricula FK
+        char(32) id_asignacion FK
+        char(32) id_registrado_por FK
+        date fecha
+        varchar(12) estado
+        varchar(255) justificacion
+        varchar(12) estado_justificacion
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    comportamiento {
+        char(32) id_comportamiento PK
+        char(32) id_matricula FK
+        char(32) id_periodo FK
+        char(32) id_tutor FK
+        char(1) cognitivo_1
+        char(1) cognitivo_2
+        char(1) cognitivo_3
+        char(1) cognitivo_4
+        char(1) social_1
+        char(1) social_2
+        char(1) social_3
+        char(1) social_4
+        char(1) social_5
+        decimal(4_2) nota
+        char(1) cualitativo
+        varchar(255) descripcion
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    parametro {
+        char(32) id_parametro PK
+        char(32) id_anio_lectivo FK
+        varchar(50) clave
+        varchar(100) valor
+        varchar(200) descripcion
+        int version
+        datetime creado_en
+        datetime actualizado_en
+    }
+    anio_lectivo ||--o{ periodo : "1 a N · id_anio_lectivo"
+    anio_lectivo ||--o{ curso : "1 a N · id_anio_lectivo"
+    persona |o--o{ curso : "0..1 a N · id_tutor"
+    persona ||--o{ asignacion : "1 a N · id_docente"
+    materia ||--o{ asignacion : "1 a N · id_materia"
+    curso ||--o{ asignacion : "1 a N · id_curso"
+    persona ||--o{ matricula : "1 a N · id_estudiante"
+    curso ||--o{ matricula : "1 a N · id_curso"
+    persona ||--o{ representacion : "1 a N · id_representante"
+    persona ||--o{ representacion : "1 a N · id_estudiante"
+    asignacion ||--o{ planificacion : "1 a N · id_asignacion"
+    periodo ||--o{ planificacion : "1 a N · id_periodo"
+    usuario |o--o{ planificacion : "0..1 a N · id_revisor"
+    planificacion ||--o{ semana_planificacion : "1 a N · id_planificacion"
+    planificacion ||--o{ observacion : "1 a N · id_planificacion"
+    semana_planificacion |o--o{ observacion : "0..1 a N · id_semana_planificacion"
+    usuario ||--o{ observacion : "1 a N · id_autor"
+    asignacion ||--o{ tarea : "1 a N · id_asignacion"
+    periodo ||--o{ tarea : "1 a N · id_periodo"
+    tarea ||--o{ entrega : "1 a N · id_tarea"
+    matricula ||--o{ entrega : "1 a N · id_matricula"
+    matricula ||--o{ calificacion : "1 a N · id_matricula"
+    asignacion ||--o{ calificacion : "1 a N · id_asignacion"
+    periodo ||--o{ calificacion : "1 a N · id_periodo"
+    matricula ||--o{ asistencia : "1 a N · id_matricula"
+    asignacion ||--o{ asistencia : "1 a N · id_asignacion"
+    usuario ||--o{ asistencia : "1 a N · id_registrado_por"
+    matricula ||--o{ comportamiento : "1 a N · id_matricula"
+    periodo ||--o{ comportamiento : "1 a N · id_periodo"
+    persona ||--o{ comportamiento : "1 a N · id_tutor"
+    anio_lectivo ||--o{ parametro : "1 a N · id_anio_lectivo"

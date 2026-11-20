@@ -1,0 +1,149 @@
+# Configuración dinámica de Traefik: rutas hacia los servicios, middlewares y TLS.
+
+http:
+  routers:
+    identidad:
+      entryPoints:
+        - websecure
+      rule: "Path(`/api/identidad`) || PathPrefix(`/api/identidad/`)"
+      priority: 20
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - quitar-prefijo-identidad
+      service: ms-identidad
+      tls: {}
+
+    # Los tokens de servicio (client credentials) solo se piden por la red interna:
+    # desde fuera del gateway /api/identidad/oauth/* responde 403 (T1110-A)
+    identidad-oauth:
+      entryPoints:
+        - websecure
+      rule: "PathPrefix(`/api/identidad/oauth`)"
+      priority: 30
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - solo-red-interna
+      service: ms-identidad
+      tls: {}
+
+    academico:
+      entryPoints:
+        - websecure
+      rule: "Path(`/api/academico`) || PathPrefix(`/api/academico/`)"
+      priority: 20
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - quitar-prefijo-academico
+      service: ms-academico
+      tls: {}
+
+    notificaciones:
+      entryPoints:
+        - websecure
+      rule: "Path(`/api/notificaciones`) || PathPrefix(`/api/notificaciones/`)"
+      priority: 20
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+        - quitar-prefijo-notificaciones
+      service: ms-notificaciones
+      tls: {}
+
+    pwa:
+      entryPoints:
+        - websecure
+      rule: "PathPrefix(`/`)"
+      priority: 1
+      middlewares:
+        - limite-peticiones
+        - cabeceras-seguridad
+      service: pwa
+      tls: {}
+
+  middlewares:
+    # Por IP de origen. Todo el colegio puede salir por una misma IP (60 docentes y 400 estudiantes,
+    # RNF-06), así que el límite es alto; se ajusta con las pruebas de carga con k6.
+    limite-peticiones:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 200
+
+    cabeceras-seguridad:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        frameDeny: true
+        referrerPolicy: no-referrer
+
+    # Ningún cliente externo llega desde 127.0.0.1 del contenedor del gateway: siempre responde 403
+    solo-red-interna:
+      ipAllowList:
+        sourceRange:
+          - 127.0.0.1/32
+
+    quitar-prefijo-identidad:
+      stripPrefix:
+        prefixes:
+          - /api/identidad
+
+    quitar-prefijo-academico:
+      stripPrefix:
+        prefixes:
+          - /api/academico
+
+    quitar-prefijo-notificaciones:
+      stripPrefix:
+        prefixes:
+          - /api/notificaciones
+
+  services:
+    ms-identidad:
+      loadBalancer:
+        servers:
+          - url: http://ms-identidad:8080
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+    ms-academico:
+      loadBalancer:
+        servers:
+          - url: http://ms-academico:3000
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+    ms-notificaciones:
+      loadBalancer:
+        servers:
+          - url: http://ms-notificaciones:8000
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+    pwa:
+      loadBalancer:
+        servers:
+          - url: http://pwa:8080
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certificados/gateway.pem
+        keyFile: /certificados/gateway.key

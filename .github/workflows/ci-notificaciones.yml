@@ -1,0 +1,77 @@
+name: CI ms-notificaciones
+
+# Lo llama ci.yml, que luego entrega la cobertura a SonarQube.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  PIP_AUDIT_VERSION: 2.10.1
+
+jobs:
+  pruebas:
+    name: ms-notificaciones
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: services/ms-notificaciones
+
+    # PostgreSQL de prueba (la misma versión del docker-compose) para aplicar las migraciones de Alembic.
+    # Contenedor efímero que solo escucha en la máquina del job: acepta conexiones sin clave (trust),
+    # así no queda ninguna contraseña escrita en el workflow (SonarQube secrets:S6698).
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24
+        env:
+          POSTGRES_USER: usr_notificaciones
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: db_notificaciones
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usr_notificaciones -d db_notificaciones"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar Python 3.12 (la misma versión del Dockerfile)
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/ms-notificaciones/requirements*.txt
+
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt "pip-audit==${PIP_AUDIT_VERSION}"
+
+      - name: Aplicar las migraciones de Alembic y comprobar que coinciden con los modelos
+        env:
+          DATABASE_URL: postgresql+psycopg://usr_notificaciones@localhost:5432/db_notificaciones
+        run: |
+          alembic upgrade head
+          # Falla si alguien cambió app/db.py sin crear su migración
+          alembic check
+          # La migración también debe poder deshacerse
+          alembic downgrade base
+
+      - name: Pruebas y cobertura (pytest)
+        run: |
+          python -m pytest --cov=app --cov-report=term --cov-report=xml:coverage.xml
+          # Rutas relativas a la raíz del repositorio, como las espera SonarQube
+          sed -i 's|<source>.*</source>|<source>.</source>|; s|filename="|filename="services/ms-notificaciones/app/|' coverage.xml
+
+      - name: Auditar dependencias (falla con cualquier vulnerabilidad conocida)
+        run: pip-audit -r requirements.txt
+
+      - name: Guardar la cobertura
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: notificaciones-resultados
+          retention-days: 7
+          path: services/ms-notificaciones/coverage.xml

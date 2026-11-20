@@ -1,0 +1,11 @@
+{
+  "name": "AulaConecta — Unidad Educativa Andoas",
+  "short_name": "AulaConecta",
+  "description": "Plataforma de gestión académica, planificación curricular, calificaciones y avisos con soporte sin conexión",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F6F7FB",
+  "theme_color": "#1E3A5F",
+  "lang": "es-EC"
+}
+

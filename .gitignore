@@ -3,8 +3,17 @@ node_modules/
 dist/
 build/
 coverage/
+reportes/
+# Salidas de Playwright (el CI las guarda como artefacto)
+playwright-report/
+test-results/
+resultados-e2e.json
 .turbo/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
+.scannerwork/
+target/
 
 # Variables de entorno y secretos (nunca se suben)
 .env
@@ -34,3 +43,6 @@ desktop.ini
 # Registros
 *.log
 npm-debug.log*
+
+# Cliente de Prisma: se genera con npm install (postinstall)
+services/ms-academico/src/generado/

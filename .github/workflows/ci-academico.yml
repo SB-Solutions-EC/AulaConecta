@@ -154,6 +154,26 @@ jobs:
           for (const grupo of new Set([...cargaRef.keys(), ...cargaReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(cargaRef.get(grupo) ?? [])} | ${celda(cargaReal.get(grupo) ?? [])} |`);
           }
+          // Calificaciones (RF-17, RF-18, T1118-A): exactitud del servidor contra la hoja oficial y permisos
+          const califRef = porGrupo(/^test\/seguridad\/referencia-calificaciones\./, 'Escenario');
+          const califReal = porGrupo(/^test\/seguridad\/calificaciones\.e2e\./, 'Escenario');
+          const casosHoja = (grupos) => [...grupos.values()].flat().filter((p) => /^[CL]\d/.test(p.title));
+          const exactitud = (pruebas) => {
+            const ejecutadas = pruebas.filter((p) => p.status === 'passed' || p.status === 'failed');
+            return ejecutadas.length ? `${cuenta(pruebas, 'passed')} de ${ejecutadas.length} (${((cuenta(pruebas, 'passed') / ejecutadas.length) * 100).toFixed(1)} %)` : 'omitida hasta que existan los endpoints';
+          };
+          lineas.push(
+            '',
+            '### Calificaciones: exactitud del servidor y permisos (RF-17, RF-18)',
+            '',
+            `Casos de la hoja oficial anonimizada que el servidor calcula igual que el libro: **${exactitud(casosHoja(califRef))}** en la referencia y **${exactitud(casosHoja(califReal))}** en los endpoints reales.`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...califRef.keys(), ...califReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(califRef.get(grupo) ?? [])} | ${celda(califReal.get(grupo) ?? [])} |`);
+          }
           const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
           if (fallidas.length) {
             lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));

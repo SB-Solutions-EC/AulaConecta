@@ -20,8 +20,10 @@ Corte: 16/11/2026, inicio del sprint 5.
 | CP-05 | RF-05 · docente y asignación | Parcial | Pantalla y E2E de Playwright: `apps/pwa/e2e/docentes.spec.ts`. Faltan los endpoints de T1110-M |
 | CP-06 | RF-06 · cursos, paralelos y materias | Automatizado | `endpoints-academicos.e2e.spec.ts` contra los endpoints reales `/cursos` y `/materias` sobre PostgreSQL: roles, validación, inyección y duplicados (también el código de materia). Esquema: `test/base-datos/esquema.bd.spec.ts`. PWA: `PantallaConfiguracionAcademica.test.tsx` |
 | CP-07 | RF-07 · fechas del año lectivo y trimestres | Automatizado | `endpoints-academicos.e2e.spec.ts` contra `/anios-lectivos` y `/periodos` reales: trimestre 1 a 3, fin antes del inicio, fuera del año lectivo, superposición y duplicado. PWA: pestaña de trimestres en `PantallaConfiguracionAcademica.test.tsx` |
+| CP-17 | RF-17 · registro de aportes por el docente de la materia | Parcial | `verificar-calificaciones.ts` (T1118-A) contra la referencia: solo el docente asignado a esa materia en ese curso califica (403 para los demás roles y docentes), versión vieja 409 y validación de aportes. Se aplica sola a los endpoints de T1118-M (`calificaciones.e2e.spec.ts`) |
+| CP-18 | RF-18 · cálculo de la nota final en el servidor | Parcial | Exactitud del servidor contra la hoja oficial anonimizada: 143 de 143 casos en la referencia, que calcula con `packages/calculo-notas`. Falta el endpoint real (T1118-M) |
 | CP-38 | RF-38 · el representante ve solo a sus representados | Parcial | `verificar-privacidad.ts` contra la referencia (`referencia-privacidad.spec.ts`); se aplica sola a los endpoints de T1111-M (`privacidad.e2e.spec.ts`) |
-| CP-08 a CP-37 y CP-39 | RF-08 a RF-37 y RF-39 | Pendiente | Sprints 5 a 8 según la sección 9.2 del documento |
+| CP-08 a CP-16, CP-19 a CP-37 y CP-39 | RF-08 a RF-16, RF-19 a RF-37 y RF-39 | Pendiente | Sprints 5 a 8 según la sección 9.2 del documento |
 
 ## Requisitos no funcionales
 

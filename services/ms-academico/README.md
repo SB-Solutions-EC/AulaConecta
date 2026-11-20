@@ -253,6 +253,43 @@ El archivo nunca se escribe en disco ni se usa su nombre para guardar nada. Los 
 
 `src/importacion/*.spec.ts` prueba el lector de ZIP y el validador sin HTTP. Para probar la suite, se desactivaron 9 controles, uno por vez: firma, tipo declarado, macros, DTD, filas, tamaño descomprimido total, nombres peligrosos, CRC y cifrado. En cada caso fallaron entre 1 y 5 pruebas.
 
+## Pruebas de calificaciones (RF-17, RF-18)
+
+`test/seguridad/verificar-calificaciones.ts` (T1118-A) arma por la API este escenario:
+- **curso A:** materia M1 con el docente D1, que es el que califica, y materia M2 con el docente D2;
+- **curso B:** materia M1 con el docente D3;
+- un estudiante de control con su representante, y una matrícula por cada 3 casos de la hoja oficial.
+
+Luego prueba tres cosas:
+
+| Grupo | Qué comprueba |
+|---|---|
+| Exactitud (I-05, RNF-02) | Cada fila de la [hoja oficial anonimizada](../../packages/calculo-notas/casos/hoja-oficial-anonimizada.json) que admite el contrato (143 de 151, todas con proyecto y examen) se registra con `PUT /calificaciones`. La nota final y el cualitativo que devuelve el **servidor** deben coincidir con el libro oficial. Después, la libreta del docente debe devolver lo mismo, y una nota final enviada por el cliente se rechaza o se ignora |
+| Permisos | Solo D1 califica la asignación de M1 en el curso A. Responden **403**: D2 (otra materia), D3 (misma materia, otro curso), el administrador, la secretaría, el estudiante, su representante, un docente sin persona y D1 con la clave temporal pendiente. Los 13 tokens inválidos responden 401. La asignación ajena y la inventada dan el mismo 403, y no se puede suplantar con `docenteId` ni con cabeceras. Calificar a un estudiante de otro curso se rechaza |
+| Versiones y entradas | Una versión vieja responde 409. Aportes fuera de 0 a 10, texto, nulos, más de 5 por bloque, trimestre fuera de 1 a 3 y faltantes responden 400 |
+| Lectura | D1 ve su libreta. D2 y la secretaría reciben 403. El estudiante y el representante ven solo lo suyo |
+
+Se ejecuta contra la referencia (`referencia/modulo-calificaciones-referencia.ts`, que calcula con `packages/calculo-notas`) y contra los endpoints reales (`calificaciones.e2e.spec.ts`), que se omiten hasta que existan todas las rutas del escenario. Su resumen en el CI muestra los casos de la hoja que coinciden.
+
+**Comprobación de la suite.** Se debilitó la referencia de 8 maneras, una por vez, y cada una hizo fallar pruebas:
+
+| Debilidad | Pruebas que fallan |
+|---|---|
+| Calcula la nota con su propia fórmula, sin truncar cada componente como el libro | 114 |
+| Cualquier docente califica cualquier asignación | 6 |
+| El administrador también puede calificar | 2 |
+| Respeta un `docenteId` que manda el cliente | 2 |
+| No revisa que la matrícula sea del curso de la asignación | 1 |
+| No controla la versión | 1 |
+| Cualquier docente lee cualquier libreta | 1 |
+| El estudiante ve las notas de todo el curso | 1 |
+
+**Para los endpoints reales (T1118-M).** La referencia importa el cálculo con la ruta relativa `packages/calculo-notas/src/index`. Para usarlo en el código del servicio, la imagen Docker necesita el paquete como contexto adicional, igual que la PWA:
+- `additional_contexts` en `infra/docker-compose.yml`;
+- `contextos-adicionales` en `ci.yml`.
+
+`tsconfig.json` ya tiene `rootDir: ../..` para el typecheck.
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -270,6 +307,8 @@ El archivo nunca se escribe en disco ni se usa su nombre para guardar nada. Los 
 | Sprint 4 (11/11) | Endpoints de matrícula individual y personas | Pendiente (T1111-M) |
 | Sprint 4 (12/11) | Controles de carga de la nómina en Excel y pruebas con archivos inválidos | Listo (T1112-A) |
 | Sprint 4 (12/11) | Importador de nóminas | Pendiente (T1112-M) |
+| Sprint 5 (18/11) | Pruebas de exactitud contra la hoja oficial y de que solo el docente de la materia califica | Listo (T1118-A) |
+| Sprint 5 (18/11) | Endpoints de calificaciones que recalculan con `packages/calculo-notas` | Pendiente (T1118-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

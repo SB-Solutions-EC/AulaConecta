@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Module, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Injectable, Module, Post, Query } from '@nestjs/common';
 import { IsIn } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { ExcepcionApi } from '../../../src/comun/excepcion-api';
@@ -16,7 +16,7 @@ import { UsuarioToken } from '../../../src/autenticacion/verificador-jwt';
 //  - decidir qué ve cada quien SOLO con el usuario del token, nunca con lo que manda el cliente.
 
 const TIPOS = ['DOCENTE', 'ESTUDIANTE', 'REPRESENTANTE'] as const;
-type TipoPersona = (typeof TIPOS)[number];
+export type TipoPersona = (typeof TIPOS)[number];
 const PERSONAL: Rol[] = ['ADMIN', 'SECRETARIA'];
 const CON_LECTURA: string[] = [...PERSONAL, 'ESTUDIANTE', 'REPRESENTANTE'];
 
@@ -52,7 +52,7 @@ class FiltroMatriculas {
   @Opcional() @Identificador() estudianteId?: string;
 }
 
-interface Persona {
+export interface Persona {
   id: string;
   usuarioId: string;
   tipo: TipoPersona;
@@ -64,14 +64,14 @@ interface Persona {
 interface PersonaCreada extends Persona {
   credenciales: { nombreUsuario: string; claveTemporal?: string; claveTemporalVence?: string };
 }
-interface Representacion {
+export interface Representacion {
   id: string;
   estudianteId: string;
   representanteId: string;
   parentesco: string;
   version: number;
 }
-interface Matricula {
+export interface Matricula {
   id: string;
   estudianteId: string;
   cursoId: string;
@@ -82,15 +82,34 @@ interface Matricula {
 const denegado = (): ExcepcionApi => new ExcepcionApi(403, 'ACCESO_DENEGADO', 'No tienes permiso para esta acción.');
 const conflicto = (mensaje: string): ExcepcionApi => new ExcepcionApi(409, 'CONFLICTO', mensaje);
 
+/** Datos en memoria de la referencia. Lo comparten otras referencias (calificaciones, T1118-A). */
+@Injectable()
+export class AlmacenReferencia {
+  readonly personas = new Map<string, Persona>();
+  // La cédula solo sirve para detectar duplicados; se guarda aparte y nunca sale en una respuesta
+  readonly cedulas = new Set<string>();
+  readonly representaciones: Representacion[] = [];
+  readonly matriculas: Matricula[] = [];
+
+  /** Personas de la cuenta del token con ese tipo (una cuenta puede tener varias, por ejemplo docente y representante). */
+  personasDe(usuarioId: string, tipo: TipoPersona): Persona[] {
+    return [...this.personas.values()].filter((p) => p.usuarioId === usuarioId && p.tipo === tipo);
+  }
+}
+
 @Controller()
 class ControladorMatriculaReferencia {
-  private readonly personas = new Map<string, Persona>();
-  // La cédula solo sirve para detectar duplicados; se guarda aparte y nunca sale en una respuesta
-  private readonly cedulas = new Set<string>();
-  private readonly representaciones: Representacion[] = [];
-  private readonly matriculas: Matricula[] = [];
+  private readonly personas: Map<string, Persona>;
+  private readonly cedulas: Set<string>;
+  private readonly representaciones: Representacion[];
+  private readonly matriculas: Matricula[];
 
-  constructor(private readonly identidad: ClienteIdentidad) {}
+  constructor(
+    private readonly identidad: ClienteIdentidad,
+    almacen: AlmacenReferencia,
+  ) {
+    ({ personas: this.personas, cedulas: this.cedulas, representaciones: this.representaciones, matriculas: this.matriculas } = almacen);
+  }
 
   /** null = puede ver a todos; si no, los estudiantes cuyos datos le pertenecen. */
   private estudiantesVisibles(usuario: UsuarioToken): Set<string> | null {
@@ -178,7 +197,7 @@ class ControladorMatriculaReferencia {
     if (this.representaciones.some((r) => r.estudianteId === solicitud.estudianteId && r.representanteId === solicitud.representanteId)) {
       throw conflicto('La representación ya existe.');
     }
-    const representacion: Representacion = { id: solicitud.id ?? randomUUID(), ...solicitud, version: 0 };
+    const representacion: Representacion = { ...solicitud, id: solicitud.id ?? randomUUID(), version: 0 };
     this.representaciones.push(representacion);
     return representacion;
   }
@@ -192,7 +211,7 @@ class ControladorMatriculaReferencia {
     if (this.matriculas.some((m) => m.estudianteId === solicitud.estudianteId && m.cursoId === solicitud.cursoId)) {
       throw conflicto('El estudiante ya está matriculado en ese curso.');
     }
-    const matricula: Matricula = { id: solicitud.id ?? randomUUID(), ...solicitud, estado: 'ACTIVA', version: 0 };
+    const matricula: Matricula = { ...solicitud, id: solicitud.id ?? randomUUID(), estado: 'ACTIVA', version: 0 };
     this.matriculas.push(matricula);
     return matricula;
   }
@@ -219,5 +238,7 @@ class ControladorMatriculaReferencia {
 @Module({
   imports: [IdentidadModule],
   controllers: [ControladorMatriculaReferencia],
+  providers: [AlmacenReferencia],
+  exports: [AlmacenReferencia],
 })
 export class ModuloMatriculaReferencia {}

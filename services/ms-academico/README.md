@@ -363,6 +363,35 @@ Para el texto libre y los enlaces hay dos validadores en `src/comun/validadores.
 
 Si alguien usa `dangerouslySetInnerHTML` o convierte el adjunto en `<a href>` sin revisar el protocolo, la prueba falla (se comprobó con las dos cosas).
 
+## Acceso a notas: el estudiante solo ve las suyas (RF-20, RNF-04)
+
+`test/seguridad/verificar-acceso-notas.ts` (T1120-A) es una matriz de quién pide qué en todo lo que expone notas: `GET /calificaciones` (sin filtro, por matrícula, por asignación) y `GET /tareas/{id}/entregas`. Arma por la API este escenario:
+- **curso A:** E1 y E2;
+- **curso B:** F;
+- **representantes:** de E1, de E2, de E1 y E2, y de F;
+- **notas:** una calificación de cada estudiante y una tarea por curso con nota y una retroalimentación de texto único, para detectar fugas.
+
+| Quién | Ve | Recibe 403 |
+|---|---|---|
+| Cada estudiante y cada representante | Solo sus notas o las de sus representados: sin filtro, por matrícula y en la tarea de su curso. En ninguna respuesta aparece la matrícula ni la retroalimentación de otro | Las notas de cada estudiante ajeno (por matrícula y por trimestre), la tarea del otro curso, y una matrícula inventada (el mismo 403 que una ajena) |
+| Manipulación (E1) | — | Pedir A1 con la matrícula de E2. La matrícula repetida, en mayúsculas, un `usuarioId`, o cabeceras `X-Usuario-Id` de E2 no le dan nada ajeno. Tampoco su token con la clave temporal pendiente, con el rol `REPRESENTANTE` o de una cuenta sin persona |
+| Personal | El docente de A1, su libreta y las notas de su tarea | El docente de otra materia o de otro curso y la secretaría: la libreta de A1 y las notas de su tarea |
+
+El resumen del CI publica el **reporte de pruebas 403** por persona, en la referencia y en los endpoints reales (que se omiten hasta que existan).
+
+**Comprobación de la suite.** Se debilitaron las referencias de calificaciones y tareas de 8 maneras, una por vez, y cada una hizo fallar pruebas:
+
+| Debilidad | Pruebas que fallan |
+|---|---|
+| Una matrícula ajena devuelve lista vacía en vez de 403 | 35 |
+| Un representante ve a los representados de todos | 23 |
+| El estudiante ve las calificaciones de todo el colegio | 11 |
+| Una matrícula inexistente responde 404 (deja averiguar cuáles existen) | 8 |
+| Cualquiera abre las notas de una tarea de otro curso | 7 |
+| En una tarea, el representante ve las notas de cualquiera del curso | 6 |
+| En una tarea, el estudiante ve las notas de todo el curso | 4 |
+| La persona del token cuenta aunque el rol del token no corresponda | 1 |
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -384,6 +413,10 @@ Si alguien usa `dangerouslySetInnerHTML` o convierte el adjunto en `<a href>` si
 | Sprint 5 (18/11) | Endpoints de calificaciones que recalculan con `packages/calculo-notas` | Pendiente (T1118-M) |
 | Sprint 5 (19/11) | Pruebas de autorización de tareas y saneamiento de texto (XSS) | Listo (T1119-A) |
 | Sprint 5 (19/11) | Endpoints de tareas con fecha de entrega | Pendiente (T1119-M) |
+| Sprint 5 (20/11) | Pruebas de acceso: el estudiante solo ve sus propias notas (reporte de pruebas 403) | Listo (T1120-A) |
+| Sprint 5 (20/11) | Endpoints de entregas, nota y retroalimentación | Pendiente (T1120-M) |
+| Sprint 5 (21/11) | Pruebas de asistencia y de quién puede justificar | Listo (T1123-A) |
+| Sprint 5 (21/11) | Endpoints de asistencia, atrasos y justificación | Pendiente (T1123-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

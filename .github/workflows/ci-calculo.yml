@@ -1,0 +1,76 @@
+name: CI cálculo de notas
+
+# Lo llama ci.yml para el paquete compartido packages/calculo-notas (T1117-A): comprueba que la hoja
+# oficial anonimizada esté al día, corre las pruebas con cobertura del 100 % y publica el indicador I-05
+# (porcentaje de casos de la hoja oficial que coinciden con el cálculo).
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: calculo-notas
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/calculo-notas
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: packages/calculo-notas/package-lock.json
+
+      - name: Instalar dependencias exactas (package-lock.json)
+        run: npm ci --no-audit --no-fund
+
+      # Los valores esperados los calcula el script con aritmética exacta: nadie puede editarlos a mano
+      - name: La hoja oficial anonimizada coincide con su generador
+        run: python3 casos/generar_casos.py --verificar
+
+      - name: Verificar tipos (TypeScript)
+        run: npm run typecheck
+
+      - name: Pruebas parametrizadas y cobertura (Vitest, mínimo 100 %)
+        run: |
+          npm run test:cov
+          # Rutas relativas a la raíz del repositorio, como las espera SonarQube
+          sed -i 's|^SF:src/|SF:packages/calculo-notas/src/|' coverage/lcov.info
+
+      - name: Indicador I-05 en el resumen
+        if: ${{ !cancelled() && hashFiles('packages/calculo-notas/reportes/resultados.json') != '' }}
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/resultados.json');
+          const hoja = r.testResults.find((t) => t.name.endsWith('hoja-oficial.test.ts'));
+          const casos = hoja.assertionResults.filter((a) => a.ancestorTitles.length > 1 && !a.title.startsWith('hoja de estándares'));
+          const ok = casos.filter((a) => a.status === 'passed').length;
+          const porcentaje = casos.length ? ((ok / casos.length) * 100).toFixed(1) : '0.0';
+          console.log('## Cálculo de notas: coincidencia con la hoja oficial (I-05)\n');
+          console.log('| Casos de la hoja oficial anonimizada | Coinciden | Indicador I-05 | Pruebas del paquete |');
+          console.log('|---|---|---|---|');
+          console.log(`| ${casos.length} | ${ok} | **${porcentaje} %** | ${r.numPassedTests} de ${r.numTotalTests} |`);
+          const fallidos = casos.filter((a) => a.status !== 'passed');
+          if (fallidos.length) {
+            console.log('\n### Casos que no coinciden\n');
+            fallidos.forEach((a) => console.log(`- ${a.title}`));
+          }
+          JS
+
+      - name: Guardar la cobertura y los reportes (JUnit y JSON)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: calculo-resultados
+          retention-days: 7
+          path: |
+            packages/calculo-notas/coverage/lcov.info
+            packages/calculo-notas/reportes/

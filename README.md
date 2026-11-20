@@ -25,7 +25,7 @@ Administrador (vicerrector) · Secretaría · Docente · Estudiante · Represent
 | Base de datos y mensajería | PostgreSQL 16 (una base por servicio: `db_identidad`, `db_academico`, `db_notificaciones`) y RabbitMQ |
 | Gateway | Traefik (TLS, cabeceras de seguridad y límite de peticiones) |
 | Frontend (PWA) | React + Vite + TypeScript, Tailwind CSS, Workbox e IndexedDB (Dexie) para el trabajo sin conexión |
-| Cálculo de notas | Paquete compartido en TypeScript (`packages/calculo`) |
+| Cálculo de notas | Paquete compartido en TypeScript (`packages/calculo-notas`) |
 | Contratos API | OpenAPI 3.1 (`openapi/`) |
 | Seguridad en CI | Gitleaks, Dependency-Check, npm audit, pip-audit, Trivy, SonarQube, OWASP ZAP |
 | Pruebas | JUnit 5, Jest/Vitest, pytest, Playwright, k6 |
@@ -47,7 +47,7 @@ Ninguna de las tres ramas permite force push ni borrado.
 ```
 apps/                Aplicaciones cliente (apps/pwa: PWA React + Vite + TypeScript)
 services/            Microservicios (ms-identidad, ms-academico, ms-notificaciones)
-packages/calculo/    Motor de cálculo de notas compartido en TypeScript (sprint 5)
+packages/calculo-notas/    Motor de cálculo de notas compartido en TypeScript (sprint 5)
 openapi/             Contratos OpenAPI 3.1 v0 de los 3 microservicios
 infra/               docker-compose, Traefik, PostgreSQL y despliegue
 tests/               Pruebas transversales: extremo a extremo (e2e) y de carga (k6)

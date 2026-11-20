@@ -33,7 +33,7 @@ import {
   calcularResumenEstandares,
   normalizarNotaEntrada,
   type EstandarLogro,
-} from '../calculo/calculoNotas';
+} from '@aulaconecta/calculo-notas';
 
 export interface FilaLibreta {
   id: string;

@@ -237,7 +237,11 @@ services:
       - interna
 
   pwa:
-    build: ../apps/pwa
+    build:
+      context: ../apps/pwa
+      # Cálculo de notas compartido (T1117-A)
+      additional_contexts:
+        calculo-notas: ../packages/calculo-notas
     read_only: true
     tmpfs:
       - /tmp

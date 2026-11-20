@@ -50,6 +50,7 @@ jobs:
             "ms-notificaciones (pytest, pip-audit)=pendiente" \
             "Integración académico–identidad=pendiente" \
             "PWA (lint, build, Vitest)=pendiente" \
+            "Cálculo de notas (Vitest, I-05)=pendiente" \
             "Imágenes (Trivy, SBOM, GHCR)=pendiente" \
             "SonarQube (quality gate)=pendiente"
 
@@ -91,6 +92,11 @@ jobs:
   web:
     name: web
     uses: ./.github/workflows/ci-web.yml
+
+  # Paquete compartido de cálculo de notas: hoja oficial anonimizada e indicador I-05 (T1117-A)
+  calculo:
+    name: calculo
+    uses: ./.github/workflows/ci-calculo.yml
 
   # ms-academico pide su token de servicio a un ms-identidad real y crea una cuenta con él (T1110-A)
   integracion:
@@ -136,7 +142,7 @@ jobs:
 
   imagen-pwa:
     name: imagen-pwa
-    needs: [gitleaks, web]
+    needs: [gitleaks, web, calculo]
     permissions:
       contents: read
       packages: write
@@ -144,6 +150,7 @@ jobs:
     with:
       servicio: pwa
       contexto: apps/pwa
+      contextos-adicionales: calculo-notas=packages/calculo-notas
       publicar: ${{ github.event_name == 'push' }}
 
   # Despliegue continuo al ambiente de pruebas (T1116-A): solo en push a test, con las imágenes que
@@ -161,7 +168,7 @@ jobs:
 
   notificar-pruebas:
     name: telegram-pruebas
-    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
+    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web, calculo,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
     if: ${{ !cancelled() && needs.notificar-inicio.result != 'skipped' }}
     runs-on: ubuntu-latest
@@ -186,6 +193,7 @@ jobs:
           NOTIFICACIONES: ${{ needs.notificaciones.result }}
           INTEGRACION: ${{ needs.integracion.result }}
           WEB: ${{ needs.web.result }}
+          CALCULO: ${{ needs.calculo.result }}
           IMAGENES: >-
             ${{ needs.imagen-identidad.result }} ${{ needs.imagen-academico.result }}
             ${{ needs.imagen-notificaciones.result }} ${{ needs.imagen-pwa.result }}
@@ -205,12 +213,13 @@ jobs:
             "ms-notificaciones (pytest, pip-audit)=$NOTIFICACIONES" \
             "Integración académico–identidad=$INTEGRACION" \
             "PWA (lint, build, Vitest)=$WEB" \
+            "Cálculo de notas (Vitest, I-05)=$CALCULO" \
             "Imágenes (Trivy, SBOM, GHCR)=$imagenes" \
             "SonarQube (quality gate)=pendiente"
 
   quality:
     name: quality-pr
-    needs: [gitleaks, identidad, academico, notificaciones, integracion, web,
+    needs: [gitleaks, identidad, academico, notificaciones, integracion, web, calculo,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa]
     # Corre aunque falle una etapa previa: un job omitido cuenta como exitoso en los checks requeridos.
     # Los PR desde forks no llegan al runner propio.
@@ -311,6 +320,13 @@ jobs:
           name: pwa-resultados
           path: apps/pwa
 
+      # El artefacto trae coverage/lcov.info y reportes/: se descarga en la carpeta del paquete
+      - name: Descargar cobertura del cálculo de notas
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: calculo-resultados
+          path: packages/calculo-notas
+
       # Sin un reporte, SonarQube cuenta ese servicio con 0 % de cobertura y el quality gate falla sin decir por qué
       - name: Verificar los reportes de cobertura
         shell: powershell
@@ -319,7 +335,8 @@ jobs:
             "services/ms-identidad/target/site/jacoco/jacoco.xml",
             "services/ms-academico/coverage/lcov.info",
             "services/ms-notificaciones/coverage.xml",
-            "apps/pwa/coverage/lcov.info"
+            "apps/pwa/coverage/lcov.info",
+            "packages/calculo-notas/coverage/lcov.info"
           )
           $faltan = @($reportes | Where-Object { -not (Test-Path -LiteralPath $_ -PathType Leaf) })
           if ($faltan.Count -gt 0) {
@@ -391,7 +408,7 @@ jobs:
 
   notificar-calidad:
     name: telegram-calidad
-    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web,
+    needs: [notificar-inicio, gitleaks, identidad, academico, notificaciones, integracion, web, calculo,
             imagen-identidad, imagen-academico, imagen-notificaciones, imagen-pwa, notificar-pruebas, quality]
     if: ${{ !cancelled() && needs.quality.result != 'skipped' && needs.notificar-inicio.result != 'skipped' }}
     runs-on: ubuntu-latest
@@ -416,6 +433,7 @@ jobs:
           NOTIFICACIONES: ${{ needs.notificaciones.result }}
           INTEGRACION: ${{ needs.integracion.result }}
           WEB: ${{ needs.web.result }}
+          CALCULO: ${{ needs.calculo.result }}
           IMAGENES: >-
             ${{ needs.imagen-identidad.result }} ${{ needs.imagen-academico.result }}
             ${{ needs.imagen-notificaciones.result }} ${{ needs.imagen-pwa.result }}
@@ -436,5 +454,6 @@ jobs:
             "ms-notificaciones (pytest, pip-audit)=$NOTIFICACIONES" \
             "Integración académico–identidad=$INTEGRACION" \
             "PWA (lint, build, Vitest)=$WEB" \
+            "Cálculo de notas (Vitest, I-05)=$CALCULO" \
             "Imágenes (Trivy, SBOM, GHCR)=$imagenes" \
             "SonarQube (quality gate)=$CALIDAD"

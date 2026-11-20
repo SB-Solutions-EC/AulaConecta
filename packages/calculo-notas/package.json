@@ -1,0 +1,23 @@
+{
+  "name": "@aulaconecta/calculo-notas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cálculo de notas idéntico al libro oficial del colegio (RF-17, RF-18, RNF-02). Lo usan la PWA y ms-academico.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "casos": "python casos/generar_casos.py",
+    "casos:verificar": "python casos/generar_casos.py --verificar"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.0.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

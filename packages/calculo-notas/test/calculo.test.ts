@@ -5,13 +5,28 @@ import {
   normalizarNotaEntrada,
   obtenerCualitativo,
   truncarADosDecimales,
-} from './calculoNotas';
+} from '../src/index';
 
-describe('Motor de cálculo de notas en la PWA (T1117-C)', () => {
+describe('Motor de cálculo de notas (T1117-C, movido a packages/calculo-notas en T1117-A)', () => {
   it('trunca a 2 decimales igual que TRUNC(,2) sin error binario IEEE-754', () => {
     expect(truncarADosDecimales(8.2 * 0.7)).toBe(5.74);
     expect(truncarADosDecimales(8.999)).toBe(8.99);
     expect(truncarADosDecimales(10)).toBe(10);
+  });
+
+  it('un curso sin estudiantes calificados no tiene promedio (T1117-A)', () => {
+    const sinNotaFinal = calcularCalificacionInmediata({ aportesBloque1: [8], aportesBloque2: [8], notaProyecto: 8 });
+
+    expect(calcularResumenEstandares([])).toMatchObject({ totalEstudiantes: 0, calificados: 0, promedioCurso: null });
+    expect(calcularResumenEstandares([sinNotaFinal])).toMatchObject({ totalEstudiantes: 1, calificados: 0, promedioCurso: null });
+  });
+
+  it('con negativos trunca hacia cero como TRUNC(,2) de Excel y los califica E- (T1117-A)', () => {
+    // Una nota negativa no se puede ingresar (normalizarNotaEntrada la rechaza); esto fija el comportamiento
+    expect(truncarADosDecimales(-1.239)).toBe(-1.23);
+    expect(truncarADosDecimales(-8.2 * 0.7)).toBe(-5.74);
+    expect(obtenerCualitativo(-0.5)).toBe('E-');
+    expect(obtenerCualitativo(Number.NaN)).toBeNull();
   });
 
   it('calcula ponderación 70/15/15, cualitativo y estándar sin refuerzo', () => {

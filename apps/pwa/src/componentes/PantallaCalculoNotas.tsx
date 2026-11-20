@@ -13,7 +13,7 @@ import {
   calcularResumenEstandares,
   normalizarNotaEntrada,
   type EstandarLogro,
-} from '../calculo/calculoNotas';
+} from '@aulaconecta/calculo-notas';
 
 export interface FilaEstudianteNotas {
   id: string;

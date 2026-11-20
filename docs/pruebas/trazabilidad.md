@@ -34,7 +34,7 @@ Corte: 16/11/2026, inicio del sprint 5.
 | CP-N14 | RNF-14 · HTTPS con TLS 1.2 o superior | Parcial | `infra/traefik/dinamico.yml` (`minVersion: VersionTLS12`, HSTS y cabeceras). Falta el escaneo dinámico con OWASP ZAP (informe de seguridad del sprint 7, 18/12) |
 | CP-N15 | RNF-15 · 0 secretos y 0 vulnerabilidades altas | Automatizado | Jobs `gitleaks`, `identidad` (Dependency-Check), `academico` (`npm audit`), `notificaciones` (`pip-audit`), `imagen-*` (Trivy) y `quality-pr` (SonarQube); ver [checklist_ci.md](../seguridad/checklist_ci.md) |
 | CP-N01 | RNF-01 · sin conexión | Pendiente | Sprint 9 |
-| CP-N02 | RNF-02 · exactitud de cálculos | Pendiente | Sprint 5 (`packages/calculo-notas`) |
+| CP-N02 | RNF-02 · exactitud de cálculos | Automatizado | `packages/calculo-notas/test/hoja-oficial.test.ts`: 151 filas de la hoja oficial anonimizada (120 estudiantes generados y 31 casos límite) contra un oráculo exacto en Python; indicador I-05 = 100 % en el job `calculo` del CI (T1117-A). Falta validar con el colegio la regla del promedio del curso (T1117-M) |
 | CP-N05 | RNF-05 · consentimiento de avisos | Pendiente | Sprint 8 |
 | CP-N06 | RNF-06 · rendimiento | Pendiente | Sprint 9 (k6 con 460 usuarios) |
 | CP-N08 | RNF-08 · respaldos | Pendiente | Sprint 9 (restauración cronometrada) |

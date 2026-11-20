@@ -1,0 +1,7 @@
+# La imagen de la PWA recibe este paquete como contexto adicional (calculo-notas): solo el código
+node_modules/
+coverage/
+reportes/
+test/
+casos/
+README.md

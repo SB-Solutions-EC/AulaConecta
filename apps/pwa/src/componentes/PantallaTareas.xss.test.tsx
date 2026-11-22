@@ -104,6 +104,14 @@ describe('PantallaTareas: el texto de las personas se muestra como texto (XSS, T
     );
 
     expect(container.textContent).toContain(TAREAS[0].titulo);
+    expect(container.textContent).toContain('Revisa el ejercicio 4');
+
+    fireEvent.click(screen.getByTestId('boton-ver-retroalimentacion-tar-xss-1'));
+    const modal = screen.getByTestId('modal-retroalimentacion-estudiante');
+    expect(modal.textContent).toContain(
+      '<img src=x onerror=alert("retro")> Revisa el ejercicio 4',
+    );
+
     sinCodigoInyectado(document.body);
     expect(alerta).not.toHaveBeenCalled();
   });

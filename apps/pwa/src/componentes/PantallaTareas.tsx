@@ -5,7 +5,6 @@ import {
   Calendar,
   CheckCircle2,
   ClipboardCheck,
-  Clock,
   Eye,
   FileText,
   Plus,
@@ -27,6 +26,10 @@ import {
   type TareaAcademica,
   type TipoActividadAcademica,
 } from '../api/tareasApi';
+import {
+  VistaTareasEstudiante,
+  normalizarNotaSobreDiez,
+} from './VistaTareasEstudiante';
 
 export interface PropiedadesPantallaTareas {
   rolActivo: CodigoRol;
@@ -209,6 +212,9 @@ export function PantallaTareas({
   const [filtroEstadoEstudiante, setFiltroEstadoEstudiante] = useState<
     'TODAS' | EstadoEntregaTarea
   >('TODAS');
+  const [filtroMateriaEstudiante, setFiltroMateriaEstudiante] = useState<
+    'TODAS' | string
+  >('TODAS');
 
   // Formulario docente
   const [tituloNuevo, setTituloNuevo] = useState<string>('');
@@ -267,11 +273,22 @@ export function PantallaTareas({
       }
       if (tareasApi.length > 0) {
         setTareas(tareasApi);
+        if (!esDocente) {
+          const entregasPorTarea = await Promise.all(
+            tareasApi.map((tarea) =>
+              servicioTareasApi.listarEntregas(tarea.id).catch(() => []),
+            ),
+          );
+          const entregasRemotas = entregasPorTarea.flat();
+          if (entregasRemotas.length > 0) {
+            setEntregas(entregasRemotas);
+          }
+        }
       }
     } finally {
       setCargando(false);
     }
-  }, [omitirCargaRemota]);
+  }, [esDocente, omitirCargaRemota]);
 
   useEffect(() => {
     cargarCatalogosYTareas().catch(() => undefined);
@@ -304,6 +321,13 @@ export function PantallaTareas({
       if (filtroTipo !== 'TODAS' && tarea.tipo !== filtroTipo) {
         return false;
       }
+      if (
+        !esDocente &&
+        filtroMateriaEstudiante !== 'TODAS' &&
+        tarea.materiaId !== filtroMateriaEstudiante
+      ) {
+        return false;
+      }
       if (!esDocente && filtroEstadoEstudiante !== 'TODAS') {
         const entrega = entregaPorTareaEstudiante.get(tarea.id);
         const estadoActual: EstadoEntregaTarea = entrega?.estado ?? 'PENDIENTE';
@@ -317,6 +341,7 @@ export function PantallaTareas({
     entregaPorTareaEstudiante,
     esDocente,
     filtroEstadoEstudiante,
+    filtroMateriaEstudiante,
     filtroTipo,
     tareas,
   ]);
@@ -325,13 +350,38 @@ export function PantallaTareas({
     let pendientes = 0;
     let entregadas = 0;
     let calificadas = 0;
+    let sumaNotasSobreDiez = 0;
+    let cantidadConNota = 0;
+
     for (const tarea of tareas) {
-      const estado = entregaPorTareaEstudiante.get(tarea.id)?.estado ?? 'PENDIENTE';
-      if (estado === 'PENDIENTE') pendientes += 1;
-      else if (estado === 'ENTREGADA') entregadas += 1;
-      else calificadas += 1;
+      const entrega = entregaPorTareaEstudiante.get(tarea.id);
+      const estado = entrega?.estado ?? 'PENDIENTE';
+      if (estado === 'PENDIENTE') {
+        pendientes += 1;
+      } else if (estado === 'ENTREGADA') {
+        entregadas += 1;
+      } else {
+        calificadas += 1;
+        if (
+          entrega?.calificacion !== null &&
+          entrega?.calificacion !== undefined
+        ) {
+          sumaNotasSobreDiez += normalizarNotaSobreDiez(
+            entrega.calificacion,
+            tarea.puntajeMaximo,
+          );
+          cantidadConNota += 1;
+        }
+      }
     }
-    return { pendientes, entregadas, calificadas };
+
+    return {
+      pendientes,
+      entregadas,
+      calificadas,
+      promedioSobreDiez:
+        cantidadConNota > 0 ? sumaNotasSobreDiez / cantidadConNota : null,
+    };
   }, [entregaPorTareaEstudiante, tareas]);
 
   const manejarPublicarTarea = async (e: React.FormEvent) => {
@@ -585,7 +635,7 @@ export function PantallaTareas({
       <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <span className="inline-block text-xs font-semibold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full mb-2">
-            Tareas, pruebas y proyectos · RF-19 ·{' '}
+            Tareas, pruebas y proyectos · RF-19 · RF-20 ·{' '}
             {esDocente ? 'Vista Docente' : 'Vista Estudiante'}
           </span>
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
@@ -823,212 +873,140 @@ export function PantallaTareas({
               </button>
             </div>
           </form>
-        </div>
-      ) : (
-        <div data-testid="vista-tareas-estudiante" className="space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5">
-              <p className="text-xs text-slate-500">Pendientes</p>
-              <p className="text-xl font-bold text-slate-900">
-                {resumenEstudiante.pendientes}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3.5">
-              <p className="text-xs text-indigo-700">Entregadas</p>
-              <p className="text-xl font-bold text-indigo-900">
-                {resumenEstudiante.entregadas}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3.5">
-              <p className="text-xs text-emerald-800">Calificadas</p>
-              <p className="text-xl font-bold text-emerald-900">
-                {resumenEstudiante.calificadas}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Barra de filtros compartida */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor="filtro-tipo-actividad" className="text-xs font-semibold text-slate-700">
-            Tipo:
-          </label>
-          <select
-            id="filtro-tipo-actividad"
-            data-testid="filtro-tipo-tareas"
-            value={filtroTipo}
-            onChange={(e) =>
-              setFiltroTipo(e.target.value as 'TODAS' | TipoActividadAcademica)
-            }
-            className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800"
-          >
-            <option value="TODAS">Todas las actividades</option>
-            <option value="TAREA">Tareas</option>
-            <option value="PRUEBA">Pruebas</option>
-            <option value="PROYECTO">Proyectos</option>
-          </select>
-
-          {!esDocente && (
-            <>
+          {/* Barra de filtros del docente */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <label
-                htmlFor="filtro-estado-actividad"
-                className="text-xs font-semibold text-slate-700 ml-2"
+                htmlFor="filtro-tipo-actividad"
+                className="text-xs font-semibold text-slate-700"
               >
-                Estado:
+                Tipo:
               </label>
               <select
-                id="filtro-estado-actividad"
-                data-testid="filtro-estado-tareas-estudiante"
-                value={filtroEstadoEstudiante}
+                id="filtro-tipo-actividad"
+                data-testid="filtro-tipo-tareas"
+                value={filtroTipo}
                 onChange={(e) =>
-                  setFiltroEstadoEstudiante(
-                    e.target.value as 'TODAS' | EstadoEntregaTarea,
+                  setFiltroTipo(
+                    e.target.value as 'TODAS' | TipoActividadAcademica,
                   )
                 }
                 className="rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800"
               >
-                <option value="TODAS">Todos los estados</option>
-                <option value="PENDIENTE">Pendientes</option>
-                <option value="ENTREGADA">Entregadas</option>
-                <option value="CALIFICADA">Calificadas</option>
+                <option value="TODAS">Todas las actividades</option>
+                <option value="TAREA">Tareas</option>
+                <option value="PRUEBA">Pruebas</option>
+                <option value="PROYECTO">Proyectos</option>
               </select>
-            </>
+            </div>
+
+            <span className="text-xs text-slate-500">
+              {tareasFiltradas.length}{' '}
+              {tareasFiltradas.length === 1 ? 'actividad' : 'actividades'}
+            </span>
+          </div>
+
+          {/* Listado de tareas, pruebas y proyectos del docente */}
+          {tareasFiltradas.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-500">
+              No existen actividades registradas para el filtro seleccionado.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {tareasFiltradas.map((tarea) => {
+                const entregasTarea = entregas.filter(
+                  (ent) => ent.tareaId === tarea.id,
+                );
+
+                return (
+                  <article
+                    key={tarea.id}
+                    data-testid={`tarjeta-tarea-${tarea.id}`}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between gap-4"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span
+                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${claseBadgeTipo(tarea.tipo)}`}
+                        >
+                          {ETIQUETAS_TIPO[tarea.tipo]}
+                        </span>
+
+                        <span className="text-xs font-semibold text-slate-600">
+                          {entregasTarea.length}{' '}
+                          {entregasTarea.length === 1 ? 'entrega' : 'entregas'}
+                        </span>
+                      </div>
+
+                      <h4 className="text-base font-bold text-slate-900">
+                        {tarea.titulo}
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {tarea.descripcion}
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 pt-1">
+                        <span className="inline-flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
+                          {mapaMaterias.get(tarea.materiaId) ?? 'Asignatura'} ·{' '}
+                          {mapaCursos.get(tarea.cursoId) ?? 'Curso'}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+                          Entrega: {tarea.fechaEntrega}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <ClipboardCheck
+                            className="w-3.5 h-3.5"
+                            aria-hidden="true"
+                          />
+                          Sobre {tarea.puntajeMaximo} pts
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        data-testid={`boton-ver-entregas-${tarea.id}`}
+                        onClick={() => {
+                          abrirModalEntregas(tarea.id).catch(() => undefined);
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                        Revisar entregas ({entregasTarea.length})
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           )}
         </div>
-
-        <span className="text-xs text-slate-500">
-          {tareasFiltradas.length}{' '}
-          {tareasFiltradas.length === 1 ? 'actividad' : 'actividades'}
-        </span>
-      </div>
-
-      {/* Listado de tareas, pruebas y proyectos */}
-      {tareasFiltradas.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-xs text-slate-500">
-          No existen actividades registradas para el filtro seleccionado.
-        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tareasFiltradas.map((tarea) => {
-            const entregasTarea = entregas.filter((ent) => ent.tareaId === tarea.id);
-            const entregaEst = entregaPorTareaEstudiante.get(tarea.id);
-            const estadoEst: EstadoEntregaTarea = entregaEst?.estado ?? 'PENDIENTE';
-
-            return (
-              <article
-                key={tarea.id}
-                data-testid={`tarjeta-tarea-${tarea.id}`}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col justify-between gap-4"
-              >
-                <div className="space-y-2.5">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${claseBadgeTipo(tarea.tipo)}`}
-                    >
-                      {ETIQUETAS_TIPO[tarea.tipo]}
-                    </span>
-
-                    {esDocente ? (
-                      <span className="text-xs font-semibold text-slate-600">
-                        {entregasTarea.length}{' '}
-                        {entregasTarea.length === 1 ? 'entrega' : 'entregas'}
-                      </span>
-                    ) : (
-                      <span
-                        data-testid={`estado-entrega-${tarea.id}`}
-                        className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${claseBadgeEstado(estadoEst)}`}
-                      >
-                        {estadoEst === 'PENDIENTE'
-                          ? 'Pendiente'
-                          : estadoEst === 'ENTREGADA'
-                            ? 'Entregada'
-                            : `Calificada · ${entregaEst?.calificacion?.toFixed(2) ?? '—'} / ${tarea.puntajeMaximo}`}
-                      </span>
-                    )}
-                  </div>
-
-                  <h4 className="text-base font-bold text-slate-900">
-                    {tarea.titulo}
-                  </h4>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {tarea.descripcion}
-                  </p>
-
-                  <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 pt-1">
-                    <span className="inline-flex items-center gap-1">
-                      <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
-                      {mapaMaterias.get(tarea.materiaId) ?? 'Asignatura'} ·{' '}
-                      {mapaCursos.get(tarea.cursoId) ?? 'Curso'}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
-                      Entrega: {tarea.fechaEntrega}
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <ClipboardCheck className="w-3.5 h-3.5" aria-hidden="true" />
-                      Sobre {tarea.puntajeMaximo} pts
-                    </span>
-                  </div>
-
-                  {!esDocente && entregaEst?.observacionDocente && (
-                    <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-900">
-                      <strong>Observación docente:</strong>{' '}
-                      {entregaEst.observacionDocente}
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                  {esDocente ? (
-                    <button
-                      type="button"
-                      data-testid={`boton-ver-entregas-${tarea.id}`}
-                      onClick={() => {
-                        abrirModalEntregas(tarea.id).catch(() => undefined);
-                      }}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-                      Revisar entregas ({entregasTarea.length})
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      data-testid={`boton-abrir-entrega-${tarea.id}`}
-                      onClick={() => {
-                        setTareaEntregaId(tarea.id);
-                        setComentarioEntrega(entregaEst?.comentario ?? '');
-                        setEnlaceEntrega(entregaEst?.enlaceAdjunto ?? '');
-                        setMensajeError(null);
-                      }}
-                      disabled={estadoEst === 'CALIFICADA'}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer disabled:bg-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed"
-                    >
-                      {estadoEst === 'CALIFICADA' ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-                          Ya calificada
-                        </>
-                      ) : estadoEst === 'ENTREGADA' ? (
-                        <>
-                          <Clock className="w-3.5 h-3.5" aria-hidden="true" />
-                          Actualizar entrega
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-3.5 h-3.5" aria-hidden="true" />
-                          Entregar actividad
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <VistaTareasEstudiante
+          tareas={tareas}
+          tareasFiltradas={tareasFiltradas}
+          materias={materias}
+          mapaCursos={mapaCursos}
+          mapaMaterias={mapaMaterias}
+          entregaPorTareaEstudiante={entregaPorTareaEstudiante}
+          resumen={resumenEstudiante}
+          filtroTipo={filtroTipo}
+          filtroEstado={filtroEstadoEstudiante}
+          filtroMateria={filtroMateriaEstudiante}
+          alCambiarFiltroTipo={setFiltroTipo}
+          alCambiarFiltroEstado={setFiltroEstadoEstudiante}
+          alCambiarFiltroMateria={setFiltroMateriaEstudiante}
+          alAbrirEntrega={(tarea, entrega) => {
+            setTareaEntregaId(tarea.id);
+            setComentarioEntrega(entrega?.comentario ?? '');
+            setEnlaceEntrega(entrega?.enlaceAdjunto ?? '');
+            setMensajeError(null);
+          }}
+        />
       )}
 
       {/* Modal de revisión de entregas para Docente */}

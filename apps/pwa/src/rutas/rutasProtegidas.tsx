@@ -136,9 +136,9 @@ export const CATALOGO_MODULOS: DefinicionModuloNavegacion[] = [
     ruta: '/tareas',
     etiqueta: 'Tareas, pruebas y proyectos',
     descripcion:
-      'Publicación de tareas, pruebas y proyectos por curso, entrega estudiantil y revisión con puntaje.',
+      'Publicación de tareas, pruebas y proyectos por curso, entrega estudiantil y consulta de notas con retroalimentación.',
     rolesPermitidos: ['DOCENTE', 'ESTUDIANTE'],
-    sprintObjetivo: 'Sprint 5 (RF-19)',
+    sprintObjetivo: 'Sprint 5 (RF-19, RF-20)',
   },
   {
     id: 'seguimiento-estudiantil',

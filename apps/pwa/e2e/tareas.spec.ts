@@ -271,11 +271,29 @@ test.describe('Pantallas de tareas del docente y del estudiante (RF-19)', () => 
     await expect(page.getByTestId('aviso-exito-tareas')).toContainText('9.50');
     await page.getByRole('button', { name: /Cerrar revisión de entregas/i }).click();
 
-    // 5. Volver a Estudiante y verificar calificación recibida
+    // 5. Volver a Estudiante y verificar calificación y retroalimentación recibidas (RF-20)
     await page.getByRole('button', { name: 'Estudiante' }).click();
     await expect(page.getByTestId('estado-entrega-tar-e2e-2')).toContainText(
       'Calificada · 9.50 / 10',
     );
     await expect(page.getByText('Excelente trabajo')).toBeVisible();
+
+    await page
+      .getByTestId('filtro-estado-tareas-estudiante')
+      .selectOption('CALIFICADA');
+    await page.getByTestId('boton-ver-retroalimentacion-tar-e2e-2').click();
+
+    const modalDetalle = page.getByTestId('modal-retroalimentacion-estudiante');
+    await expect(modalDetalle).toBeVisible();
+    await expect(modalDetalle).toContainText('9.50 / 10');
+    await expect(modalDetalle).toContainText('DA');
+    await expect(
+      page.getByTestId('detalle-retroalimentacion-docente'),
+    ).toContainText('Excelente trabajo');
+
+    await page
+      .getByRole('button', { name: /Cerrar detalle de calificación/i })
+      .click();
+    await expect(modalDetalle).toBeHidden();
   });
 });

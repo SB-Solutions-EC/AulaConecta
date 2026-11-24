@@ -1,0 +1,18 @@
+package ec.sbsolutions.aulaconecta.identidad.auditoria;
+
+/** Eventos de AUDITORIA_ACCESO; los mismos valores que admite la restricción CHECK de la tabla. */
+public enum EventoAcceso {
+    LOGIN_OK,
+    LOGIN_FALLIDO,
+    BLOQUEO,
+    DESBLOQUEO,
+    CAMBIO_CLAVE,
+    LOGOUT,
+    ROL_ASIGNADO,
+    ROL_RETIRADO,
+    /** Token de servicio emitido (client credentials); el client_id va en nombre_usuario_intentado. */
+    TOKEN_SERVICIO,
+    TOKEN_SERVICIO_FALLIDO,
+    /** Se generó una clave temporal (alta, desbloqueo con restablecimiento o pedido de la secretaría). */
+    CLAVE_TEMPORAL
+}

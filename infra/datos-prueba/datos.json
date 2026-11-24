@@ -1,0 +1,418 @@
+{
+  "_aviso": "Datos FICTICIOS para pruebas y demostraciones. Ninguna persona es real: las cédulas usan la provincia 99 (no existe), los correos el dominio reservado .test y los WhatsApp la serie 555-01XX reservada para ficción. Nunca cargar en producción.",
+  "anioLectivo": {
+    "id": "316b24ef-640e-54bb-b588-7191c1a0c2a4",
+    "nombre": "2026-2027",
+    "fechaInicio": "2026-09-07",
+    "fechaFin": "2027-07-02",
+    "activo": true,
+    "periodos": [
+      {
+        "id": "1f602085-bc9a-515b-8f1e-c1ed6d0b9628",
+        "numero": 1,
+        "fechaInicio": "2026-09-07",
+        "fechaFin": "2026-12-04"
+      },
+      {
+        "id": "fe861f1a-bd24-5a31-b610-92889db1f7a3",
+        "numero": 2,
+        "fechaInicio": "2026-12-07",
+        "fechaFin": "2027-03-26"
+      },
+      {
+        "id": "f70a588f-caa4-5cdb-855c-804f6445b0ae",
+        "numero": 3,
+        "fechaInicio": "2027-03-29",
+        "fechaFin": "2027-07-02"
+      }
+    ]
+  },
+  "materias": [
+    {
+      "id": "f475891a-8d51-5ef3-96d4-b12d5e20fc99",
+      "codigo": "MAT",
+      "nombre": "Matemática",
+      "area": "Matemática"
+    },
+    {
+      "id": "9b63d6d5-6c79-568e-8df8-a9bb9a176f16",
+      "codigo": "LEN",
+      "nombre": "Lengua y Literatura",
+      "area": "Lengua y Literatura"
+    },
+    {
+      "id": "0e1ccaa3-e8da-563a-8817-42326700ab4c",
+      "codigo": "CCNN",
+      "nombre": "Ciencias Naturales",
+      "area": "Ciencias Naturales"
+    },
+    {
+      "id": "4c9c9583-1421-5c4b-9487-8f1812e636f6",
+      "codigo": "EESS",
+      "nombre": "Estudios Sociales",
+      "area": "Ciencias Sociales"
+    },
+    {
+      "id": "20404054-fa4a-54a8-8622-cebb8a67e79f",
+      "codigo": "ING",
+      "nombre": "Inglés",
+      "area": "Lengua Extranjera"
+    },
+    {
+      "id": "d23af71e-cbeb-525e-8c1d-37b2c34b2562",
+      "codigo": "EF",
+      "nombre": "Educación Física",
+      "area": "Educación Física"
+    },
+    {
+      "id": "2783414a-666d-5a7a-a191-746f565e9002",
+      "codigo": "ECA",
+      "nombre": "Educación Cultural y Artística",
+      "area": "Educación Cultural y Artística"
+    }
+  ],
+  "personal": [
+    {
+      "usuarioId": "14e5c1e4-d3e5-5ce9-8e88-f6ba05a40cf4",
+      "nombreUsuario": "rosa.prueba",
+      "roles": [
+        "ADMIN"
+      ]
+    },
+    {
+      "usuarioId": "35048519-e720-5e4c-81d9-fe8f142d61fc",
+      "nombreUsuario": "luis.prueba",
+      "roles": [
+        "SECRETARIA"
+      ]
+    }
+  ],
+  "docentes": [
+    {
+      "id": "03c2a470-9bc1-551d-ab8d-2a4d43d0ab3d",
+      "usuarioId": "998ad770-90b1-54f6-a8e0-14bfcdef839c",
+      "nombreUsuario": "marta.ficticia",
+      "cedula": "9900000001",
+      "nombres": "Marta",
+      "apellidos": "Ficticia Andrade",
+      "area": "Matemática",
+      "sexo": "F",
+      "correo": "marta.ficticia@ejemplo.test"
+    },
+    {
+      "id": "354dd64f-d9a3-5fdc-b1a6-86887c5f5d84",
+      "usuarioId": "a4a4d59b-0d2f-5a82-8ada-3901b3d6d582",
+      "nombreUsuario": "jorge.ejemplo",
+      "cedula": "9900000002",
+      "nombres": "Jorge",
+      "apellidos": "Ejemplo Vargas",
+      "area": "Lengua y Literatura",
+      "sexo": "M",
+      "correo": "jorge.ejemplo@ejemplo.test"
+    },
+    {
+      "id": "81b38ae7-59a4-5fdb-8c0b-b74fed14e049",
+      "usuarioId": "6aa6935d-8ce6-5812-83c8-9ddc77a079ea",
+      "nombreUsuario": "elena.prueba",
+      "cedula": "9900000003",
+      "nombres": "Elena",
+      "apellidos": "Prueba Cárdenas",
+      "area": "Ciencias Naturales",
+      "sexo": "F",
+      "correo": "elena.prueba@ejemplo.test"
+    },
+    {
+      "id": "d0d9b3ad-0d13-5170-8175-fc62a03d8af5",
+      "usuarioId": "d10257f8-3558-5873-8a7b-c014ab1464b9",
+      "nombreUsuario": "pablo.demo",
+      "cedula": "9900000004",
+      "nombres": "Pablo",
+      "apellidos": "Demo Salazar",
+      "area": "Estudios Sociales",
+      "sexo": "M",
+      "correo": "pablo.demo@ejemplo.test"
+    }
+  ],
+  "cursos": [
+    {
+      "id": "bf464e09-0b2f-5730-a6ca-5777708c7211",
+      "nivel": "8vo EGB",
+      "paralelo": "A",
+      "tutorId": "03c2a470-9bc1-551d-ab8d-2a4d43d0ab3d"
+    },
+    {
+      "id": "d10ba7d5-5057-5393-a145-2875125c2f3b",
+      "nivel": "9no EGB",
+      "paralelo": "A",
+      "tutorId": "354dd64f-d9a3-5fdc-b1a6-86887c5f5d84"
+    },
+    {
+      "id": "a9e291c2-aa7c-5f5c-af78-755ee22bae00",
+      "nivel": "9no EGB",
+      "paralelo": "B",
+      "tutorId": "81b38ae7-59a4-5fdb-8c0b-b74fed14e049"
+    },
+    {
+      "id": "7ad93678-abb1-5a66-8276-9d7319cd1fea",
+      "nivel": "10mo EGB",
+      "paralelo": "A",
+      "tutorId": "d0d9b3ad-0d13-5170-8175-fc62a03d8af5"
+    }
+  ],
+  "representantes": [
+    {
+      "id": "116d0005-abd3-5fb4-b86f-0fa274a612ac",
+      "usuarioId": "64295faf-cb3a-5397-8738-3d16a9a09ecd",
+      "nombreUsuario": "carmen.simulada",
+      "cedula": "9900000005",
+      "nombres": "Carmen",
+      "apellidos": "Simulada Torres",
+      "sexo": "F",
+      "whatsapp": "+12025550101"
+    },
+    {
+      "id": "ba6d0789-9980-5e53-af8e-bacd83c43dec",
+      "usuarioId": "bdb63475-d3fb-5ab4-8a07-9c9465cb591f",
+      "nombreUsuario": "diego.inventado",
+      "cedula": "9900000006",
+      "nombres": "Diego",
+      "apellidos": "Inventado Ruiz",
+      "sexo": "M",
+      "whatsapp": "+12025550102"
+    },
+    {
+      "id": "47124585-a309-536b-a9af-bef0c0421343",
+      "usuarioId": "7276f2d1-0894-5a3d-a80d-b98e94f30c78",
+      "nombreUsuario": "lucia.ficticia",
+      "cedula": "9900000007",
+      "nombres": "Lucía",
+      "apellidos": "Ficticia Mena",
+      "sexo": "F",
+      "whatsapp": "+12025550103"
+    },
+    {
+      "id": "8f5b3960-28a5-5ffa-900b-8b560efe22a8",
+      "usuarioId": "f4b0c644-cb5a-52c7-9536-6938071ee8b0",
+      "nombreUsuario": "hector.ejemplo",
+      "cedula": "9900000008",
+      "nombres": "Héctor",
+      "apellidos": "Ejemplo Paz",
+      "sexo": "M",
+      "whatsapp": "+12025550104"
+    },
+    {
+      "id": "21436ff3-9ac0-5205-8f9c-ab64d681d4a4",
+      "usuarioId": "cc8f5a03-87d0-5692-9415-6a8b4a587fb0",
+      "nombreUsuario": "sonia.demo",
+      "cedula": "9900000009",
+      "nombres": "Sonia",
+      "apellidos": "Demo Lara",
+      "sexo": "F",
+      "whatsapp": "+12025550105"
+    },
+    {
+      "id": "4f2f0c9f-b019-51f5-85bd-62061365df8b",
+      "usuarioId": "52f9721e-c1c0-5bcd-b7a5-c8a7fb2f4563",
+      "nombreUsuario": "raul.prueba",
+      "cedula": "9900000010",
+      "nombres": "Raúl",
+      "apellidos": "Prueba Ortiz",
+      "sexo": "M",
+      "whatsapp": "+12025550106"
+    }
+  ],
+  "estudiantes": [
+    {
+      "id": "bff8b321-fb9a-554b-b78f-7e3530acc49f",
+      "usuarioId": "13f3e974-6b94-5567-9e52-2260e4110470",
+      "nombreUsuario": "ana.simulada",
+      "cedula": "9900000011",
+      "nombres": "Ana",
+      "apellidos": "Simulada Torres",
+      "sexo": "F",
+      "fechaNacimiento": "2014-01-15",
+      "cursoId": "bf464e09-0b2f-5730-a6ca-5777708c7211",
+      "codigoMatricula": "AND-2026-0001",
+      "matriculaId": "db867107-daf1-5e86-ab04-3cd6d515d2f5",
+      "representanteId": "116d0005-abd3-5fb4-b86f-0fa274a612ac",
+      "parentesco": "MADRE",
+      "contactoId": "de7fb630-c3e1-5bab-abf1-e6c7ac7a5306"
+    },
+    {
+      "id": "57759360-d103-5396-a443-9f88bb1f1a81",
+      "usuarioId": "a126d24a-5d3f-575f-99ba-0e7e71b55421",
+      "nombreUsuario": "bruno.simulada",
+      "cedula": "9900000012",
+      "nombres": "Bruno",
+      "apellidos": "Simulada Torres",
+      "sexo": "M",
+      "fechaNacimiento": "2014-02-15",
+      "cursoId": "bf464e09-0b2f-5730-a6ca-5777708c7211",
+      "codigoMatricula": "AND-2026-0002",
+      "matriculaId": "6e9b03c5-a475-56be-9a34-037290244c4d",
+      "representanteId": "116d0005-abd3-5fb4-b86f-0fa274a612ac",
+      "parentesco": "MADRE",
+      "contactoId": "d80a88d5-e5f9-5b55-a6a8-c9b00dcc052c"
+    },
+    {
+      "id": "a3ddd60b-e5f9-5f4a-b63b-9563ff166f58",
+      "usuarioId": "728829b6-4d6e-5e9e-ac74-406d315bda81",
+      "nombreUsuario": "camila.inventado",
+      "cedula": "9900000013",
+      "nombres": "Camila",
+      "apellidos": "Inventado Ruiz",
+      "sexo": "F",
+      "fechaNacimiento": "2014-03-15",
+      "cursoId": "bf464e09-0b2f-5730-a6ca-5777708c7211",
+      "codigoMatricula": "AND-2026-0003",
+      "matriculaId": "3adf4dec-ee5f-5d6e-8819-a30c87ec385c",
+      "representanteId": "ba6d0789-9980-5e53-af8e-bacd83c43dec",
+      "parentesco": "PADRE",
+      "contactoId": "6fe77da3-4c48-565b-a3bc-409d7e6d8a83"
+    },
+    {
+      "id": "09903cf3-f1d0-5f2a-b5a9-2434c395a551",
+      "usuarioId": "4b1886df-7ca8-5954-aaf2-67bf110ce486",
+      "nombreUsuario": "daniel.inventado",
+      "cedula": "9900000014",
+      "nombres": "Daniel",
+      "apellidos": "Inventado Ruiz",
+      "sexo": "M",
+      "fechaNacimiento": "2013-04-15",
+      "cursoId": "d10ba7d5-5057-5393-a145-2875125c2f3b",
+      "codigoMatricula": "AND-2026-0004",
+      "matriculaId": "90b7346c-6b77-5f11-b108-0d96a47bdc7d",
+      "representanteId": "ba6d0789-9980-5e53-af8e-bacd83c43dec",
+      "parentesco": "PADRE",
+      "contactoId": "c7e0be1f-558f-5f8e-bc55-4dda6710a85d"
+    },
+    {
+      "id": "daa94619-ec91-5382-b145-eb2334d48f16",
+      "usuarioId": "8322b6f7-fdeb-5b7d-8c2c-9598eed5c5a3",
+      "nombreUsuario": "eva.ficticia",
+      "cedula": "9900000015",
+      "nombres": "Eva",
+      "apellidos": "Ficticia Mena",
+      "sexo": "F",
+      "fechaNacimiento": "2013-05-15",
+      "cursoId": "d10ba7d5-5057-5393-a145-2875125c2f3b",
+      "codigoMatricula": "AND-2026-0005",
+      "matriculaId": "5737def4-5834-50a8-bff6-5c2b89ddbb1a",
+      "representanteId": "47124585-a309-536b-a9af-bef0c0421343",
+      "parentesco": "MADRE",
+      "contactoId": "73fa2cf1-a3a4-53fe-bb27-58cded019434"
+    },
+    {
+      "id": "3778c5fe-5616-56fe-bbc9-16d630cb0606",
+      "usuarioId": "dce2f75f-aac9-5b94-8cbb-e8dd6e4667ee",
+      "nombreUsuario": "felix.ficticia",
+      "cedula": "9900000016",
+      "nombres": "Félix",
+      "apellidos": "Ficticia Mena",
+      "sexo": "M",
+      "fechaNacimiento": "2013-06-15",
+      "cursoId": "d10ba7d5-5057-5393-a145-2875125c2f3b",
+      "codigoMatricula": "AND-2026-0006",
+      "matriculaId": "8e254626-6973-5ac6-929c-c57542f4363e",
+      "representanteId": "47124585-a309-536b-a9af-bef0c0421343",
+      "parentesco": "MADRE",
+      "contactoId": "93177941-e44c-5566-a90b-13aaed3e85bd"
+    },
+    {
+      "id": "0186033d-bd67-5325-a965-f6e4288ac61d",
+      "usuarioId": "cd44cd78-8327-5d5a-a4f1-028308c02fd1",
+      "nombreUsuario": "gabriela.ejemplo",
+      "cedula": "9900000017",
+      "nombres": "Gabriela",
+      "apellidos": "Ejemplo Paz",
+      "sexo": "F",
+      "fechaNacimiento": "2013-07-15",
+      "cursoId": "a9e291c2-aa7c-5f5c-af78-755ee22bae00",
+      "codigoMatricula": "AND-2026-0007",
+      "matriculaId": "21b4bd56-366b-5e9a-8c71-cc824c9c694b",
+      "representanteId": "8f5b3960-28a5-5ffa-900b-8b560efe22a8",
+      "parentesco": "PADRE",
+      "contactoId": "b1828053-9cd6-5d43-a9b0-a736c5ca5868"
+    },
+    {
+      "id": "020770d4-ad99-5b96-b098-e525118de513",
+      "usuarioId": "27d5d0ea-8149-50c6-a79c-106917f5e290",
+      "nombreUsuario": "hugo.ejemplo",
+      "cedula": "9900000018",
+      "nombres": "Hugo",
+      "apellidos": "Ejemplo Paz",
+      "sexo": "M",
+      "fechaNacimiento": "2013-08-15",
+      "cursoId": "a9e291c2-aa7c-5f5c-af78-755ee22bae00",
+      "codigoMatricula": "AND-2026-0008",
+      "matriculaId": "88c1754d-0dcf-5c55-9a34-a25769a558c3",
+      "representanteId": "8f5b3960-28a5-5ffa-900b-8b560efe22a8",
+      "parentesco": "PADRE",
+      "contactoId": "afad5a74-42fa-5e8f-b5ff-34d197176008"
+    },
+    {
+      "id": "5fc5742d-094d-5c56-a896-13d01c1fa672",
+      "usuarioId": "0cd16835-5f63-572c-a1fe-8a8623e360ca",
+      "nombreUsuario": "irene.demo",
+      "cedula": "9900000019",
+      "nombres": "Irene",
+      "apellidos": "Demo Lara",
+      "sexo": "F",
+      "fechaNacimiento": "2013-09-15",
+      "cursoId": "a9e291c2-aa7c-5f5c-af78-755ee22bae00",
+      "codigoMatricula": "AND-2026-0009",
+      "matriculaId": "af0b07f6-b5e8-5729-9f7a-dca3a9ccc0c4",
+      "representanteId": "21436ff3-9ac0-5205-8f9c-ab64d681d4a4",
+      "parentesco": "MADRE",
+      "contactoId": "c8508276-f192-56bd-9963-0712714995a6"
+    },
+    {
+      "id": "178ad406-40dc-5e05-8297-2871d6174182",
+      "usuarioId": "60a7dd4b-e5ed-51ed-9274-d515cd0aab60",
+      "nombreUsuario": "joel.demo",
+      "cedula": "9900000020",
+      "nombres": "Joel",
+      "apellidos": "Demo Lara",
+      "sexo": "M",
+      "fechaNacimiento": "2012-01-15",
+      "cursoId": "7ad93678-abb1-5a66-8276-9d7319cd1fea",
+      "codigoMatricula": "AND-2026-0010",
+      "matriculaId": "387fbaf0-8964-5f57-9c7e-0bc0538bda8c",
+      "representanteId": "21436ff3-9ac0-5205-8f9c-ab64d681d4a4",
+      "parentesco": "MADRE",
+      "contactoId": "5fd4ae6b-2c91-54c1-a380-eec07d9eb815"
+    },
+    {
+      "id": "52b177ef-5de2-53a6-98ad-c733786f36bf",
+      "usuarioId": "bb8762c8-9e95-5cfc-9b51-bff6e1bb22cb",
+      "nombreUsuario": "karen.prueba",
+      "cedula": "9900000021",
+      "nombres": "Karen",
+      "apellidos": "Prueba Ortiz",
+      "sexo": "F",
+      "fechaNacimiento": "2012-02-15",
+      "cursoId": "7ad93678-abb1-5a66-8276-9d7319cd1fea",
+      "codigoMatricula": "AND-2026-0011",
+      "matriculaId": "9dd874b7-fffc-5c1e-a126-f5445a2eb500",
+      "representanteId": "4f2f0c9f-b019-51f5-85bd-62061365df8b",
+      "parentesco": "PADRE",
+      "contactoId": "9f7f4fb2-32f0-50ef-a08c-4d45bf5993d1"
+    },
+    {
+      "id": "19869f3f-f5a6-5d7c-9bb2-04f3068bac2b",
+      "usuarioId": "8498e0c4-7e27-5f52-9c55-4d07b7a50732",
+      "nombreUsuario": "leo.prueba",
+      "cedula": "9900000022",
+      "nombres": "Leo",
+      "apellidos": "Prueba Ortiz",
+      "sexo": "M",
+      "fechaNacimiento": "2012-03-15",
+      "cursoId": "7ad93678-abb1-5a66-8276-9d7319cd1fea",
+      "codigoMatricula": "AND-2026-0012",
+      "matriculaId": "9493148f-536d-5ba0-a43f-3a8f42f3713e",
+      "representanteId": "4f2f0c9f-b019-51f5-85bd-62061365df8b",
+      "parentesco": "PADRE",
+      "contactoId": "ce90b001-7e0b-5df1-aaff-dedc92f3969a"
+    }
+  ]
+}

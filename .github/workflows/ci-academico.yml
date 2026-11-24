@@ -1,0 +1,250 @@
+name: CI ms-academico
+
+# Lo llama ci.yml, que luego entrega la cobertura a SonarQube.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: ms-academico
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: services/ms-academico
+
+    # PostgreSQL de prueba (la misma versión del docker-compose) para aplicar las migraciones de Prisma.
+    # Contenedor efímero que solo escucha en la máquina del job: acepta conexiones sin clave (trust),
+    # así no queda ninguna contraseña escrita en el workflow (SonarQube secrets:S6698).
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24
+        env:
+          POSTGRES_USER: usr_academico
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: db_academico
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U usr_academico -d db_academico"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://usr_academico@localhost:5432/db_academico
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar Node.js 24 (la misma versión del Dockerfile)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: services/ms-academico/package-lock.json
+
+      - name: Instalar dependencias exactas (package-lock.json)
+        run: npm ci --no-audit --no-fund
+
+      - name: Validar el esquema de Prisma
+        run: npm run prisma:validar
+
+      - name: Aplicar las migraciones en una base vacía
+        run: npm run prisma:migrar
+
+      # Falla si alguien cambió schema.prisma sin crear su migración (código 2: hay diferencias)
+      - name: Comprobar que las migraciones coinciden con el esquema
+        run: npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code
+
+      - name: Verificar tipos (TypeScript)
+        run: npm run typecheck
+
+      - name: Pruebas y cobertura (Vitest)
+        run: |
+          npm run test:cov
+          # Rutas relativas a la raíz del repositorio, como las espera SonarQube
+          sed -i 's|^SF:src/|SF:services/ms-academico/src/|' coverage/lcov.info
+
+      # Las pruebas de validación e inyección (test/seguridad/) se resumen por endpoint
+      - name: Reporte de pruebas en el resumen del job
+        if: ${{ !cancelled() && hashFiles('services/ms-academico/reportes/resultados.json') != '' }}
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/resultados.json');
+          const cuenta = (pruebas, estado) => pruebas.filter((p) => p.status === estado).length;
+          const celda = (pruebas) =>
+            pruebas.length ? `${cuenta(pruebas, 'passed')} ✅ · ${cuenta(pruebas, 'failed')} ❌ · ${cuenta(pruebas, 'skipped') + cuenta(pruebas, 'pending') + cuenta(pruebas, 'todo')} ⏭️` : '—';
+          const archivo = (t) => t.name.replace(/^.*\/ms-academico\//, '');
+          const omitidas = r.numPendingTests + r.numTodoTests;
+
+          const lineas = [
+            '## Pruebas de ms-academico',
+            '',
+            `**${r.numTotalTests}** pruebas: ${r.numPassedTests} pasaron, ${r.numFailedTests} fallaron y ${omitidas} se omitieron.`,
+            '',
+            '| Archivo | Resultado |',
+            '|---|---|',
+            ...r.testResults.map((t) => `| \`${archivo(t)}\` | ${celda(t.assertionResults)} |`),
+            '',
+            '### Validación de entradas e inyección (RF-06, RF-07)',
+            '',
+            'La suite de `test/seguridad/` se ejecuta contra la implementación de referencia y contra los endpoints reales;',
+            'los endpoints reales que aún no existen aparecen como omitidos.',
+            '',
+            '| Endpoint | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          ];
+          const porEndpoint = (patron) => {
+            const grupos = new Map();
+            for (const t of r.testResults.filter((x) => patron.test(archivo(x)))) {
+              for (const p of t.assertionResults) {
+                const endpoint = p.ancestorTitles.find((titulo) => /^(GET|POST|PUT|PATCH|DELETE) \//.test(titulo));
+                if (endpoint) grupos.set(endpoint, [...(grupos.get(endpoint) ?? []), p]);
+              }
+            }
+            return grupos;
+          };
+          const referencia = porEndpoint(/^test\/seguridad\/referencia\./);
+          const reales = porEndpoint(/^test\/seguridad\/endpoints-academicos\./);
+          for (const endpoint of new Set([...referencia.keys(), ...reales.keys()])) {
+            lineas.push(`| \`${endpoint}\` | ${celda(referencia.get(endpoint) ?? [])} | ${celda(reales.get(endpoint) ?? [])} |`);
+          }
+          // Privacidad (RNF-04, T1111-A): agrupada por lo que intenta cada persona
+          const porGrupo = (patron, raiz) => {
+            const grupos = new Map();
+            for (const t of r.testResults.filter((x) => patron.test(archivo(x)))) {
+              for (const p of t.assertionResults) {
+                const grupo = p.ancestorTitles.length > 1 ? p.ancestorTitles.at(-1) : raiz;
+                grupos.set(grupo, [...(grupos.get(grupo) ?? []), p]);
+              }
+            }
+            return grupos;
+          };
+          const privRef = porGrupo(/^test\/seguridad\/referencia-privacidad\./, 'Altas en ms-identidad');
+          const privReal = porGrupo(/^test\/seguridad\/privacidad\.e2e\./, 'Altas en ms-identidad');
+          const de403 = (grupos) => [...grupos.values()].flat().filter((p) => p.title.includes('403'));
+          lineas.push(
+            '',
+            '### Privacidad: un estudiante o representante no accede a datos ajenos (RNF-04)',
+            '',
+            `Pruebas de 403: **${cuenta(de403(privRef), 'passed')}** pasaron en la referencia y **${cuenta(de403(privReal), 'passed')}** en los endpoints reales (${cuenta(de403(privReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...privRef.keys(), ...privReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(privRef.get(grupo) ?? [])} | ${celda(privReal.get(grupo) ?? [])} |`);
+          }
+          // Controles de carga de la nómina en Excel (RF-04, T1112-A)
+          const cargaRef = porGrupo(/^test\/seguridad\/referencia-carga\./, 'Nómina válida hasta el importador');
+          const cargaReal = porGrupo(/^test\/seguridad\/carga\.e2e\./, 'Nómina válida hasta el importador');
+          const invalidos = (grupos) => grupos.get('archivos inválidos') ?? [];
+          lineas.push(
+            '',
+            '### Controles de carga de la nómina en Excel (RF-04)',
+            '',
+            `Archivos inválidos rechazados: **${cuenta(invalidos(cargaRef), 'passed')} de ${invalidos(cargaRef).length}** con los controles de \`src/importacion/\` y **${cuenta(invalidos(cargaReal), 'passed')}** en el importador real (${cuenta(invalidos(cargaReal), 'skipped')} omitidas hasta que exista).`,
+            '',
+            '| Qué se prueba | Referencia | Importador real |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...cargaRef.keys(), ...cargaReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(cargaRef.get(grupo) ?? [])} | ${celda(cargaReal.get(grupo) ?? [])} |`);
+          }
+          // Calificaciones (RF-17, RF-18, T1118-A): exactitud del servidor contra la hoja oficial y permisos
+          const califRef = porGrupo(/^test\/seguridad\/referencia-calificaciones\./, 'Escenario');
+          const califReal = porGrupo(/^test\/seguridad\/calificaciones\.e2e\./, 'Escenario');
+          const casosHoja = (grupos) => [...grupos.values()].flat().filter((p) => /^[CL]\d/.test(p.title));
+          const exactitud = (pruebas) => {
+            const ejecutadas = pruebas.filter((p) => p.status === 'passed' || p.status === 'failed');
+            return ejecutadas.length ? `${cuenta(pruebas, 'passed')} de ${ejecutadas.length} (${((cuenta(pruebas, 'passed') / ejecutadas.length) * 100).toFixed(1)} %)` : 'omitida hasta que existan los endpoints';
+          };
+          lineas.push(
+            '',
+            '### Calificaciones: exactitud del servidor y permisos (RF-17, RF-18)',
+            '',
+            `Casos de la hoja oficial anonimizada que el servidor calcula igual que el libro: **${exactitud(casosHoja(califRef))}** en la referencia y **${exactitud(casosHoja(califReal))}** en los endpoints reales.`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...califRef.keys(), ...califReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(califRef.get(grupo) ?? [])} | ${celda(califReal.get(grupo) ?? [])} |`);
+          }
+          // Asistencia y justificación (RF-21, CU-19, T1123-A): solo el docente de la materia aprueba
+          const asisRef = porGrupo(/^test\/seguridad\/referencia-asistencia\./, 'Escenario');
+          const asisReal = porGrupo(/^test\/seguridad\/asistencia\.e2e\./, 'Escenario');
+          const asis403 = (grupos) => [...grupos.values()].flat().filter((p) => p.title.startsWith('403'));
+          lineas.push(
+            '',
+            '### Asistencia: quién registra y quién puede justificar (RF-21)',
+            '',
+            `Pruebas de 403: **${cuenta(asis403(asisRef), 'passed')} de ${asis403(asisRef).length}** en la referencia y **${cuenta(asis403(asisReal), 'passed')}** en los endpoints reales (${cuenta(asis403(asisReal), 'skipped')} omitidas hasta que existan). Regla: el docente de la materia registra y es el único que aprueba; el estudiante solo solicita.`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...asisRef.keys(), ...asisReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(asisRef.get(grupo) ?? [])} | ${celda(asisReal.get(grupo) ?? [])} |`);
+          }
+          // Tareas (RF-19, RF-20, T1119-A): autorización y saneamiento de texto contra XSS
+          const tareasRef = porGrupo(/^test\/seguridad\/referencia-tareas\./, 'Escenario');
+          const tareasReal = porGrupo(/^test\/seguridad\/tareas\.e2e\./, 'Escenario');
+          const deXss = (grupos) => [...grupos.entries()].filter(([g]) => g.startsWith('Saneamiento')).flatMap(([, p]) => p);
+          lineas.push(
+            '',
+            '### Tareas: autorización y saneamiento de texto (RF-19, RF-20)',
+            '',
+            `Pruebas de XSS (texto y enlaces): **${cuenta(deXss(tareasRef), 'passed')} de ${deXss(tareasRef).length}** en la referencia y **${cuenta(deXss(tareasReal), 'passed')}** en los endpoints reales (${cuenta(deXss(tareasReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...tareasRef.keys(), ...tareasReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(tareasRef.get(grupo) ?? [])} | ${celda(tareasReal.get(grupo) ?? [])} |`);
+          }
+          // Acceso a notas (RF-20, RNF-04, T1120-A): reporte de pruebas 403 por persona
+          const notasRef = porGrupo(/^test\/seguridad\/referencia-acceso-notas\./, 'Escenario');
+          const notasReal = porGrupo(/^test\/seguridad\/acceso-notas\.e2e\./, 'Escenario');
+          const es403 = (p) => p.title.startsWith('403');
+          const todas403 = (grupos) => [...grupos.values()].flat().filter(es403);
+          const celda403 = (pruebas) => (pruebas.length ? `${cuenta(pruebas, 'passed')}/${pruebas.length}${cuenta(pruebas, 'failed') ? ` · ${cuenta(pruebas, 'failed')} ❌` : ''}${cuenta(pruebas, 'skipped') ? ` · ${cuenta(pruebas, 'skipped')} ⏭️` : ''}` : '—');
+          lineas.push(
+            '',
+            '### Acceso a notas: el estudiante solo ve sus notas (RF-20, RNF-04)',
+            '',
+            `Pruebas de **403**: **${cuenta(todas403(notasRef), 'passed')} de ${todas403(notasRef).length}** en la referencia y **${cuenta(todas403(notasReal), 'passed')}** en los endpoints reales (${cuenta(todas403(notasReal), 'skipped')} omitidas hasta que existan).`,
+            '',
+            '| Quién pide | 403 (referencia) | Ve solo lo suyo (referencia) | 403 (reales) | Ve solo lo suyo (reales) |',
+            '|---|---|---|---|---|',
+          );
+          for (const grupo of new Set([...notasRef.keys(), ...notasReal.keys()])) {
+            const ref = notasRef.get(grupo) ?? [];
+            const real = notasReal.get(grupo) ?? [];
+            lineas.push(`| ${grupo} | ${celda403(ref.filter(es403))} | ${celda403(ref.filter((p) => !es403(p)))} | ${celda403(real.filter(es403))} | ${celda403(real.filter((p) => !es403(p)))} |`);
+          }
+          const fallidas = r.testResults.flatMap((t) => t.assertionResults.filter((p) => p.status === 'failed').map((p) => p.fullName));
+          if (fallidas.length) {
+            lineas.push('', '### Pruebas que fallaron', '', ...fallidas.slice(0, 50).map((nombre) => `- ${nombre}`));
+          }
+          console.log(lineas.join('\n'));
+          JS
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Auditar dependencias de producción (falla con HIGH o CRITICAL)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Guardar la cobertura y los reportes de pruebas (JUnit y JSON)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: academico-resultados
+          retention-days: 7
+          path: |
+            services/ms-academico/coverage/lcov.info
+            services/ms-academico/reportes/

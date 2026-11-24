@@ -1,0 +1,60 @@
+name: CI ms-identidad
+
+# Lo llama ci.yml, que luego entrega las clases compiladas y la cobertura a SonarQube.
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: ms-identidad
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: services/ms-identidad
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar Java 21
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: services/ms-identidad/pom.xml
+
+      - name: Compilar, probar y medir cobertura
+        run: ./mvnw -B verify
+
+      - name: Fecha para la caché de vulnerabilidades
+        id: fecha
+        run: echo "hoy=$(date +%F)" >> "$GITHUB_OUTPUT"
+
+      # La primera descarga de la base de la NVD tarda varios minutos; con la caché, segundos.
+      - name: Restaurar la base de vulnerabilidades
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.dependency-check
+          key: nvd-${{ steps.fecha.outputs.hoy }}
+          restore-keys: nvd-
+
+      - name: Analizar dependencias (falla con CVSS 7 o mayor)
+        run: ./mvnw -B org.owasp:dependency-check-maven:check -DdataDirectory="$HOME/.dependency-check"
+
+      - name: Guardar clases, cobertura y reportes
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: identidad-resultados
+          retention-days: 7
+          path: |
+            services/ms-identidad/target/classes
+            services/ms-identidad/target/test-classes
+            services/ms-identidad/target/site/jacoco/jacoco.xml
+            services/ms-identidad/target/surefire-reports
+            services/ms-identidad/target/dependency-check-report.html

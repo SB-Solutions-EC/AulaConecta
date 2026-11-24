@@ -1,0 +1,215 @@
+name: CD pruebas
+
+# Despliegue continuo al ambiente de pruebas (T1116-A) y prueba e2e de login contra él (T1116-C).
+# - ci.yml lo llama en cada push a test, después de escanear y publicar las 4 imágenes en GHCR.
+# - A mano (Actions › CD pruebas › Run workflow) vuelve a desplegar una versión ya publicada.
+# El servidor y las claves se configuran en el GitHub Environment "pruebas" (infra/despliegue/README.md).
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Etiqueta ya publicada en GHCR (sha-1a2b3c4). Vacío = el commit de la rama elegida
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+# Un despliegue a la vez; el siguiente espera a que termine el anterior
+concurrency:
+  group: despliegue-pruebas
+  cancel-in-progress: false
+
+jobs:
+  desplegar:
+    name: desplegar y probar
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: pruebas
+      url: ${{ steps.configuracion.outputs.url }}
+    env:
+      DIR_DESPLIEGUE: /opt/aulaconecta
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Revisar la configuración del ambiente
+        id: configuracion
+        env:
+          VERSION_ELEGIDA: ${{ inputs.version }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USUARIO: ${{ vars.SSH_USUARIO }}
+          SSH_HUELLAS: ${{ vars.SSH_HUELLAS }}
+          URL_PRUEBAS: ${{ vars.URL_PRUEBAS }}
+          SSH_CLAVE_PRIVADA: ${{ secrets.SSH_CLAVE_PRIVADA }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_IDENTIDAD_PASSWORD: ${{ secrets.POSTGRES_IDENTIDAD_PASSWORD }}
+          POSTGRES_ACADEMICO_PASSWORD: ${{ secrets.POSTGRES_ACADEMICO_PASSWORD }}
+          POSTGRES_NOTIFICACIONES_PASSWORD: ${{ secrets.POSTGRES_NOTIFICACIONES_PASSWORD }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          CLAVE_DATOS_PRUEBA: ${{ secrets.CLAVE_DATOS_PRUEBA }}
+        run: |
+          faltan=()
+          for nombre in SSH_HOST SSH_USUARIO SSH_HUELLAS URL_PRUEBAS SSH_CLAVE_PRIVADA POSTGRES_PASSWORD \
+                        POSTGRES_IDENTIDAD_PASSWORD POSTGRES_ACADEMICO_PASSWORD POSTGRES_NOTIFICACIONES_PASSWORD \
+                        RABBITMQ_PASSWORD CLAVE_DATOS_PRUEBA; do
+            [[ -n "${!nombre}" ]] || faltan+=("$nombre")
+          done
+          if (( ${#faltan[@]} )); then
+            echo "::error::Faltan en el environment 'pruebas': ${faltan[*]} (ver infra/despliegue/README.md)"
+            exit 1
+          fi
+          version="${VERSION_ELEGIDA:-sha-${GITHUB_SHA::7}}"
+          [[ "$version" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Versión inválida: $version"; exit 1; }
+          url="${URL_PRUEBAS%/}"
+          {
+            echo "version=$version"
+            echo "url=$url"
+            echo "dominio=$(echo "$url" | sed -E 's|^https?://([^/:]+).*|\1|')"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Preparar la conexión SSH
+        env:
+          SSH_CLAVE_PRIVADA: ${{ secrets.SSH_CLAVE_PRIVADA }}
+          SSH_HUELLAS: ${{ vars.SSH_HUELLAS }}
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USUARIO: ${{ vars.SSH_USUARIO }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_CLAVE_PRIVADA" > ~/.ssh/despliegue
+          chmod 600 ~/.ssh/despliegue
+          # Huellas fijas del servidor: sin ellas SSH no se conecta (evita un servidor suplantado)
+          printf '%s\n' "$SSH_HUELLAS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host pruebas
+            HostName $SSH_HOST
+            User $SSH_USUARIO
+            IdentityFile ~/.ssh/despliegue
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            ServerAliveInterval 30
+          EOF
+          ssh pruebas 'docker version --format "Docker {{.Server.Version}} en el servidor"'
+
+      - name: Enviar la configuración de esta versión
+        env:
+          VERSION: ${{ steps.configuracion.outputs.version }}
+        run: |
+          # Solo infra/ y lo que necesita la imagen de migraciones; el código ya va dentro de las imágenes
+          tar -czf "$RUNNER_TEMP/version.tgz" --exclude='infra/.env' infra \
+            services/ms-academico/package.json services/ms-academico/package-lock.json \
+            services/ms-academico/prisma.config.ts services/ms-academico/prisma
+          ssh pruebas "rm -rf '$DIR_DESPLIEGUE/versiones/$VERSION' && mkdir -p '$DIR_DESPLIEGUE/versiones/$VERSION' \
+            && tar -xzf - -C '$DIR_DESPLIEGUE/versiones/$VERSION'" < "$RUNNER_TEMP/version.tgz"
+
+      - name: Enviar las claves del ambiente
+        env:
+          DOMINIO: ${{ steps.configuracion.outputs.dominio }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_IDENTIDAD_PASSWORD: ${{ secrets.POSTGRES_IDENTIDAD_PASSWORD }}
+          POSTGRES_ACADEMICO_PASSWORD: ${{ secrets.POSTGRES_ACADEMICO_PASSWORD }}
+          POSTGRES_NOTIFICACIONES_PASSWORD: ${{ secrets.POSTGRES_NOTIFICACIONES_PASSWORD }}
+          RABBITMQ_PASSWORD: ${{ secrets.RABBITMQ_PASSWORD }}
+          CLAVE_DATOS_PRUEBA: ${{ secrets.CLAVE_DATOS_PRUEBA }}
+        run: |
+          # Por la entrada estándar de SSH: las claves no quedan en la línea de comandos ni en el log
+          {
+            echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+            echo "POSTGRES_IDENTIDAD_PASSWORD=$POSTGRES_IDENTIDAD_PASSWORD"
+            echo "POSTGRES_ACADEMICO_PASSWORD=$POSTGRES_ACADEMICO_PASSWORD"
+            echo "POSTGRES_NOTIFICACIONES_PASSWORD=$POSTGRES_NOTIFICACIONES_PASSWORD"
+            echo "RABBITMQ_USER=aulaconecta"
+            echo "RABBITMQ_PASSWORD=$RABBITMQ_PASSWORD"
+            echo "CLAVE_DATOS_PRUEBA=$CLAVE_DATOS_PRUEBA"
+            echo "DOMINIO=$DOMINIO"
+          } | ssh pruebas "umask 077 && cat > '$DIR_DESPLIEGUE/.env'"
+
+      - name: Desplegar en el servidor
+        env:
+          VERSION: ${{ steps.configuracion.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Token del job, solo lectura de paquetes y válido mientras dura: se cierra la sesión al terminar
+          echo "$GH_TOKEN" | ssh pruebas "docker login ghcr.io -u '$GITHUB_ACTOR' --password-stdin" >/dev/null
+          trap 'ssh pruebas "docker logout ghcr.io" >/dev/null 2>&1 || true' EXIT
+          ssh pruebas "DIR_DESPLIEGUE='$DIR_DESPLIEGUE' bash '$DIR_DESPLIEGUE/versiones/$VERSION/infra/despliegue/desplegar.sh' '$VERSION'" \
+            | tee "$RUNNER_TEMP/despliegue.log"
+
+      - name: Comprobar el ambiente desde Internet
+        env:
+          URL: ${{ steps.configuracion.outputs.url }}
+        run: |
+          for ruta in /health /api/identidad/health /api/academico/health /api/notificaciones/health; do
+            curl --silent --show-error --fail --insecure --retry 6 --retry-delay 5 --retry-all-errors \
+              --max-time 10 "$URL$ruta" > /dev/null
+            echo "OK  $URL$ruta"
+          done
+
+      # ---- Prueba e2e de login con Playwright contra el ambiente recién desplegado (T1116-C) ----
+
+      - name: Instalar Node.js 22
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+
+      - name: Instalar la PWA y Chromium para Playwright
+        working-directory: apps/pwa
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Prueba e2e de login (Playwright)
+        working-directory: apps/pwa
+        env:
+          E2E_BASE_URL: ${{ steps.configuracion.outputs.url }}
+          E2E_CLAVE_PRUEBA: ${{ secrets.CLAVE_DATOS_PRUEBA }}
+          PLAYWRIGHT_JSON_OUTPUT_NAME: resultados-e2e.json
+        run: npx playwright test e2e/login.spec.ts --reporter=list,html,json
+
+      - name: Guardar el reporte de Playwright
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: reporte-playwright-pruebas
+          retention-days: 14
+          path: |
+            apps/pwa/playwright-report/
+            apps/pwa/test-results/
+            apps/pwa/resultados-e2e.json
+
+      - name: Resumen del despliegue
+        if: ${{ !cancelled() }}
+        env:
+          VERSION: ${{ steps.configuracion.outputs.version }}
+          URL: ${{ steps.configuracion.outputs.url }}
+        run: |
+          {
+            echo "## Ambiente de pruebas"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| URL | $URL |"
+            echo "| Versión | \`$VERSION\` (imágenes de GHCR escaneadas por el CI) |"
+            echo "| Commit | \`$GITHUB_SHA\` |"
+            echo
+            if [[ -f "$RUNNER_TEMP/despliegue.log" ]]; then
+              echo "### Servicios"
+              echo
+              echo '```'
+              sed -n '/^SERVICE/,/^$/p' "$RUNNER_TEMP/despliegue.log"
+              echo '```'
+            fi
+            if [[ -f apps/pwa/resultados-e2e.json ]]; then
+              node -e '
+                const r = require("./apps/pwa/resultados-e2e.json");
+                const s = r.stats;
+                console.log("### Prueba e2e de login (Playwright)\n");
+                console.log(`| Pasaron | Fallaron | Omitidas | Inestables |\n|---|---|---|---|\n| ${s.expected} | ${s.unexpected} | ${s.skipped} | ${s.flaky} |\n`);
+                console.log("El reporte HTML está en el artefacto `reporte-playwright-pruebas`.");
+              '
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

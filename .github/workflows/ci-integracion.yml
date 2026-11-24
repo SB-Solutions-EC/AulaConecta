@@ -1,0 +1,101 @@
+name: CI integración académico–identidad
+
+# Lo llama ci.yml. Levanta PostgreSQL y ms-identidad reales con infra/docker-compose.yml y prueba que
+# ms-academico obtiene su token de servicio (client credentials) y crea cuentas con él (T1110-A).
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+env:
+  # Proyecto aparte: no comparte volúmenes con ningún otro stack
+  COMPOSE: docker compose -p aulaconecta-ci --env-file ${{ github.workspace }}/../integracion.env -f infra/docker-compose.yml -f infra/docker-compose.integracion.yml
+
+jobs:
+  integracion:
+    name: academico-identidad
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Claves de PostgreSQL de un solo uso
+        run: |
+          # Se generan en cada ejecución y nunca salen del runner
+          archivo="$GITHUB_WORKSPACE/../integracion.env"
+          : > "$archivo"
+          for variable in POSTGRES_PASSWORD POSTGRES_IDENTIDAD_PASSWORD POSTGRES_ACADEMICO_PASSWORD \
+                          POSTGRES_NOTIFICACIONES_PASSWORD RABBITMQ_PASSWORD; do
+            clave="$(openssl rand -hex 24)"
+            echo "::add-mask::$clave"
+            echo "$variable=$clave" >> "$archivo"
+          done
+          chmod 600 "$archivo"
+
+      - name: Levantar PostgreSQL y ms-identidad
+        run: $COMPOSE up -d --build --wait --wait-timeout 300 ms-identidad
+
+      - name: Entregar el secreto de ms-academico a la prueba
+        run: |
+          # El mismo archivo que monta el contenedor de ms-academico (volumen secreto-ms-academico)
+          docker run --rm -v aulaconecta-ci_secreto-ms-academico:/s:ro --entrypoint cat alpine/openssl:3.5.9 /s/secreto \
+            > "$RUNNER_TEMP/secreto-ms-academico"
+          echo "::add-mask::$(cat "$RUNNER_TEMP/secreto-ms-academico")"
+          chmod 600 "$RUNNER_TEMP/secreto-ms-academico"
+
+      - name: Instalar Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: services/ms-academico/package-lock.json
+
+      - name: Instalar dependencias de ms-academico
+        working-directory: services/ms-academico
+        run: npm ci --no-audit --no-fund
+
+      - name: Prueba de integración (Vitest)
+        working-directory: services/ms-academico
+        env:
+          IDENTIDAD_URL: http://127.0.0.1:18080
+          AULACONECTA_CLIENTE_SECRETO_ARCHIVO: ${{ runner.temp }}/secreto-ms-academico
+        run: npm run test:integracion
+
+      - name: Reporte en el resumen del job
+        if: ${{ !cancelled() && hashFiles('services/ms-academico/reportes/integracion.json') != '' }}
+        working-directory: services/ms-academico
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/integracion.json');
+          const icono = { passed: '✅', failed: '❌' };
+          const lineas = [
+            '## Integración ms-academico → ms-identidad (token de servicio)',
+            '',
+            `**${r.numPassedTests} de ${r.numTotalTests}** pruebas pasaron contra ms-identidad y PostgreSQL reales.`,
+            '',
+            ...r.testResults.flatMap((t) => t.assertionResults.map((p) => `- ${icono[p.status] ?? '⏭️'} ${p.title}`)),
+          ];
+          console.log(lineas.join('\n'));
+          JS
+
+      - name: Registro de ms-identidad si algo falló
+        if: ${{ failure() }}
+        run: $COMPOSE logs --no-color ms-identidad secretos-servicio | tail -n 200
+
+      - name: Guardar el reporte de pruebas
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: integracion-resultados
+          retention-days: 7
+          path: services/ms-academico/reportes/
+          if-no-files-found: ignore
+
+      - name: Apagar y borrar el stack de prueba
+        if: ${{ always() }}
+        run: |
+          $COMPOSE down -v --remove-orphans
+          rm -f "$RUNNER_TEMP/secreto-ms-academico" "$GITHUB_WORKSPACE/../integracion.env"

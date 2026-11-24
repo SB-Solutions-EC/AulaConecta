@@ -1,0 +1,5921 @@
+{
+ "descripcion": "Hoja oficial anonimizada: fórmulas del libro de calificaciones del colegio con notas generadas",
+ "origen": "Fórmulas de CALIFICACIONES 2025-2026.xlsx; notas generadas con semilla fija, nunca transcritas (docs/seguridad/datos_sensibles.md, sección 3)",
+ "generadoPor": "packages/calculo-notas/casos/generar_casos.py",
+ "semilla": 20261117,
+ "totalCasos": 151,
+ "casos": [
+  {
+   "id": "C1-E01",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 01",
+   "entrada": {
+    "aportesBloque1": [
+     7.1,
+     7.63,
+     7.93,
+     8.4,
+     9.7
+    ],
+    "aportesBloque2": [
+     8.5,
+     9.79,
+     8.2,
+     7.41,
+     9.02
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.89,
+    "notaExamen": 9.76
+   },
+   "esperado": {
+    "promedioBloque1": 8.152,
+    "promedioBloque2": 8.584,
+    "promedioGeneral": 8.368,
+    "promedioConRefuerzo": 8.368,
+    "componente70": 5.85,
+    "componenteProyecto15": 1.18,
+    "componenteExamen15": 1.46,
+    "notaFinal": 8.49,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E02",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 02",
+   "entrada": {
+    "aportesBloque1": [
+     5.72,
+     5.83,
+     4.1,
+     5.7,
+     4.21
+    ],
+    "aportesBloque2": [
+     4.22,
+     4.74,
+     5.93,
+     4.8,
+     5.6
+    ],
+    "refuerzo": 6.36,
+    "notaProyecto": 5.39,
+    "notaExamen": 4.36
+   },
+   "esperado": {
+    "promedioBloque1": 5.112,
+    "promedioBloque2": 5.058,
+    "promedioGeneral": 5.085,
+    "promedioConRefuerzo": 5.7225,
+    "componente70": 4.0,
+    "componenteProyecto15": 0.8,
+    "componenteExamen15": 0.65,
+    "notaFinal": 5.45,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E03",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 03",
+   "entrada": {
+    "aportesBloque1": [
+     6.58,
+     7.2,
+     8.03,
+     6.11,
+     6.61
+    ],
+    "aportesBloque2": [
+     7.8,
+     8.04,
+     7.7,
+     7.24,
+     7.07
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.07,
+    "notaExamen": 8.22
+   },
+   "esperado": {
+    "promedioBloque1": 6.906,
+    "promedioBloque2": 7.57,
+    "promedioGeneral": 7.238,
+    "promedioConRefuerzo": 7.238,
+    "componente70": 5.06,
+    "componenteProyecto15": 0.91,
+    "componenteExamen15": 1.23,
+    "notaFinal": 7.2,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E04",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 04",
+   "entrada": {
+    "aportesBloque1": [
+     6.99,
+     7.49,
+     6.57,
+     7.5,
+     9.16
+    ],
+    "aportesBloque2": [
+     7.91,
+     9.41,
+     6.68,
+     7.0,
+     8.96
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.39,
+    "notaExamen": 7.76
+   },
+   "esperado": {
+    "promedioBloque1": 7.542,
+    "promedioBloque2": 7.992,
+    "promedioGeneral": 7.767,
+    "promedioConRefuerzo": 7.767,
+    "componente70": 5.43,
+    "componenteProyecto15": 1.1,
+    "componenteExamen15": 1.16,
+    "notaFinal": 7.69,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E05",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 05",
+   "entrada": {
+    "aportesBloque1": [
+     3.5,
+     4.63,
+     5.03,
+     2.9,
+     2.6
+    ],
+    "aportesBloque2": [
+     5.33,
+     5.0,
+     3.8,
+     4.42,
+     3.66
+    ],
+    "refuerzo": 5.5,
+    "notaProyecto": 4.2,
+    "notaExamen": 4.81
+   },
+   "esperado": {
+    "promedioBloque1": 3.732,
+    "promedioBloque2": 4.442,
+    "promedioGeneral": 4.087,
+    "promedioConRefuerzo": 4.7935,
+    "componente70": 3.35,
+    "componenteProyecto15": 0.63,
+    "componenteExamen15": 0.72,
+    "notaFinal": 4.7,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E06",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 06",
+   "entrada": {
+    "aportesBloque1": [
+     4.39,
+     4.0,
+     5.41,
+     4.95,
+     5.2
+    ],
+    "aportesBloque2": [
+     5.51,
+     3.74,
+     4.9,
+     5.2,
+     4.35
+    ],
+    "refuerzo": 6.0,
+    "notaProyecto": 6.05,
+    "notaExamen": 6.3
+   },
+   "esperado": {
+    "promedioBloque1": 4.79,
+    "promedioBloque2": 4.74,
+    "promedioGeneral": 4.765,
+    "promedioConRefuerzo": 5.3825,
+    "componente70": 3.76,
+    "componenteProyecto15": 0.9,
+    "componenteExamen15": 0.94,
+    "notaFinal": 5.6,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E07",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 07",
+   "entrada": {
+    "aportesBloque1": [
+     7.59,
+     7.71,
+     9.11,
+     8.5,
+     7.0
+    ],
+    "aportesBloque2": [
+     8.6,
+     6.9,
+     8.58,
+     9.6,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.76,
+    "notaExamen": 7.32
+   },
+   "esperado": {
+    "promedioBloque1": 7.982,
+    "promedioBloque2": 8.336,
+    "promedioGeneral": 8.159,
+    "promedioConRefuerzo": 8.159,
+    "componente70": 5.71,
+    "componenteProyecto15": 1.16,
+    "componenteExamen15": 1.09,
+    "notaFinal": 7.96,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E08",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 08",
+   "entrada": {
+    "aportesBloque1": [
+     5.97,
+     6.68,
+     6.24,
+     6.34,
+     7.61
+    ],
+    "aportesBloque2": [
+     5.71,
+     6.22,
+     7.2,
+     6.0,
+     4.95
+    ],
+    "refuerzo": 8.1,
+    "notaProyecto": 7.2,
+    "notaExamen": 7.47
+   },
+   "esperado": {
+    "promedioBloque1": 6.568,
+    "promedioBloque2": 6.016,
+    "promedioGeneral": 6.292,
+    "promedioConRefuerzo": 7.196,
+    "componente70": 5.03,
+    "componenteProyecto15": 1.08,
+    "componenteExamen15": 1.12,
+    "notaFinal": 7.23,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E09",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 09",
+   "entrada": {
+    "aportesBloque1": [
+     3.59,
+     6.13,
+     6.1,
+     6.0,
+     null
+    ],
+    "aportesBloque2": [
+     4.53,
+     5.22,
+     6.11,
+     6.06,
+     5.76
+    ],
+    "refuerzo": 7.0,
+    "notaProyecto": 4.0,
+    "notaExamen": 5.21
+   },
+   "esperado": {
+    "promedioBloque1": 5.455,
+    "promedioBloque2": 5.536,
+    "promedioGeneral": 5.4955,
+    "promedioConRefuerzo": 6.24775,
+    "componente70": 4.37,
+    "componenteProyecto15": 0.6,
+    "componenteExamen15": 0.78,
+    "notaFinal": 5.75,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E10",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 10",
+   "entrada": {
+    "aportesBloque1": [
+     6.3,
+     4.64,
+     6.2,
+     5.4,
+     4.69
+    ],
+    "aportesBloque2": [
+     6.18,
+     4.65,
+     3.9,
+     5.1,
+     4.33
+    ],
+    "refuerzo": 6.7,
+    "notaProyecto": 4.64,
+    "notaExamen": 6.1
+   },
+   "esperado": {
+    "promedioBloque1": 5.446,
+    "promedioBloque2": 4.832,
+    "promedioGeneral": 5.139,
+    "promedioConRefuerzo": 5.9195,
+    "componente70": 4.14,
+    "componenteProyecto15": 0.69,
+    "componenteExamen15": 0.91,
+    "notaFinal": 5.74,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E11",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 11",
+   "entrada": {
+    "aportesBloque1": [
+     5.98,
+     6.06,
+     6.6,
+     6.75,
+     5.33
+    ],
+    "aportesBloque2": [
+     6.29,
+     6.45,
+     4.34,
+     5.56,
+     4.2
+    ],
+    "refuerzo": 7.43,
+    "notaProyecto": 6.4,
+    "notaExamen": 5.44
+   },
+   "esperado": {
+    "promedioBloque1": 6.144,
+    "promedioBloque2": 5.368,
+    "promedioGeneral": 5.756,
+    "promedioConRefuerzo": 6.593,
+    "componente70": 4.61,
+    "componenteProyecto15": 0.96,
+    "componenteExamen15": 0.81,
+    "notaFinal": 6.38,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E12",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 12",
+   "entrada": {
+    "aportesBloque1": [
+     5.66,
+     6.84,
+     6.85,
+     8.28,
+     6.51
+    ],
+    "aportesBloque2": [
+     7.2,
+     5.9,
+     6.5,
+     6.45,
+     8.2
+    ],
+    "refuerzo": 9.25,
+    "notaProyecto": 5.77,
+    "notaExamen": 5.8
+   },
+   "esperado": {
+    "promedioBloque1": 6.828,
+    "promedioBloque2": 6.85,
+    "promedioGeneral": 6.839,
+    "promedioConRefuerzo": 8.0445,
+    "componente70": 5.63,
+    "componenteProyecto15": 0.86,
+    "componenteExamen15": 0.87,
+    "notaFinal": 7.36,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E13",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 13",
+   "entrada": {
+    "aportesBloque1": [
+     9.3,
+     8.34,
+     8.83,
+     6.99,
+     8.5
+    ],
+    "aportesBloque2": [
+     8.6,
+     7.25,
+     7.4,
+     7.0,
+     7.83
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.1,
+    "notaExamen": 9.1
+   },
+   "esperado": {
+    "promedioBloque1": 8.392,
+    "promedioBloque2": 7.616,
+    "promedioGeneral": 8.004,
+    "promedioConRefuerzo": 8.004,
+    "componente70": 5.6,
+    "componenteProyecto15": 1.36,
+    "componenteExamen15": 1.36,
+    "notaFinal": 8.32,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E14",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 14",
+   "entrada": {
+    "aportesBloque1": [
+     3.91,
+     3.85,
+     6.24,
+     6.24,
+     5.92
+    ],
+    "aportesBloque2": [
+     3.64,
+     6.3,
+     6.4,
+     5.8,
+     4.6
+    ],
+    "refuerzo": 6.3,
+    "notaProyecto": 5.64,
+    "notaExamen": 4.92
+   },
+   "esperado": {
+    "promedioBloque1": 5.232,
+    "promedioBloque2": 5.348,
+    "promedioGeneral": 5.29,
+    "promedioConRefuerzo": 5.795,
+    "componente70": 4.05,
+    "componenteProyecto15": 0.84,
+    "componenteExamen15": 0.73,
+    "notaFinal": 5.62,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E15",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 15",
+   "entrada": {
+    "aportesBloque1": [
+     8.1,
+     8.3,
+     10.0,
+     7.35,
+     9.71
+    ],
+    "aportesBloque2": [
+     7.43,
+     7.49,
+     8.45,
+     9.9,
+     9.35
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.25,
+    "notaExamen": 9.6
+   },
+   "esperado": {
+    "promedioBloque1": 8.692,
+    "promedioBloque2": 8.524,
+    "promedioGeneral": 8.608,
+    "promedioConRefuerzo": 8.608,
+    "componente70": 6.02,
+    "componenteProyecto15": 1.38,
+    "componenteExamen15": 1.44,
+    "notaFinal": 8.84,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E16",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 16",
+   "entrada": {
+    "aportesBloque1": [
+     4.46,
+     5.06,
+     5.17,
+     5.15,
+     5.21
+    ],
+    "aportesBloque2": [
+     4.6,
+     5.46,
+     5.72,
+     5.55,
+     5.2
+    ],
+    "refuerzo": 7.04,
+    "notaProyecto": 4.5,
+    "notaExamen": 5.91
+   },
+   "esperado": {
+    "promedioBloque1": 5.01,
+    "promedioBloque2": 5.306,
+    "promedioGeneral": 5.158,
+    "promedioConRefuerzo": 6.099,
+    "componente70": 4.26,
+    "componenteProyecto15": 0.67,
+    "componenteExamen15": 0.88,
+    "notaFinal": 5.81,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E17",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 17",
+   "entrada": {
+    "aportesBloque1": [
+     7.0,
+     6.3,
+     4.09,
+     6.0,
+     6.29
+    ],
+    "aportesBloque2": [
+     6.78,
+     6.09,
+     4.06,
+     6.82,
+     5.26
+    ],
+    "refuerzo": null,
+    "notaProyecto": 4.7,
+    "notaExamen": 4.8
+   },
+   "esperado": {
+    "promedioBloque1": 5.936,
+    "promedioBloque2": 5.802,
+    "promedioGeneral": 5.869,
+    "promedioConRefuerzo": 5.869,
+    "componente70": 4.1,
+    "componenteProyecto15": 0.7,
+    "componenteExamen15": 0.72,
+    "notaFinal": 5.52,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E18",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 18",
+   "entrada": {
+    "aportesBloque1": [
+     6.33,
+     7.97,
+     6.74,
+     6.22,
+     6.88
+    ],
+    "aportesBloque2": [
+     8.48,
+     6.11,
+     8.14,
+     6.72,
+     7.82
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.5,
+    "notaExamen": 6.1
+   },
+   "esperado": {
+    "promedioBloque1": 6.828,
+    "promedioBloque2": 7.454,
+    "promedioGeneral": 7.141,
+    "promedioConRefuerzo": 7.141,
+    "componente70": 4.99,
+    "componenteProyecto15": 1.12,
+    "componenteExamen15": 0.91,
+    "notaFinal": 7.02,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E19",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 19",
+   "entrada": {
+    "aportesBloque1": [
+     8.13,
+     5.7,
+     6.8,
+     6.21,
+     6.9
+    ],
+    "aportesBloque2": [
+     5.98,
+     7.06,
+     7.42,
+     7.8,
+     6.47
+    ],
+    "refuerzo": 8.1,
+    "notaProyecto": 7.85,
+    "notaExamen": 6.04
+   },
+   "esperado": {
+    "promedioBloque1": 6.748,
+    "promedioBloque2": 6.946,
+    "promedioGeneral": 6.847,
+    "promedioConRefuerzo": 7.4735,
+    "componente70": 5.23,
+    "componenteProyecto15": 1.17,
+    "componenteExamen15": 0.9,
+    "notaFinal": 7.3,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E20",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 20",
+   "entrada": {
+    "aportesBloque1": [
+     7.3,
+     8.01,
+     7.54,
+     9.7,
+     9.0
+    ],
+    "aportesBloque2": [
+     null,
+     7.32,
+     9.98,
+     9.19,
+     7.26
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.64,
+    "notaExamen": 8.91
+   },
+   "esperado": {
+    "promedioBloque1": 8.31,
+    "promedioBloque2": 8.4375,
+    "promedioGeneral": 8.37375,
+    "promedioConRefuerzo": 8.37375,
+    "componente70": 5.86,
+    "componenteProyecto15": 1.14,
+    "componenteExamen15": 1.33,
+    "notaFinal": 8.33,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E21",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 21",
+   "entrada": {
+    "aportesBloque1": [
+     7.05,
+     6.2,
+     8.6,
+     7.54,
+     7.98
+    ],
+    "aportesBloque2": [
+     6.79,
+     8.64,
+     7.8,
+     7.09,
+     6.01
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.04,
+    "notaExamen": 6.4
+   },
+   "esperado": {
+    "promedioBloque1": 7.474,
+    "promedioBloque2": 7.266,
+    "promedioGeneral": 7.37,
+    "promedioConRefuerzo": 7.37,
+    "componente70": 5.15,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 0.96,
+    "notaFinal": 7.16,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E22",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 22",
+   "entrada": {
+    "aportesBloque1": [
+     6.37,
+     5.5,
+     5.56,
+     6.8,
+     6.66
+    ],
+    "aportesBloque2": [
+     5.1,
+     6.47,
+     6.99,
+     5.25,
+     6.08
+    ],
+    "refuerzo": 8.3,
+    "notaProyecto": 6.51,
+    "notaExamen": 5.57
+   },
+   "esperado": {
+    "promedioBloque1": 6.178,
+    "promedioBloque2": 5.978,
+    "promedioGeneral": 6.078,
+    "promedioConRefuerzo": 7.189,
+    "componente70": 5.03,
+    "componenteProyecto15": 0.97,
+    "componenteExamen15": 0.83,
+    "notaFinal": 6.83,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E23",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 23",
+   "entrada": {
+    "aportesBloque1": [
+     6.54,
+     7.1,
+     4.89,
+     5.8,
+     7.8
+    ],
+    "aportesBloque2": [
+     null,
+     5.1,
+     7.15,
+     6.78,
+     5.1
+    ],
+    "refuerzo": 7.8,
+    "notaProyecto": 5.7,
+    "notaExamen": 6.88
+   },
+   "esperado": {
+    "promedioBloque1": 6.426,
+    "promedioBloque2": 6.0325,
+    "promedioGeneral": 6.22925,
+    "promedioConRefuerzo": 7.014625,
+    "componente70": 4.91,
+    "componenteProyecto15": 0.85,
+    "componenteExamen15": 1.03,
+    "notaFinal": 6.79,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E24",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 24",
+   "entrada": {
+    "aportesBloque1": [
+     7.45,
+     6.2,
+     6.64,
+     5.61,
+     6.34
+    ],
+    "aportesBloque2": [
+     5.4,
+     5.7,
+     6.7,
+     6.7,
+     6.07
+    ],
+    "refuerzo": 7.52,
+    "notaProyecto": 6.6,
+    "notaExamen": 5.9
+   },
+   "esperado": {
+    "promedioBloque1": 6.448,
+    "promedioBloque2": 6.114,
+    "promedioGeneral": 6.281,
+    "promedioConRefuerzo": 6.9005,
+    "componente70": 4.83,
+    "componenteProyecto15": 0.99,
+    "componenteExamen15": 0.88,
+    "notaFinal": 6.7,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C1-E25",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 25",
+   "entrada": {
+    "aportesBloque1": [
+     7.64,
+     9.5,
+     7.2,
+     8.26,
+     7.43
+    ],
+    "aportesBloque2": [
+     8.2,
+     9.5,
+     8.09,
+     8.05,
+     7.26
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.5,
+    "notaExamen": 7.82
+   },
+   "esperado": {
+    "promedioBloque1": 8.006,
+    "promedioBloque2": 8.22,
+    "promedioGeneral": 8.113,
+    "promedioConRefuerzo": 8.113,
+    "componente70": 5.67,
+    "componenteProyecto15": 1.12,
+    "componenteExamen15": 1.17,
+    "notaFinal": 7.96,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E26",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 26",
+   "entrada": {
+    "aportesBloque1": [
+     9.39,
+     8.1,
+     10.0,
+     8.4,
+     7.23
+    ],
+    "aportesBloque2": [
+     9.03,
+     8.8,
+     9.27,
+     8.8,
+     7.5
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.3,
+    "notaExamen": 7.4
+   },
+   "esperado": {
+    "promedioBloque1": 8.624,
+    "promedioBloque2": 8.68,
+    "promedioGeneral": 8.652,
+    "promedioConRefuerzo": 8.652,
+    "componente70": 6.05,
+    "componenteProyecto15": 1.39,
+    "componenteExamen15": 1.11,
+    "notaFinal": 8.55,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E27",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 27",
+   "entrada": {
+    "aportesBloque1": [
+     7.46,
+     4.8,
+     4.86,
+     5.28,
+     7.2
+    ],
+    "aportesBloque2": [
+     5.52,
+     4.9,
+     6.19,
+     5.94,
+     5.77
+    ],
+    "refuerzo": 7.1,
+    "notaProyecto": 5.62,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 5.92,
+    "promedioBloque2": 5.664,
+    "promedioGeneral": 5.792,
+    "promedioConRefuerzo": 6.446,
+    "componente70": 4.51,
+    "componenteProyecto15": 0.84,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E28",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 28",
+   "entrada": {
+    "aportesBloque1": [
+     9.69,
+     8.97,
+     8.42,
+     8.1,
+     7.4
+    ],
+    "aportesBloque2": [
+     9.75,
+     8.02,
+     7.95,
+     7.31,
+     7.17
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.87,
+    "notaExamen": 9.3
+   },
+   "esperado": {
+    "promedioBloque1": 8.516,
+    "promedioBloque2": 8.04,
+    "promedioGeneral": 8.278,
+    "promedioConRefuerzo": 8.278,
+    "componente70": 5.79,
+    "componenteProyecto15": 1.18,
+    "componenteExamen15": 1.39,
+    "notaFinal": 8.36,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E29",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 29",
+   "entrada": {
+    "aportesBloque1": [
+     9.98,
+     10.0,
+     10.0,
+     10.0,
+     7.99
+    ],
+    "aportesBloque2": [
+     9.7,
+     9.69,
+     8.9,
+     10.0,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.82,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 9.594,
+    "promedioBloque2": 9.658,
+    "promedioGeneral": 9.626,
+    "promedioConRefuerzo": 9.626,
+    "componente70": 6.73,
+    "componenteProyecto15": 1.32,
+    "componenteExamen15": 1.5,
+    "notaFinal": 9.55,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C1-E30",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 30",
+   "entrada": {
+    "aportesBloque1": [
+     7.53,
+     8.69,
+     7.0,
+     8.3,
+     7.7
+    ],
+    "aportesBloque2": [
+     6.89,
+     9.4,
+     8.1,
+     9.4,
+     7.87
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.56,
+    "notaExamen": 7.07
+   },
+   "esperado": {
+    "promedioBloque1": 7.844,
+    "promedioBloque2": 8.332,
+    "promedioGeneral": 8.088,
+    "promedioConRefuerzo": 8.088,
+    "componente70": 5.66,
+    "componenteProyecto15": 1.13,
+    "componenteExamen15": 1.06,
+    "notaFinal": 7.85,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E01",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 01",
+   "entrada": {
+    "aportesBloque1": [
+     4.2,
+     3.81,
+     2.4,
+     2.11,
+     4.18
+    ],
+    "aportesBloque2": [
+     3.9,
+     3.3,
+     2.2,
+     4.78,
+     2.06
+    ],
+    "refuerzo": 5.0,
+    "notaProyecto": 2.5,
+    "notaExamen": 4.49
+   },
+   "esperado": {
+    "promedioBloque1": 3.34,
+    "promedioBloque2": 3.248,
+    "promedioGeneral": 3.294,
+    "promedioConRefuerzo": 4.147,
+    "componente70": 2.9,
+    "componenteProyecto15": 0.37,
+    "componenteExamen15": 0.67,
+    "notaFinal": 3.94,
+    "cualitativo": "D-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E02",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 02",
+   "entrada": {
+    "aportesBloque1": [
+     3.95,
+     6.2,
+     5.76,
+     5.09,
+     4.01
+    ],
+    "aportesBloque2": [
+     5.19,
+     6.19,
+     6.59,
+     5.48,
+     4.0
+    ],
+    "refuerzo": 7.6,
+    "notaProyecto": 5.7,
+    "notaExamen": 4.62
+   },
+   "esperado": {
+    "promedioBloque1": 5.002,
+    "promedioBloque2": 5.49,
+    "promedioGeneral": 5.246,
+    "promedioConRefuerzo": 6.423,
+    "componente70": 4.49,
+    "componenteProyecto15": 0.85,
+    "componenteExamen15": 0.69,
+    "notaFinal": 6.03,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E03",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 03",
+   "entrada": {
+    "aportesBloque1": [
+     9.3,
+     8.94,
+     7.88,
+     7.52,
+     8.29
+    ],
+    "aportesBloque2": [
+     7.18,
+     9.6,
+     7.76,
+     7.73,
+     9.95
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.52,
+    "notaExamen": 9.3
+   },
+   "esperado": {
+    "promedioBloque1": 8.386,
+    "promedioBloque2": 8.444,
+    "promedioGeneral": 8.415,
+    "promedioConRefuerzo": 8.415,
+    "componente70": 5.89,
+    "componenteProyecto15": 1.12,
+    "componenteExamen15": 1.39,
+    "notaFinal": 8.4,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E04",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 04",
+   "entrada": {
+    "aportesBloque1": [
+     8.22,
+     7.53,
+     5.8,
+     7.98,
+     6.7
+    ],
+    "aportesBloque2": [
+     7.8,
+     6.07,
+     7.76,
+     6.77,
+     6.24
+    ],
+    "refuerzo": null,
+    "notaProyecto": 5.8,
+    "notaExamen": 6.98
+   },
+   "esperado": {
+    "promedioBloque1": 7.246,
+    "promedioBloque2": 6.928,
+    "promedioGeneral": 7.087,
+    "promedioConRefuerzo": 7.087,
+    "componente70": 4.96,
+    "componenteProyecto15": 0.87,
+    "componenteExamen15": 1.04,
+    "notaFinal": 6.87,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E05",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 05",
+   "entrada": {
+    "aportesBloque1": [
+     8.93,
+     8.95,
+     7.3,
+     7.0,
+     8.66
+    ],
+    "aportesBloque2": [
+     7.77,
+     9.07,
+     7.03,
+     8.69,
+     9.65
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.4,
+    "notaExamen": 8.01
+   },
+   "esperado": {
+    "promedioBloque1": 8.168,
+    "promedioBloque2": 8.442,
+    "promedioGeneral": 8.305,
+    "promedioConRefuerzo": 8.305,
+    "componente70": 5.81,
+    "componenteProyecto15": 1.41,
+    "componenteExamen15": 1.2,
+    "notaFinal": 8.42,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E06",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 06",
+   "entrada": {
+    "aportesBloque1": [
+     8.08,
+     5.4,
+     6.6,
+     null,
+     7.04
+    ],
+    "aportesBloque2": [
+     7.86,
+     7.62,
+     7.35,
+     5.9,
+     5.7
+    ],
+    "refuerzo": 8.37,
+    "notaProyecto": 5.9,
+    "notaExamen": 5.27
+   },
+   "esperado": {
+    "promedioBloque1": 6.78,
+    "promedioBloque2": 6.886,
+    "promedioGeneral": 6.833,
+    "promedioConRefuerzo": 7.6015,
+    "componente70": 5.32,
+    "componenteProyecto15": 0.88,
+    "componenteExamen15": 0.79,
+    "notaFinal": 6.99,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E07",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 07",
+   "entrada": {
+    "aportesBloque1": [
+     7.5,
+     null,
+     8.2,
+     6.82,
+     9.6
+    ],
+    "aportesBloque2": [
+     7.18,
+     8.9,
+     9.61,
+     7.48,
+     8.85
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.03,
+    "notaExamen": 7.74
+   },
+   "esperado": {
+    "promedioBloque1": 8.03,
+    "promedioBloque2": 8.404,
+    "promedioGeneral": 8.217,
+    "promedioConRefuerzo": 8.217,
+    "componente70": 5.75,
+    "componenteProyecto15": 1.2,
+    "componenteExamen15": 1.16,
+    "notaFinal": 8.11,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E08",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 08",
+   "entrada": {
+    "aportesBloque1": [
+     5.52,
+     3.84,
+     4.31,
+     4.42,
+     3.8
+    ],
+    "aportesBloque2": [
+     4.35,
+     5.65,
+     3.51,
+     3.5,
+     4.6
+    ],
+    "refuerzo": 6.0,
+    "notaProyecto": 4.34,
+    "notaExamen": 3.98
+   },
+   "esperado": {
+    "promedioBloque1": 4.378,
+    "promedioBloque2": 4.322,
+    "promedioGeneral": 4.35,
+    "promedioConRefuerzo": 5.175,
+    "componente70": 3.62,
+    "componenteProyecto15": 0.65,
+    "componenteExamen15": 0.59,
+    "notaFinal": 4.86,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E09",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 09",
+   "entrada": {
+    "aportesBloque1": [
+     8.8,
+     8.8,
+     7.09,
+     8.37,
+     8.12
+    ],
+    "aportesBloque2": [
+     8.79,
+     7.56,
+     null,
+     8.9,
+     8.34
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.6,
+    "notaExamen": 7.43
+   },
+   "esperado": {
+    "promedioBloque1": 8.236,
+    "promedioBloque2": 8.3975,
+    "promedioGeneral": 8.31675,
+    "promedioConRefuerzo": 8.31675,
+    "componente70": 5.82,
+    "componenteProyecto15": 1.14,
+    "componenteExamen15": 1.11,
+    "notaFinal": 8.07,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E10",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 10",
+   "entrada": {
+    "aportesBloque1": [
+     5.62,
+     3.08,
+     null,
+     4.9,
+     4.64
+    ],
+    "aportesBloque2": [
+     null,
+     4.93,
+     4.1,
+     5.01,
+     3.13
+    ],
+    "refuerzo": 5.7,
+    "notaProyecto": 4.6,
+    "notaExamen": 2.8
+   },
+   "esperado": {
+    "promedioBloque1": 4.56,
+    "promedioBloque2": 4.2925,
+    "promedioGeneral": 4.42625,
+    "promedioConRefuerzo": 5.063125,
+    "componente70": 3.54,
+    "componenteProyecto15": 0.69,
+    "componenteExamen15": 0.42,
+    "notaFinal": 4.65,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E11",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 11",
+   "entrada": {
+    "aportesBloque1": [
+     5.92,
+     5.48,
+     3.81,
+     3.57,
+     6.0
+    ],
+    "aportesBloque2": [
+     4.1,
+     5.33,
+     4.02,
+     5.05,
+     4.01
+    ],
+    "refuerzo": 5.6,
+    "notaProyecto": 4.76,
+    "notaExamen": 3.69
+   },
+   "esperado": {
+    "promedioBloque1": 4.956,
+    "promedioBloque2": 4.502,
+    "promedioGeneral": 4.729,
+    "promedioConRefuerzo": 5.1645,
+    "componente70": 3.61,
+    "componenteProyecto15": 0.71,
+    "componenteExamen15": 0.55,
+    "notaFinal": 4.87,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E12",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 12",
+   "entrada": {
+    "aportesBloque1": [
+     5.9,
+     6.9,
+     6.4,
+     6.96,
+     6.83
+    ],
+    "aportesBloque2": [
+     7.9,
+     6.85,
+     5.53,
+     8.3,
+     6.35
+    ],
+    "refuerzo": null,
+    "notaProyecto": 5.81,
+    "notaExamen": 7.8
+   },
+   "esperado": {
+    "promedioBloque1": 6.598,
+    "promedioBloque2": 6.986,
+    "promedioGeneral": 6.792,
+    "promedioConRefuerzo": 6.792,
+    "componente70": 4.75,
+    "componenteProyecto15": 0.87,
+    "componenteExamen15": 1.17,
+    "notaFinal": 6.79,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E13",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 13",
+   "entrada": {
+    "aportesBloque1": [
+     3.91,
+     4.37,
+     3.75,
+     6.11,
+     3.35
+    ],
+    "aportesBloque2": [
+     4.6,
+     3.34,
+     null,
+     3.26,
+     4.43
+    ],
+    "refuerzo": 6.6,
+    "notaProyecto": 3.59,
+    "notaExamen": 4.1
+   },
+   "esperado": {
+    "promedioBloque1": 4.298,
+    "promedioBloque2": 3.9075,
+    "promedioGeneral": 4.10275,
+    "promedioConRefuerzo": 5.351375,
+    "componente70": 3.74,
+    "componenteProyecto15": 0.53,
+    "componenteExamen15": 0.61,
+    "notaFinal": 4.88,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E14",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 14",
+   "entrada": {
+    "aportesBloque1": [
+     4.75,
+     4.7,
+     6.0,
+     4.5,
+     4.26
+    ],
+    "aportesBloque2": [
+     5.34,
+     4.9,
+     5.7,
+     4.3,
+     5.89
+    ],
+    "refuerzo": 7.43,
+    "notaProyecto": 5.7,
+    "notaExamen": 5.16
+   },
+   "esperado": {
+    "promedioBloque1": 4.842,
+    "promedioBloque2": 5.226,
+    "promedioGeneral": 5.034,
+    "promedioConRefuerzo": 6.232,
+    "componente70": 4.36,
+    "componenteProyecto15": 0.85,
+    "componenteExamen15": 0.77,
+    "notaFinal": 5.98,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E15",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 15",
+   "entrada": {
+    "aportesBloque1": [
+     7.58,
+     7.04,
+     8.36,
+     8.22,
+     9.3
+    ],
+    "aportesBloque2": [
+     null,
+     7.02,
+     9.38,
+     9.6,
+     8.5
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.22,
+    "notaExamen": 7.63
+   },
+   "esperado": {
+    "promedioBloque1": 8.1,
+    "promedioBloque2": 8.625,
+    "promedioGeneral": 8.3625,
+    "promedioConRefuerzo": 8.3625,
+    "componente70": 5.85,
+    "componenteProyecto15": 1.08,
+    "componenteExamen15": 1.14,
+    "notaFinal": 8.07,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E16",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 16",
+   "entrada": {
+    "aportesBloque1": [
+     7.7,
+     8.21,
+     7.39,
+     7.3,
+     5.79
+    ],
+    "aportesBloque2": [
+     6.9,
+     8.39,
+     7.91,
+     7.2,
+     7.51
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.7,
+    "notaExamen": 6.81
+   },
+   "esperado": {
+    "promedioBloque1": 7.278,
+    "promedioBloque2": 7.582,
+    "promedioGeneral": 7.43,
+    "promedioConRefuerzo": 7.43,
+    "componente70": 5.2,
+    "componenteProyecto15": 1.15,
+    "componenteExamen15": 1.02,
+    "notaFinal": 7.37,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E17",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 17",
+   "entrada": {
+    "aportesBloque1": [
+     6.09,
+     8.55,
+     8.7,
+     6.52,
+     8.0
+    ],
+    "aportesBloque2": [
+     6.4,
+     8.3,
+     6.05,
+     6.1,
+     7.5
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.0,
+    "notaExamen": 6.96
+   },
+   "esperado": {
+    "promedioBloque1": 7.572,
+    "promedioBloque2": 6.87,
+    "promedioGeneral": 7.221,
+    "promedioConRefuerzo": 7.221,
+    "componente70": 5.05,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 1.04,
+    "notaFinal": 7.14,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E18",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 18",
+   "entrada": {
+    "aportesBloque1": [
+     8.1,
+     6.85,
+     7.4,
+     8.5,
+     8.76
+    ],
+    "aportesBloque2": [
+     8.5,
+     8.97,
+     9.3,
+     8.18,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.73,
+    "notaExamen": 7.22
+   },
+   "esperado": {
+    "promedioBloque1": 7.922,
+    "promedioBloque2": 8.59,
+    "promedioGeneral": 8.256,
+    "promedioConRefuerzo": 8.256,
+    "componente70": 5.77,
+    "componenteProyecto15": 1.3,
+    "componenteExamen15": 1.08,
+    "notaFinal": 8.15,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E19",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 19",
+   "entrada": {
+    "aportesBloque1": [
+     6.74,
+     6.8,
+     7.48,
+     8.15,
+     9.29
+    ],
+    "aportesBloque2": [
+     9.1,
+     8.1,
+     8.18,
+     8.11,
+     7.2
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.6,
+    "notaExamen": 8.14
+   },
+   "esperado": {
+    "promedioBloque1": 7.692,
+    "promedioBloque2": 8.138,
+    "promedioGeneral": 7.915,
+    "promedioConRefuerzo": 7.915,
+    "componente70": 5.54,
+    "componenteProyecto15": 1.14,
+    "componenteExamen15": 1.22,
+    "notaFinal": 7.9,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E20",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 20",
+   "entrada": {
+    "aportesBloque1": [
+     4.15,
+     5.76,
+     5.45,
+     6.5,
+     5.95
+    ],
+    "aportesBloque2": [
+     5.12,
+     6.21,
+     5.32,
+     6.4,
+     4.13
+    ],
+    "refuerzo": 6.15,
+    "notaProyecto": 6.0,
+    "notaExamen": 6.87
+   },
+   "esperado": {
+    "promedioBloque1": 5.562,
+    "promedioBloque2": 5.436,
+    "promedioGeneral": 5.499,
+    "promedioConRefuerzo": 5.8245,
+    "componente70": 4.07,
+    "componenteProyecto15": 0.9,
+    "componenteExamen15": 1.03,
+    "notaFinal": 6.0,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E21",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 21",
+   "entrada": {
+    "aportesBloque1": [
+     8.8,
+     9.44,
+     8.36,
+     9.8,
+     10.0
+    ],
+    "aportesBloque2": [
+     8.81,
+     8.84,
+     9.21,
+     10.0,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 7.45
+   },
+   "esperado": {
+    "promedioBloque1": 9.28,
+    "promedioBloque2": 8.972,
+    "promedioGeneral": 9.126,
+    "promedioConRefuerzo": 9.126,
+    "componente70": 6.38,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.11,
+    "notaFinal": 8.99,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E22",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 22",
+   "entrada": {
+    "aportesBloque1": [
+     5.25,
+     7.43,
+     5.41,
+     6.0,
+     6.84
+    ],
+    "aportesBloque2": [
+     7.14,
+     6.3,
+     5.1,
+     5.55,
+     4.7
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.8,
+    "notaExamen": 4.6
+   },
+   "esperado": {
+    "promedioBloque1": 6.186,
+    "promedioBloque2": 5.758,
+    "promedioGeneral": 5.972,
+    "promedioConRefuerzo": 5.972,
+    "componente70": 4.18,
+    "componenteProyecto15": 1.02,
+    "componenteExamen15": 0.69,
+    "notaFinal": 5.89,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E23",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 23",
+   "entrada": {
+    "aportesBloque1": [
+     7.61,
+     7.31,
+     6.78,
+     6.6,
+     6.5
+    ],
+    "aportesBloque2": [
+     6.55,
+     7.4,
+     5.3,
+     6.8,
+     5.75
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.6,
+    "notaExamen": 7.17
+   },
+   "esperado": {
+    "promedioBloque1": 6.96,
+    "promedioBloque2": 6.36,
+    "promedioGeneral": 6.66,
+    "promedioConRefuerzo": 6.66,
+    "componente70": 4.66,
+    "componenteProyecto15": 0.99,
+    "componenteExamen15": 1.07,
+    "notaFinal": 6.72,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E24",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 24",
+   "entrada": {
+    "aportesBloque1": [
+     6.27,
+     6.79,
+     6.2,
+     6.36,
+     6.8
+    ],
+    "aportesBloque2": [
+     4.56,
+     6.33,
+     4.3,
+     4.33,
+     6.69
+    ],
+    "refuerzo": 7.05,
+    "notaProyecto": 6.3,
+    "notaExamen": 5.14
+   },
+   "esperado": {
+    "promedioBloque1": 6.484,
+    "promedioBloque2": 5.242,
+    "promedioGeneral": 5.863,
+    "promedioConRefuerzo": 6.4565,
+    "componente70": 4.51,
+    "componenteProyecto15": 0.94,
+    "componenteExamen15": 0.77,
+    "notaFinal": 6.22,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E25",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 25",
+   "entrada": {
+    "aportesBloque1": [
+     7.4,
+     6.34,
+     7.62,
+     7.6,
+     5.44
+    ],
+    "aportesBloque2": [
+     6.71,
+     5.02,
+     5.98,
+     6.7,
+     6.4
+    ],
+    "refuerzo": 8.48,
+    "notaProyecto": 5.2,
+    "notaExamen": 5.74
+   },
+   "esperado": {
+    "promedioBloque1": 6.88,
+    "promedioBloque2": 6.162,
+    "promedioGeneral": 6.521,
+    "promedioConRefuerzo": 7.5005,
+    "componente70": 5.25,
+    "componenteProyecto15": 0.78,
+    "componenteExamen15": 0.86,
+    "notaFinal": 6.89,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E26",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 26",
+   "entrada": {
+    "aportesBloque1": [
+     4.31,
+     2.17,
+     3.11,
+     1.9,
+     2.2
+    ],
+    "aportesBloque2": [
+     2.79,
+     3.7,
+     3.11,
+     4.1,
+     3.46
+    ],
+    "refuerzo": 4.07,
+    "notaProyecto": 3.9,
+    "notaExamen": 3.34
+   },
+   "esperado": {
+    "promedioBloque1": 2.738,
+    "promedioBloque2": 3.432,
+    "promedioGeneral": 3.085,
+    "promedioConRefuerzo": 3.5775,
+    "componente70": 2.5,
+    "componenteProyecto15": 0.58,
+    "componenteExamen15": 0.5,
+    "notaFinal": 3.58,
+    "cualitativo": "D-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E27",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 27",
+   "entrada": {
+    "aportesBloque1": [
+     5.2,
+     6.5,
+     5.9,
+     5.85,
+     4.8
+    ],
+    "aportesBloque2": [
+     4.64,
+     6.3,
+     4.56,
+     5.32,
+     6.31
+    ],
+    "refuerzo": null,
+    "notaProyecto": 5.97,
+    "notaExamen": 6.4
+   },
+   "esperado": {
+    "promedioBloque1": 5.65,
+    "promedioBloque2": 5.426,
+    "promedioGeneral": 5.538,
+    "promedioConRefuerzo": 5.538,
+    "componente70": 3.87,
+    "componenteProyecto15": 0.89,
+    "componenteExamen15": 0.96,
+    "notaFinal": 5.72,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C2-E28",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 28",
+   "entrada": {
+    "aportesBloque1": [
+     8.15,
+     6.79,
+     8.54,
+     9.0,
+     7.99
+    ],
+    "aportesBloque2": [
+     8.83,
+     9.07,
+     7.71,
+     7.18,
+     8.51
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.32,
+    "notaExamen": 6.33
+   },
+   "esperado": {
+    "promedioBloque1": 8.094,
+    "promedioBloque2": 8.26,
+    "promedioGeneral": 8.177,
+    "promedioConRefuerzo": 8.177,
+    "componente70": 5.72,
+    "componenteProyecto15": 1.24,
+    "componenteExamen15": 0.94,
+    "notaFinal": 7.9,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E29",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 29",
+   "entrada": {
+    "aportesBloque1": [
+     7.16,
+     6.84,
+     6.3,
+     6.26,
+     7.38
+    ],
+    "aportesBloque2": [
+     6.9,
+     9.12,
+     7.17,
+     7.1,
+     6.3
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.86,
+    "notaExamen": 7.6
+   },
+   "esperado": {
+    "promedioBloque1": 6.788,
+    "promedioBloque2": 7.318,
+    "promedioGeneral": 7.053,
+    "promedioConRefuerzo": 7.053,
+    "componente70": 4.93,
+    "componenteProyecto15": 1.32,
+    "componenteExamen15": 1.14,
+    "notaFinal": 7.39,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C2-E30",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 30",
+   "entrada": {
+    "aportesBloque1": [
+     6.4,
+     8.23,
+     8.4,
+     6.65,
+     6.41
+    ],
+    "aportesBloque2": [
+     7.21,
+     6.8,
+     8.72,
+     6.5,
+     8.6
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.4,
+    "notaExamen": 8.03
+   },
+   "esperado": {
+    "promedioBloque1": 7.218,
+    "promedioBloque2": 7.566,
+    "promedioGeneral": 7.392,
+    "promedioConRefuerzo": 7.392,
+    "componente70": 5.17,
+    "componenteProyecto15": 1.11,
+    "componenteExamen15": 1.2,
+    "notaFinal": 7.48,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E01",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 01",
+   "entrada": {
+    "aportesBloque1": [
+     5.04,
+     2.86,
+     3.6,
+     5.2,
+     4.62
+    ],
+    "aportesBloque2": [
+     3.56,
+     5.13,
+     3.4,
+     4.86,
+     4.36
+    ],
+    "refuerzo": 4.77,
+    "notaProyecto": 3.03,
+    "notaExamen": 4.1
+   },
+   "esperado": {
+    "promedioBloque1": 4.264,
+    "promedioBloque2": 4.262,
+    "promedioGeneral": 4.263,
+    "promedioConRefuerzo": 4.5165,
+    "componente70": 3.16,
+    "componenteProyecto15": 0.45,
+    "componenteExamen15": 0.61,
+    "notaFinal": 4.22,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E02",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 02",
+   "entrada": {
+    "aportesBloque1": [
+     5.74,
+     4.6,
+     4.6,
+     6.44,
+     5.2
+    ],
+    "aportesBloque2": [
+     6.45,
+     3.69,
+     5.02,
+     4.2,
+     5.4
+    ],
+    "refuerzo": 5.74,
+    "notaProyecto": 5.65,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 5.316,
+    "promedioBloque2": 4.952,
+    "promedioGeneral": 5.134,
+    "promedioConRefuerzo": 5.437,
+    "componente70": 3.8,
+    "componenteProyecto15": 0.84,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E03",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 03",
+   "entrada": {
+    "aportesBloque1": [
+     7.96,
+     6.9,
+     6.2,
+     8.34,
+     6.2
+    ],
+    "aportesBloque2": [
+     7.6,
+     6.3,
+     5.94,
+     5.77,
+     6.86
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.75,
+    "notaExamen": 7.28
+   },
+   "esperado": {
+    "promedioBloque1": 7.12,
+    "promedioBloque2": 6.494,
+    "promedioGeneral": 6.807,
+    "promedioConRefuerzo": 6.807,
+    "componente70": 4.76,
+    "componenteProyecto15": 1.01,
+    "componenteExamen15": 1.09,
+    "notaFinal": 6.86,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E04",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 04",
+   "entrada": {
+    "aportesBloque1": [
+     8.22,
+     9.37,
+     8.9,
+     9.2,
+     7.4
+    ],
+    "aportesBloque2": [
+     8.55,
+     9.61,
+     8.62,
+     9.02,
+     8.35
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.53,
+    "notaExamen": 9.58
+   },
+   "esperado": {
+    "promedioBloque1": 8.618,
+    "promedioBloque2": 8.83,
+    "promedioGeneral": 8.724,
+    "promedioConRefuerzo": 8.724,
+    "componente70": 6.1,
+    "componenteProyecto15": 1.42,
+    "componenteExamen15": 1.43,
+    "notaFinal": 8.95,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E05",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 05",
+   "entrada": {
+    "aportesBloque1": [
+     8.5,
+     8.02,
+     9.67,
+     9.37,
+     9.3
+    ],
+    "aportesBloque2": [
+     8.1,
+     7.88,
+     null,
+     7.85,
+     7.27
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.29,
+    "notaExamen": 7.7
+   },
+   "esperado": {
+    "promedioBloque1": 8.972,
+    "promedioBloque2": 7.775,
+    "promedioGeneral": 8.3735,
+    "promedioConRefuerzo": 8.3735,
+    "componente70": 5.86,
+    "componenteProyecto15": 1.09,
+    "componenteExamen15": 1.15,
+    "notaFinal": 8.1,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E06",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 06",
+   "entrada": {
+    "aportesBloque1": [
+     6.8,
+     8.4,
+     8.92,
+     7.1,
+     8.02
+    ],
+    "aportesBloque2": [
+     8.69,
+     8.1,
+     6.71,
+     8.8,
+     6.63
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.97,
+    "notaExamen": 7.84
+   },
+   "esperado": {
+    "promedioBloque1": 7.848,
+    "promedioBloque2": 7.786,
+    "promedioGeneral": 7.817,
+    "promedioConRefuerzo": 7.817,
+    "componente70": 5.47,
+    "componenteProyecto15": 1.34,
+    "componenteExamen15": 1.17,
+    "notaFinal": 7.98,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E07",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 07",
+   "entrada": {
+    "aportesBloque1": [
+     7.2,
+     6.17,
+     7.01,
+     6.95,
+     7.57
+    ],
+    "aportesBloque2": [
+     6.8,
+     6.85,
+     7.6,
+     8.02,
+     5.41
+    ],
+    "refuerzo": 8.4,
+    "notaProyecto": 5.64,
+    "notaExamen": 6.45
+   },
+   "esperado": {
+    "promedioBloque1": 6.98,
+    "promedioBloque2": 6.936,
+    "promedioGeneral": 6.958,
+    "promedioConRefuerzo": 7.679,
+    "componente70": 5.37,
+    "componenteProyecto15": 0.84,
+    "componenteExamen15": 0.96,
+    "notaFinal": 7.17,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E08",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 08",
+   "entrada": {
+    "aportesBloque1": [
+     9.8,
+     9.5,
+     9.56,
+     8.68,
+     8.62
+    ],
+    "aportesBloque2": [
+     8.86,
+     null,
+     7.9,
+     9.84,
+     8.87
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.94,
+    "notaExamen": 9.1
+   },
+   "esperado": {
+    "promedioBloque1": 9.232,
+    "promedioBloque2": 8.8675,
+    "promedioGeneral": 9.04975,
+    "promedioConRefuerzo": 9.04975,
+    "componente70": 6.33,
+    "componenteProyecto15": 1.34,
+    "componenteExamen15": 1.36,
+    "notaFinal": 9.03,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E09",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 09",
+   "entrada": {
+    "aportesBloque1": [
+     6.2,
+     5.28,
+     5.2,
+     6.76,
+     7.2
+    ],
+    "aportesBloque2": [
+     8.02,
+     7.89,
+     5.96,
+     6.44,
+     7.2
+    ],
+    "refuerzo": 7.8,
+    "notaProyecto": 7.32,
+    "notaExamen": 7.22
+   },
+   "esperado": {
+    "promedioBloque1": 6.128,
+    "promedioBloque2": 7.102,
+    "promedioGeneral": 6.615,
+    "promedioConRefuerzo": 7.2075,
+    "componente70": 5.04,
+    "componenteProyecto15": 1.09,
+    "componenteExamen15": 1.08,
+    "notaFinal": 7.21,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E10",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 10",
+   "entrada": {
+    "aportesBloque1": [
+     5.0,
+     7.4,
+     5.7,
+     6.5,
+     6.75
+    ],
+    "aportesBloque2": [
+     6.74,
+     6.04,
+     6.02,
+     6.26,
+     4.98
+    ],
+    "refuerzo": null,
+    "notaProyecto": 5.64,
+    "notaExamen": 4.99
+   },
+   "esperado": {
+    "promedioBloque1": 6.27,
+    "promedioBloque2": 6.008,
+    "promedioGeneral": 6.139,
+    "promedioConRefuerzo": 6.139,
+    "componente70": 4.29,
+    "componenteProyecto15": 0.84,
+    "componenteExamen15": 0.74,
+    "notaFinal": 5.87,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E11",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 11",
+   "entrada": {
+    "aportesBloque1": [
+     7.0,
+     9.08,
+     7.94,
+     7.63,
+     6.83
+    ],
+    "aportesBloque2": [
+     7.6,
+     6.94,
+     8.12,
+     7.7,
+     7.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.71,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 7.696,
+    "promedioBloque2": 7.472,
+    "promedioGeneral": 7.584,
+    "promedioConRefuerzo": 7.584,
+    "componente70": 5.3,
+    "componenteProyecto15": 1.3,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E12",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 12",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     9.39,
+     8.87,
+     8.58,
+     7.9
+    ],
+    "aportesBloque2": [
+     10.0,
+     8.4,
+     9.44,
+     9.26,
+     9.32
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.2,
+    "notaExamen": 9.15
+   },
+   "esperado": {
+    "promedioBloque1": 8.948,
+    "promedioBloque2": 9.284,
+    "promedioGeneral": 9.116,
+    "promedioConRefuerzo": 9.116,
+    "componente70": 6.38,
+    "componenteProyecto15": 1.38,
+    "componenteExamen15": 1.37,
+    "notaFinal": 9.13,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E13",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 13",
+   "entrada": {
+    "aportesBloque1": [
+     9.86,
+     8.66,
+     9.91,
+     9.2,
+     10.0
+    ],
+    "aportesBloque2": [
+     8.5,
+     7.6,
+     9.34,
+     7.94,
+     9.9
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.61,
+    "notaExamen": 8.23
+   },
+   "esperado": {
+    "promedioBloque1": 9.526,
+    "promedioBloque2": 8.656,
+    "promedioGeneral": 9.091,
+    "promedioConRefuerzo": 9.091,
+    "componente70": 6.36,
+    "componenteProyecto15": 1.44,
+    "componenteExamen15": 1.23,
+    "notaFinal": 9.03,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E14",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 14",
+   "entrada": {
+    "aportesBloque1": [
+     3.0,
+     3.68,
+     3.6,
+     5.4,
+     null
+    ],
+    "aportesBloque2": [
+     4.9,
+     4.82,
+     2.91,
+     3.7,
+     5.0
+    ],
+    "refuerzo": 5.1,
+    "notaProyecto": 3.81,
+    "notaExamen": 5.1
+   },
+   "esperado": {
+    "promedioBloque1": 3.92,
+    "promedioBloque2": 4.266,
+    "promedioGeneral": 4.093,
+    "promedioConRefuerzo": 4.5965,
+    "componente70": 3.21,
+    "componenteProyecto15": 0.57,
+    "componenteExamen15": 0.76,
+    "notaFinal": 4.54,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E15",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 15",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     8.52,
+     8.87,
+     9.37,
+     10.0
+    ],
+    "aportesBloque2": [
+     9.3,
+     9.84,
+     8.69,
+     9.13,
+     9.96
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 9.352,
+    "promedioBloque2": 9.384,
+    "promedioGeneral": 9.368,
+    "promedioConRefuerzo": 9.368,
+    "componente70": 6.55,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 9.55,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E16",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 16",
+   "entrada": {
+    "aportesBloque1": [
+     5.82,
+     6.21,
+     7.82,
+     7.2,
+     7.94
+    ],
+    "aportesBloque2": [
+     6.62,
+     6.63,
+     8.7,
+     7.16,
+     null
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.47,
+    "notaExamen": 5.89
+   },
+   "esperado": {
+    "promedioBloque1": 6.998,
+    "promedioBloque2": 7.2775,
+    "promedioGeneral": 7.13775,
+    "promedioConRefuerzo": 7.13775,
+    "componente70": 4.99,
+    "componenteProyecto15": 1.12,
+    "componenteExamen15": 0.88,
+    "notaFinal": 6.99,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E17",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 17",
+   "entrada": {
+    "aportesBloque1": [
+     3.72,
+     5.9,
+     4.14,
+     5.7,
+     6.41
+    ],
+    "aportesBloque2": [
+     6.2,
+     4.7,
+     6.39,
+     5.7,
+     3.66
+    ],
+    "refuerzo": null,
+    "notaProyecto": 3.94,
+    "notaExamen": 5.0
+   },
+   "esperado": {
+    "promedioBloque1": 5.174,
+    "promedioBloque2": 5.33,
+    "promedioGeneral": 5.252,
+    "promedioConRefuerzo": 5.252,
+    "componente70": 3.67,
+    "componenteProyecto15": 0.59,
+    "componenteExamen15": 0.75,
+    "notaFinal": 5.01,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E18",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 18",
+   "entrada": {
+    "aportesBloque1": [
+     6.7,
+     4.65,
+     6.33,
+     null,
+     3.72
+    ],
+    "aportesBloque2": [
+     5.5,
+     5.68,
+     3.7,
+     5.61,
+     6.26
+    ],
+    "refuerzo": 5.83,
+    "notaProyecto": 4.3,
+    "notaExamen": 6.17
+   },
+   "esperado": {
+    "promedioBloque1": 5.35,
+    "promedioBloque2": 5.35,
+    "promedioGeneral": 5.35,
+    "promedioConRefuerzo": 5.59,
+    "componente70": 3.91,
+    "componenteProyecto15": 0.64,
+    "componenteExamen15": 0.92,
+    "notaFinal": 5.47,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E19",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 19",
+   "entrada": {
+    "aportesBloque1": [
+     4.98,
+     5.61,
+     7.79,
+     5.25,
+     7.22
+    ],
+    "aportesBloque2": [
+     7.2,
+     7.57,
+     5.66,
+     7.67,
+     6.16
+    ],
+    "refuerzo": 7.91,
+    "notaProyecto": 6.52,
+    "notaExamen": 6.1
+   },
+   "esperado": {
+    "promedioBloque1": 6.17,
+    "promedioBloque2": 6.852,
+    "promedioGeneral": 6.511,
+    "promedioConRefuerzo": 7.2105,
+    "componente70": 5.04,
+    "componenteProyecto15": 0.97,
+    "componenteExamen15": 0.91,
+    "notaFinal": 6.92,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E20",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 20",
+   "entrada": {
+    "aportesBloque1": [
+     5.7,
+     4.34,
+     5.5,
+     4.68,
+     6.68
+    ],
+    "aportesBloque2": [
+     5.9,
+     6.8,
+     7.0,
+     5.6,
+     7.15
+    ],
+    "refuerzo": 7.48,
+    "notaProyecto": 6.6,
+    "notaExamen": 6.29
+   },
+   "esperado": {
+    "promedioBloque1": 5.38,
+    "promedioBloque2": 6.49,
+    "promedioGeneral": 5.935,
+    "promedioConRefuerzo": 6.7075,
+    "componente70": 4.69,
+    "componenteProyecto15": 0.99,
+    "componenteExamen15": 0.94,
+    "notaFinal": 6.62,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E21",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 21",
+   "entrada": {
+    "aportesBloque1": [
+     8.6,
+     9.3,
+     8.14,
+     9.7,
+     7.7
+    ],
+    "aportesBloque2": [
+     7.8,
+     7.62,
+     10.0,
+     8.6,
+     7.41
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.3,
+    "notaExamen": 7.7
+   },
+   "esperado": {
+    "promedioBloque1": 8.688,
+    "promedioBloque2": 8.286,
+    "promedioGeneral": 8.487,
+    "promedioConRefuerzo": 8.487,
+    "componente70": 5.94,
+    "componenteProyecto15": 1.39,
+    "componenteExamen15": 1.15,
+    "notaFinal": 8.48,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E22",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 22",
+   "entrada": {
+    "aportesBloque1": [
+     8.32,
+     8.3,
+     7.6,
+     8.27,
+     8.76
+    ],
+    "aportesBloque2": [
+     7.29,
+     9.0,
+     7.92,
+     6.33,
+     6.73
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.7,
+    "notaExamen": 7.7
+   },
+   "esperado": {
+    "promedioBloque1": 8.25,
+    "promedioBloque2": 7.454,
+    "promedioGeneral": 7.852,
+    "promedioConRefuerzo": 7.852,
+    "componente70": 5.49,
+    "componenteProyecto15": 1.3,
+    "componenteExamen15": 1.15,
+    "notaFinal": 7.94,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E23",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 23",
+   "entrada": {
+    "aportesBloque1": [
+     5.2,
+     5.0,
+     5.4,
+     5.0,
+     4.34
+    ],
+    "aportesBloque2": [
+     4.6,
+     4.83,
+     5.38,
+     4.04,
+     3.65
+    ],
+    "refuerzo": 6.85,
+    "notaProyecto": 4.66,
+    "notaExamen": 3.6
+   },
+   "esperado": {
+    "promedioBloque1": 4.988,
+    "promedioBloque2": 4.5,
+    "promedioGeneral": 4.744,
+    "promedioConRefuerzo": 5.797,
+    "componente70": 4.05,
+    "componenteProyecto15": 0.69,
+    "componenteExamen15": 0.54,
+    "notaFinal": 5.28,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E24",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 24",
+   "entrada": {
+    "aportesBloque1": [
+     7.72,
+     8.3,
+     5.91,
+     7.09,
+     6.9
+    ],
+    "aportesBloque2": [
+     8.13,
+     5.8,
+     7.6,
+     6.21,
+     5.99
+    ],
+    "refuerzo": 7.5,
+    "notaProyecto": 7.5,
+    "notaExamen": 6.4
+   },
+   "esperado": {
+    "promedioBloque1": 7.184,
+    "promedioBloque2": 6.746,
+    "promedioGeneral": 6.965,
+    "promedioConRefuerzo": 7.2325,
+    "componente70": 5.06,
+    "componenteProyecto15": 1.12,
+    "componenteExamen15": 0.96,
+    "notaFinal": 7.14,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E25",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 25",
+   "entrada": {
+    "aportesBloque1": [
+     7.68,
+     9.8,
+     7.14,
+     7.62,
+     8.97
+    ],
+    "aportesBloque2": [
+     7.6,
+     8.35,
+     9.4,
+     7.08,
+     9.87
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.18,
+    "notaExamen": 8.43
+   },
+   "esperado": {
+    "promedioBloque1": 8.242,
+    "promedioBloque2": 8.46,
+    "promedioGeneral": 8.351,
+    "promedioConRefuerzo": 8.351,
+    "componente70": 5.84,
+    "componenteProyecto15": 1.37,
+    "componenteExamen15": 1.26,
+    "notaFinal": 8.47,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E26",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 26",
+   "entrada": {
+    "aportesBloque1": [
+     6.76,
+     6.1,
+     5.98,
+     7.8,
+     7.7
+    ],
+    "aportesBloque2": [
+     7.82,
+     8.62,
+     6.84,
+     5.8,
+     6.58
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.8,
+    "notaExamen": 8.27
+   },
+   "esperado": {
+    "promedioBloque1": 6.868,
+    "promedioBloque2": 7.132,
+    "promedioGeneral": 7.0,
+    "promedioConRefuerzo": 7.0,
+    "componente70": 4.9,
+    "componenteProyecto15": 1.17,
+    "componenteExamen15": 1.24,
+    "notaFinal": 7.31,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E27",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 27",
+   "entrada": {
+    "aportesBloque1": [
+     6.4,
+     4.88,
+     6.6,
+     5.84,
+     4.52
+    ],
+    "aportesBloque2": [
+     6.7,
+     5.51,
+     6.1,
+     5.65,
+     3.9
+    ],
+    "refuerzo": 7.21,
+    "notaProyecto": 4.2,
+    "notaExamen": 5.34
+   },
+   "esperado": {
+    "promedioBloque1": 5.648,
+    "promedioBloque2": 5.572,
+    "promedioGeneral": 5.61,
+    "promedioConRefuerzo": 6.41,
+    "componente70": 4.48,
+    "componenteProyecto15": 0.63,
+    "componenteExamen15": 0.8,
+    "notaFinal": 5.91,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E28",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 28",
+   "entrada": {
+    "aportesBloque1": [
+     3.9,
+     4.67,
+     5.56,
+     3.2,
+     4.61
+    ],
+    "aportesBloque2": [
+     5.33,
+     4.03,
+     3.76,
+     5.19,
+     4.9
+    ],
+    "refuerzo": null,
+    "notaProyecto": 5.27,
+    "notaExamen": 4.19
+   },
+   "esperado": {
+    "promedioBloque1": 4.388,
+    "promedioBloque2": 4.642,
+    "promedioGeneral": 4.515,
+    "promedioConRefuerzo": 4.515,
+    "componente70": 3.16,
+    "componenteProyecto15": 0.79,
+    "componenteExamen15": 0.62,
+    "notaFinal": 4.57,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C3-E29",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 29",
+   "entrada": {
+    "aportesBloque1": [
+     6.16,
+     8.2,
+     6.54,
+     7.88,
+     6.9
+    ],
+    "aportesBloque2": [
+     6.8,
+     5.99,
+     7.41,
+     6.46,
+     7.23
+    ],
+    "refuerzo": 8.43,
+    "notaProyecto": 8.48,
+    "notaExamen": 6.9
+   },
+   "esperado": {
+    "promedioBloque1": 7.136,
+    "promedioBloque2": 6.778,
+    "promedioGeneral": 6.957,
+    "promedioConRefuerzo": 7.6935,
+    "componente70": 5.38,
+    "componenteProyecto15": 1.27,
+    "componenteExamen15": 1.03,
+    "notaFinal": 7.68,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C3-E30",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 30",
+   "entrada": {
+    "aportesBloque1": [
+     6.11,
+     4.1,
+     4.78,
+     6.7,
+     4.73
+    ],
+    "aportesBloque2": [
+     6.75,
+     null,
+     4.9,
+     4.6,
+     6.41
+    ],
+    "refuerzo": 7.2,
+    "notaProyecto": 6.4,
+    "notaExamen": 4.92
+   },
+   "esperado": {
+    "promedioBloque1": 5.284,
+    "promedioBloque2": 5.665,
+    "promedioGeneral": 5.4745,
+    "promedioConRefuerzo": 6.33725,
+    "componente70": 4.43,
+    "componenteProyecto15": 0.96,
+    "componenteExamen15": 0.73,
+    "notaFinal": 6.12,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E01",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 01",
+   "entrada": {
+    "aportesBloque1": [
+     3.97,
+     4.83,
+     3.6,
+     3.2,
+     4.17
+    ],
+    "aportesBloque2": [
+     5.9,
+     5.3,
+     3.35,
+     3.6,
+     3.07
+    ],
+    "refuerzo": 5.4,
+    "notaProyecto": 4.3,
+    "notaExamen": 5.2
+   },
+   "esperado": {
+    "promedioBloque1": 3.954,
+    "promedioBloque2": 4.244,
+    "promedioGeneral": 4.099,
+    "promedioConRefuerzo": 4.7495,
+    "componente70": 3.32,
+    "componenteProyecto15": 0.64,
+    "componenteExamen15": 0.78,
+    "notaFinal": 4.74,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E02",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 02",
+   "entrada": {
+    "aportesBloque1": [
+     9.29,
+     10.0,
+     9.25,
+     10.0,
+     9.15
+    ],
+    "aportesBloque2": [
+     9.24,
+     8.49,
+     9.17,
+     9.45,
+     9.6
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 9.538,
+    "promedioBloque2": 9.19,
+    "promedioGeneral": 9.364,
+    "promedioConRefuerzo": 9.364,
+    "componente70": 6.55,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 9.55,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E03",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 03",
+   "entrada": {
+    "aportesBloque1": [
+     9.54,
+     8.56,
+     9.21,
+     10.0,
+     7.9
+    ],
+    "aportesBloque2": [
+     10.0,
+     7.99,
+     9.3,
+     7.87,
+     9.97
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 8.25
+   },
+   "esperado": {
+    "promedioBloque1": 9.042,
+    "promedioBloque2": 9.026,
+    "promedioGeneral": 9.034,
+    "promedioConRefuerzo": 9.034,
+    "componente70": 6.32,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.23,
+    "notaFinal": 9.05,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E04",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 04",
+   "entrada": {
+    "aportesBloque1": [
+     7.78,
+     8.57,
+     7.52,
+     8.73,
+     7.57
+    ],
+    "aportesBloque2": [
+     6.45,
+     8.09,
+     7.42,
+     8.24,
+     7.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.42,
+    "notaExamen": 8.1
+   },
+   "esperado": {
+    "promedioBloque1": 8.034,
+    "promedioBloque2": 7.44,
+    "promedioGeneral": 7.737,
+    "promedioConRefuerzo": 7.737,
+    "componente70": 5.41,
+    "componenteProyecto15": 0.96,
+    "componenteExamen15": 1.21,
+    "notaFinal": 7.58,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E05",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 05",
+   "entrada": {
+    "aportesBloque1": [
+     8.6,
+     8.7,
+     8.48,
+     8.79,
+     8.08
+    ],
+    "aportesBloque2": [
+     8.6,
+     8.48,
+     6.75,
+     7.38,
+     9.71
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.89,
+    "notaExamen": 8.53
+   },
+   "esperado": {
+    "promedioBloque1": 8.53,
+    "promedioBloque2": 8.184,
+    "promedioGeneral": 8.357,
+    "promedioConRefuerzo": 8.357,
+    "componente70": 5.84,
+    "componenteProyecto15": 1.33,
+    "componenteExamen15": 1.27,
+    "notaFinal": 8.44,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E06",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 06",
+   "entrada": {
+    "aportesBloque1": [
+     7.8,
+     5.53,
+     5.7,
+     7.22,
+     7.04
+    ],
+    "aportesBloque2": [
+     5.64,
+     7.79,
+     6.19,
+     7.67,
+     5.8
+    ],
+    "refuerzo": 9.18,
+    "notaProyecto": 7.6,
+    "notaExamen": 6.34
+   },
+   "esperado": {
+    "promedioBloque1": 6.658,
+    "promedioBloque2": 6.618,
+    "promedioGeneral": 6.638,
+    "promedioConRefuerzo": 7.909,
+    "componente70": 5.53,
+    "componenteProyecto15": 1.14,
+    "componenteExamen15": 0.95,
+    "notaFinal": 7.62,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E07",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 07",
+   "entrada": {
+    "aportesBloque1": [
+     2.27,
+     4.4,
+     2.0,
+     1.89,
+     3.18
+    ],
+    "aportesBloque2": [
+     3.94,
+     2.97,
+     4.47,
+     2.3,
+     2.27
+    ],
+    "refuerzo": null,
+    "notaProyecto": 2.96,
+    "notaExamen": 3.5
+   },
+   "esperado": {
+    "promedioBloque1": 2.748,
+    "promedioBloque2": 3.19,
+    "promedioGeneral": 2.969,
+    "promedioConRefuerzo": 2.969,
+    "componente70": 2.07,
+    "componenteProyecto15": 0.44,
+    "componenteExamen15": 0.52,
+    "notaFinal": 3.03,
+    "cualitativo": "D-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E08",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 08",
+   "entrada": {
+    "aportesBloque1": [
+     7.6,
+     6.7,
+     7.1,
+     7.9,
+     7.94
+    ],
+    "aportesBloque2": [
+     6.9,
+     8.52,
+     9.22,
+     6.47,
+     8.54
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.72,
+    "notaExamen": 7.01
+   },
+   "esperado": {
+    "promedioBloque1": 7.448,
+    "promedioBloque2": 7.93,
+    "promedioGeneral": 7.689,
+    "promedioConRefuerzo": 7.689,
+    "componente70": 5.38,
+    "componenteProyecto15": 1.3,
+    "componenteExamen15": 1.05,
+    "notaFinal": 7.73,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E09",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 09",
+   "entrada": {
+    "aportesBloque1": [
+     7.8,
+     6.45,
+     7.97,
+     6.36,
+     6.21
+    ],
+    "aportesBloque2": [
+     6.7,
+     7.31,
+     5.85,
+     6.49,
+     8.27
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.0,
+    "notaExamen": 7.52
+   },
+   "esperado": {
+    "promedioBloque1": 6.958,
+    "promedioBloque2": 6.924,
+    "promedioGeneral": 6.941,
+    "promedioConRefuerzo": 6.941,
+    "componente70": 4.85,
+    "componenteProyecto15": 0.9,
+    "componenteExamen15": 1.12,
+    "notaFinal": 6.87,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E10",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 10",
+   "entrada": {
+    "aportesBloque1": [
+     7.96,
+     8.0,
+     5.98,
+     null,
+     5.91
+    ],
+    "aportesBloque2": [
+     7.83,
+     6.5,
+     8.33,
+     7.2,
+     7.93
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.29,
+    "notaExamen": 5.7
+   },
+   "esperado": {
+    "promedioBloque1": 6.9625,
+    "promedioBloque2": 7.558,
+    "promedioGeneral": 7.26025,
+    "promedioConRefuerzo": 7.26025,
+    "componente70": 5.08,
+    "componenteProyecto15": 1.09,
+    "componenteExamen15": 0.85,
+    "notaFinal": 7.02,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E11",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 11",
+   "entrada": {
+    "aportesBloque1": [
+     6.33,
+     5.64,
+     6.19,
+     5.4,
+     6.96
+    ],
+    "aportesBloque2": [
+     8.09,
+     6.26,
+     7.04,
+     6.12,
+     5.5
+    ],
+    "refuerzo": 9.0,
+    "notaProyecto": 7.03,
+    "notaExamen": 5.92
+   },
+   "esperado": {
+    "promedioBloque1": 6.104,
+    "promedioBloque2": 6.602,
+    "promedioGeneral": 6.353,
+    "promedioConRefuerzo": 7.6765,
+    "componente70": 5.37,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 0.88,
+    "notaFinal": 7.3,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E12",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 12",
+   "entrada": {
+    "aportesBloque1": [
+     8.64,
+     8.3,
+     7.37,
+     6.29,
+     8.45
+    ],
+    "aportesBloque2": [
+     7.1,
+     7.61,
+     8.0,
+     7.8,
+     7.49
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.9,
+    "notaExamen": 6.3
+   },
+   "esperado": {
+    "promedioBloque1": 7.81,
+    "promedioBloque2": 7.6,
+    "promedioGeneral": 7.705,
+    "promedioConRefuerzo": 7.705,
+    "componente70": 5.39,
+    "componenteProyecto15": 1.18,
+    "componenteExamen15": 0.94,
+    "notaFinal": 7.51,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E13",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 13",
+   "entrada": {
+    "aportesBloque1": [
+     5.6,
+     7.7,
+     6.3,
+     6.86,
+     7.7
+    ],
+    "aportesBloque2": [
+     5.44,
+     6.37,
+     5.57,
+     5.3,
+     7.87
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.7,
+    "notaExamen": 6.14
+   },
+   "esperado": {
+    "promedioBloque1": 6.832,
+    "promedioBloque2": 6.11,
+    "promedioGeneral": 6.471,
+    "promedioConRefuerzo": 6.471,
+    "componente70": 4.52,
+    "componenteProyecto15": 1.15,
+    "componenteExamen15": 0.92,
+    "notaFinal": 6.59,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E14",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 14",
+   "entrada": {
+    "aportesBloque1": [
+     7.5,
+     7.2,
+     6.26,
+     8.0,
+     6.7
+    ],
+    "aportesBloque2": [
+     7.0,
+     null,
+     5.71,
+     7.86,
+     5.58
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.06,
+    "notaExamen": 5.4
+   },
+   "esperado": {
+    "promedioBloque1": 7.132,
+    "promedioBloque2": 6.5375,
+    "promedioGeneral": 6.83475,
+    "promedioConRefuerzo": 6.83475,
+    "componente70": 4.78,
+    "componenteProyecto15": 0.9,
+    "componenteExamen15": 0.81,
+    "notaFinal": 6.49,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E15",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 15",
+   "entrada": {
+    "aportesBloque1": [
+     6.93,
+     4.6,
+     6.46,
+     4.3,
+     4.5
+    ],
+    "aportesBloque2": [
+     6.12,
+     4.26,
+     5.36,
+     4.2,
+     6.2
+    ],
+    "refuerzo": 7.81,
+    "notaProyecto": 5.83,
+    "notaExamen": 4.4
+   },
+   "esperado": {
+    "promedioBloque1": 5.358,
+    "promedioBloque2": 5.228,
+    "promedioGeneral": 5.293,
+    "promedioConRefuerzo": 6.5515,
+    "componente70": 4.58,
+    "componenteProyecto15": 0.87,
+    "componenteExamen15": 0.66,
+    "notaFinal": 6.11,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E16",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 16",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     8.3,
+     8.81,
+     8.8,
+     10.0
+    ],
+    "aportesBloque2": [
+     10.0,
+     9.52,
+     9.22,
+     10.0,
+     8.99
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.97,
+    "notaExamen": 8.4
+   },
+   "esperado": {
+    "promedioBloque1": 9.182,
+    "promedioBloque2": 9.546,
+    "promedioGeneral": 9.364,
+    "promedioConRefuerzo": 9.364,
+    "componente70": 6.55,
+    "componenteProyecto15": 1.34,
+    "componenteExamen15": 1.26,
+    "notaFinal": 9.15,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E17",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 17",
+   "entrada": {
+    "aportesBloque1": [
+     6.76,
+     6.56,
+     7.6,
+     8.09,
+     7.54
+    ],
+    "aportesBloque2": [
+     8.03,
+     8.6,
+     7.25,
+     6.83,
+     6.58
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.09,
+    "notaExamen": 9.0
+   },
+   "esperado": {
+    "promedioBloque1": 7.31,
+    "promedioBloque2": 7.458,
+    "promedioGeneral": 7.384,
+    "promedioConRefuerzo": 7.384,
+    "componente70": 5.16,
+    "componenteProyecto15": 1.06,
+    "componenteExamen15": 1.35,
+    "notaFinal": 7.57,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E18",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 18",
+   "entrada": {
+    "aportesBloque1": [
+     6.4,
+     5.43,
+     6.4,
+     4.8,
+     5.89
+    ],
+    "aportesBloque2": [
+     3.78,
+     3.84,
+     5.48,
+     4.8,
+     4.5
+    ],
+    "refuerzo": 6.28,
+    "notaProyecto": 4.58,
+    "notaExamen": 5.31
+   },
+   "esperado": {
+    "promedioBloque1": 5.784,
+    "promedioBloque2": 4.48,
+    "promedioGeneral": 5.132,
+    "promedioConRefuerzo": 5.706,
+    "componente70": 3.99,
+    "componenteProyecto15": 0.68,
+    "componenteExamen15": 0.79,
+    "notaFinal": 5.46,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E19",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 19",
+   "entrada": {
+    "aportesBloque1": [
+     3.5,
+     5.03,
+     5.1,
+     4.04,
+     4.81
+    ],
+    "aportesBloque2": [
+     3.97,
+     5.72,
+     6.11,
+     4.2,
+     3.6
+    ],
+    "refuerzo": 6.8,
+    "notaProyecto": 4.46,
+    "notaExamen": 3.66
+   },
+   "esperado": {
+    "promedioBloque1": 4.496,
+    "promedioBloque2": 4.72,
+    "promedioGeneral": 4.608,
+    "promedioConRefuerzo": 5.704,
+    "componente70": 3.99,
+    "componenteProyecto15": 0.66,
+    "componenteExamen15": 0.54,
+    "notaFinal": 5.19,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E20",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 20",
+   "entrada": {
+    "aportesBloque1": [
+     5.95,
+     6.4,
+     6.3,
+     6.47,
+     7.4
+    ],
+    "aportesBloque2": [
+     8.56,
+     5.92,
+     8.25,
+     8.18,
+     6.04
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.3,
+    "notaExamen": 6.82
+   },
+   "esperado": {
+    "promedioBloque1": 6.504,
+    "promedioBloque2": 7.39,
+    "promedioGeneral": 6.947,
+    "promedioConRefuerzo": 6.947,
+    "componente70": 4.86,
+    "componenteProyecto15": 1.09,
+    "componenteExamen15": 1.02,
+    "notaFinal": 6.97,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E21",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 21",
+   "entrada": {
+    "aportesBloque1": [
+     7.4,
+     6.42,
+     7.59,
+     7.66,
+     5.85
+    ],
+    "aportesBloque2": [
+     6.07,
+     8.3,
+     7.41,
+     8.65,
+     7.91
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.54,
+    "notaExamen": 7.74
+   },
+   "esperado": {
+    "promedioBloque1": 6.984,
+    "promedioBloque2": 7.668,
+    "promedioGeneral": 7.326,
+    "promedioConRefuerzo": 7.326,
+    "componente70": 5.12,
+    "componenteProyecto15": 0.98,
+    "componenteExamen15": 1.16,
+    "notaFinal": 7.26,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E22",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 22",
+   "entrada": {
+    "aportesBloque1": [
+     7.99,
+     6.8,
+     7.2,
+     8.23,
+     7.97
+    ],
+    "aportesBloque2": [
+     9.0,
+     7.61,
+     8.17,
+     9.2,
+     8.99
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.45,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 7.638,
+    "promedioBloque2": 8.594,
+    "promedioGeneral": 8.116,
+    "promedioConRefuerzo": 8.116,
+    "componente70": 5.68,
+    "componenteProyecto15": 1.11,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E23",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 23",
+   "entrada": {
+    "aportesBloque1": [
+     8.85,
+     8.1,
+     8.74,
+     8.66,
+     8.56
+    ],
+    "aportesBloque2": [
+     9.22,
+     8.3,
+     8.85,
+     9.22,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.51,
+    "notaExamen": 8.26
+   },
+   "esperado": {
+    "promedioBloque1": 8.582,
+    "promedioBloque2": 9.118,
+    "promedioGeneral": 8.85,
+    "promedioConRefuerzo": 8.85,
+    "componente70": 6.19,
+    "componenteProyecto15": 1.27,
+    "componenteExamen15": 1.23,
+    "notaFinal": 8.69,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E24",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 24",
+   "entrada": {
+    "aportesBloque1": [
+     6.81,
+     7.5,
+     8.0,
+     7.23,
+     6.43
+    ],
+    "aportesBloque2": [
+     8.59,
+     8.89,
+     8.7,
+     8.2,
+     8.47
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.08,
+    "notaExamen": 7.9
+   },
+   "esperado": {
+    "promedioBloque1": 7.194,
+    "promedioBloque2": 8.57,
+    "promedioGeneral": 7.882,
+    "promedioConRefuerzo": 7.882,
+    "componente70": 5.51,
+    "componenteProyecto15": 1.06,
+    "componenteExamen15": 1.18,
+    "notaFinal": 7.75,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E25",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 25",
+   "entrada": {
+    "aportesBloque1": [
+     9.0,
+     7.38,
+     8.0,
+     8.65,
+     6.63
+    ],
+    "aportesBloque2": [
+     7.1,
+     8.92,
+     7.42,
+     9.03,
+     8.78
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.22,
+    "notaExamen": 9.26
+   },
+   "esperado": {
+    "promedioBloque1": 7.932,
+    "promedioBloque2": 8.25,
+    "promedioGeneral": 8.091,
+    "promedioConRefuerzo": 8.091,
+    "componente70": 5.66,
+    "componenteProyecto15": 1.23,
+    "componenteExamen15": 1.38,
+    "notaFinal": 8.27,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E26",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 26",
+   "entrada": {
+    "aportesBloque1": [
+     6.3,
+     4.3,
+     4.25,
+     5.35,
+     4.1
+    ],
+    "aportesBloque2": [
+     5.6,
+     5.8,
+     4.94,
+     5.61,
+     6.01
+    ],
+    "refuerzo": 7.41,
+    "notaProyecto": 4.7,
+    "notaExamen": 5.2
+   },
+   "esperado": {
+    "promedioBloque1": 4.86,
+    "promedioBloque2": 5.592,
+    "promedioGeneral": 5.226,
+    "promedioConRefuerzo": 6.318,
+    "componente70": 4.42,
+    "componenteProyecto15": 0.7,
+    "componenteExamen15": 0.78,
+    "notaFinal": 5.9,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "C4-E27",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 27",
+   "entrada": {
+    "aportesBloque1": [
+     9.23,
+     8.95,
+     9.4,
+     9.44,
+     10.0
+    ],
+    "aportesBloque2": [
+     9.96,
+     8.3,
+     7.5,
+     7.73,
+     9.99
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.16,
+    "notaExamen": 8.72
+   },
+   "esperado": {
+    "promedioBloque1": 9.404,
+    "promedioBloque2": 8.696,
+    "promedioGeneral": 9.05,
+    "promedioConRefuerzo": 9.05,
+    "componente70": 6.33,
+    "componenteProyecto15": 1.37,
+    "componenteExamen15": 1.3,
+    "notaFinal": 9.0,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E28",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 28",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     9.1,
+     8.2,
+     10.0,
+     8.3
+    ],
+    "aportesBloque2": [
+     9.23,
+     9.2,
+     10.0,
+     9.38,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.04,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 9.12,
+    "promedioBloque2": 9.562,
+    "promedioGeneral": 9.341,
+    "promedioConRefuerzo": 9.341,
+    "componente70": 6.53,
+    "componenteProyecto15": 1.35,
+    "componenteExamen15": 1.5,
+    "notaFinal": 9.38,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E29",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 29",
+   "entrada": {
+    "aportesBloque1": [
+     9.4,
+     9.5,
+     10.0,
+     7.94,
+     8.9
+    ],
+    "aportesBloque2": [
+     8.32,
+     10.0,
+     9.5,
+     8.07,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.23,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 9.148,
+    "promedioBloque2": 9.178,
+    "promedioGeneral": 9.163,
+    "promedioConRefuerzo": 9.163,
+    "componente70": 6.41,
+    "componenteProyecto15": 1.38,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "C4-E30",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 30",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     7.8,
+     7.9,
+     9.22,
+     10.0
+    ],
+    "aportesBloque2": [
+     8.04,
+     9.49,
+     8.46,
+     10.0,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 9.07
+   },
+   "esperado": {
+    "promedioBloque1": 8.984,
+    "promedioBloque2": 9.198,
+    "promedioGeneral": 9.091,
+    "promedioConRefuerzo": 9.091,
+    "componente70": 6.36,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.36,
+    "notaFinal": 9.22,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L01",
+   "grupo": "Casos límite",
+   "descripcion": "8,2 × 0,70 = 5,74 exacto (en coma flotante da 5,7399…)",
+   "entrada": {
+    "aportesBloque1": [
+     8.2,
+     8.2,
+     8.2,
+     8.2,
+     8.2
+    ],
+    "aportesBloque2": [
+     8.2,
+     8.2,
+     8.2,
+     8.2,
+     8.2
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.2,
+    "notaExamen": 8.2
+   },
+   "esperado": {
+    "promedioBloque1": 8.2,
+    "promedioBloque2": 8.2,
+    "promedioGeneral": 8.2,
+    "promedioConRefuerzo": 8.2,
+    "componente70": 5.74,
+    "componenteProyecto15": 1.23,
+    "componenteExamen15": 1.23,
+    "notaFinal": 8.2,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L02",
+   "grupo": "Casos límite",
+   "descripcion": "Todo 10: nota final 10, A+",
+   "entrada": {
+    "aportesBloque1": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "aportesBloque2": [
+     10.0,
+     10.0,
+     10.0,
+     10.0,
+     10.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 10.0,
+    "promedioBloque2": 10.0,
+    "promedioGeneral": 10.0,
+    "promedioConRefuerzo": 10.0,
+    "componente70": 7.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 10.0,
+    "cualitativo": "A+",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L03",
+   "grupo": "Casos límite",
+   "descripcion": "Todo 0: nota final 0, E-",
+   "entrada": {
+    "aportesBloque1": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "aportesBloque2": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 0.0,
+    "notaExamen": 0.0
+   },
+   "esperado": {
+    "promedioBloque1": 0.0,
+    "promedioBloque2": 0.0,
+    "promedioGeneral": 0.0,
+    "promedioConRefuerzo": 0.0,
+    "componente70": 0.0,
+    "componenteProyecto15": 0.0,
+    "componenteExamen15": 0.0,
+    "notaFinal": 0.0,
+    "cualitativo": "E-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L04",
+   "grupo": "Casos límite",
+   "descripcion": "Bloques con 3 aportes: promedio periódico (8,333…)",
+   "entrada": {
+    "aportesBloque1": [
+     8.0,
+     8.0,
+     9.0
+    ],
+    "aportesBloque2": [
+     9.0,
+     8.0,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.5,
+    "notaExamen": 8.0
+   },
+   "esperado": {
+    "promedioBloque1": 8.333333333333,
+    "promedioBloque2": 8.333333333333,
+    "promedioGeneral": 8.333333333333,
+    "promedioConRefuerzo": 8.333333333333,
+    "componente70": 5.83,
+    "componenteProyecto15": 1.27,
+    "componenteExamen15": 1.2,
+    "notaFinal": 8.3,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L05",
+   "grupo": "Casos límite",
+   "descripcion": "Un solo aporte por bloque",
+   "entrada": {
+    "aportesBloque1": [
+     6.5
+    ],
+    "aportesBloque2": [
+     7.25
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.0,
+    "notaExamen": 6.75
+   },
+   "esperado": {
+    "promedioBloque1": 6.5,
+    "promedioBloque2": 7.25,
+    "promedioGeneral": 6.875,
+    "promedioConRefuerzo": 6.875,
+    "componente70": 4.81,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 1.01,
+    "notaFinal": 6.87,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L06",
+   "grupo": "Casos límite",
+   "descripcion": "Promedio general exactamente 7: no requiere refuerzo",
+   "entrada": {
+    "aportesBloque1": [
+     7.0,
+     7.0,
+     7.0,
+     7.0,
+     7.0
+    ],
+    "aportesBloque2": [
+     7.0,
+     7.0,
+     7.0,
+     7.0,
+     7.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 7.0,
+    "notaExamen": 7.0
+   },
+   "esperado": {
+    "promedioBloque1": 7.0,
+    "promedioBloque2": 7.0,
+    "promedioGeneral": 7.0,
+    "promedioConRefuerzo": 7.0,
+    "componente70": 4.9,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 1.05,
+    "notaFinal": 7.0,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L07",
+   "grupo": "Casos límite",
+   "descripcion": "Promedio general 6,99: requiere refuerzo",
+   "entrada": {
+    "aportesBloque1": [
+     6.99,
+     6.99,
+     6.99,
+     6.99,
+     6.99
+    ],
+    "aportesBloque2": [
+     6.99,
+     6.99,
+     6.99,
+     6.99,
+     6.99
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.0,
+    "notaExamen": 8.0
+   },
+   "esperado": {
+    "promedioBloque1": 6.99,
+    "promedioBloque2": 6.99,
+    "promedioGeneral": 6.99,
+    "promedioConRefuerzo": 6.99,
+    "componente70": 4.89,
+    "componenteProyecto15": 1.2,
+    "componenteExamen15": 1.2,
+    "notaFinal": 7.29,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L08",
+   "grupo": "Casos límite",
+   "descripcion": "Refuerzo que sube la nota sobre 7",
+   "entrada": {
+    "aportesBloque1": [
+     5.5,
+     5.5,
+     5.5,
+     5.5,
+     5.5
+    ],
+    "aportesBloque2": [
+     6.0,
+     6.0,
+     6.0,
+     6.0,
+     6.0
+    ],
+    "refuerzo": 9.5,
+    "notaProyecto": 7.0,
+    "notaExamen": 7.0
+   },
+   "esperado": {
+    "promedioBloque1": 5.5,
+    "promedioBloque2": 6.0,
+    "promedioGeneral": 5.75,
+    "promedioConRefuerzo": 7.625,
+    "componente70": 5.33,
+    "componenteProyecto15": 1.05,
+    "componenteExamen15": 1.05,
+    "notaFinal": 7.43,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L09",
+   "grupo": "Casos límite",
+   "descripcion": "Refuerzo con promedio 0",
+   "entrada": {
+    "aportesBloque1": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "aportesBloque2": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refuerzo": 10.0,
+    "notaProyecto": 5.0,
+    "notaExamen": 5.0
+   },
+   "esperado": {
+    "promedioBloque1": 0.0,
+    "promedioBloque2": 0.0,
+    "promedioGeneral": 0.0,
+    "promedioConRefuerzo": 5.0,
+    "componente70": 3.5,
+    "componenteProyecto15": 0.75,
+    "componenteExamen15": 0.75,
+    "notaFinal": 5.0,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L10",
+   "grupo": "Casos límite",
+   "descripcion": "Refuerzo sin aportes registrados: cuenta solo el refuerzo",
+   "entrada": {
+    "aportesBloque1": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "aportesBloque2": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "refuerzo": 8.0,
+    "notaProyecto": 8.0,
+    "notaExamen": 8.0
+   },
+   "esperado": {
+    "promedioBloque1": null,
+    "promedioBloque2": null,
+    "promedioGeneral": null,
+    "promedioConRefuerzo": 8.0,
+    "componente70": 5.6,
+    "componenteProyecto15": 1.2,
+    "componenteExamen15": 1.2,
+    "notaFinal": 8.0,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L11",
+   "grupo": "Casos límite",
+   "descripcion": "Bloque 2 vacío: el promedio general es el del bloque 1",
+   "entrada": {
+    "aportesBloque1": [
+     9.0,
+     8.5,
+     9.5,
+     8.0,
+     9.0
+    ],
+    "aportesBloque2": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.0,
+    "notaExamen": 9.0
+   },
+   "esperado": {
+    "promedioBloque1": 8.8,
+    "promedioBloque2": null,
+    "promedioGeneral": 8.8,
+    "promedioConRefuerzo": 8.8,
+    "componente70": 6.16,
+    "componenteProyecto15": 1.35,
+    "componenteExamen15": 1.35,
+    "notaFinal": 8.86,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L12",
+   "grupo": "Casos límite",
+   "descripcion": "Sin proyecto: no hay nota final",
+   "entrada": {
+    "aportesBloque1": [
+     8.0,
+     8.0,
+     8.0,
+     8.0,
+     8.0
+    ],
+    "aportesBloque2": [
+     8.0,
+     8.0,
+     8.0,
+     8.0,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": null,
+    "notaExamen": 8.0
+   },
+   "esperado": {
+    "promedioBloque1": 8.0,
+    "promedioBloque2": 8.0,
+    "promedioGeneral": 8.0,
+    "promedioConRefuerzo": 8.0,
+    "componente70": 5.6,
+    "componenteProyecto15": null,
+    "componenteExamen15": 1.2,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L13",
+   "grupo": "Casos límite",
+   "descripcion": "Sin examen: no hay nota final",
+   "entrada": {
+    "aportesBloque1": [
+     8.0,
+     8.0,
+     8.0,
+     8.0,
+     8.0
+    ],
+    "aportesBloque2": [
+     8.0,
+     8.0,
+     8.0,
+     8.0,
+     8.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.0,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": 8.0,
+    "promedioBloque2": 8.0,
+    "promedioGeneral": 8.0,
+    "promedioConRefuerzo": 8.0,
+    "componente70": 5.6,
+    "componenteProyecto15": 1.2,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L14",
+   "grupo": "Casos límite",
+   "descripcion": "Fila vacía (estudiante retirado)",
+   "entrada": {
+    "aportesBloque1": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "aportesBloque2": [
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "refuerzo": null,
+    "notaProyecto": null,
+    "notaExamen": null
+   },
+   "esperado": {
+    "promedioBloque1": null,
+    "promedioBloque2": null,
+    "promedioGeneral": null,
+    "promedioConRefuerzo": null,
+    "componente70": null,
+    "componenteProyecto15": null,
+    "componenteExamen15": null,
+    "notaFinal": null,
+    "cualitativo": null,
+    "estandar": null,
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L15",
+   "grupo": "Casos límite",
+   "descripcion": "Aportes con un decimal y con dos decimales",
+   "entrada": {
+    "aportesBloque1": [
+     7.5,
+     8.25,
+     9.0,
+     6.75,
+     8.5
+    ],
+    "aportesBloque2": [
+     8.1,
+     7.95,
+     9.4,
+     8.05,
+     7.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 8.35,
+    "notaExamen": 7.85
+   },
+   "esperado": {
+    "promedioBloque1": 8.0,
+    "promedioBloque2": 8.1,
+    "promedioGeneral": 8.05,
+    "promedioConRefuerzo": 8.05,
+    "componente70": 5.63,
+    "componenteProyecto15": 1.25,
+    "componenteExamen15": 1.17,
+    "notaFinal": 8.05,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L16",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 9,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     8.58,
+     8.58,
+     8.58,
+     8.58,
+     8.58
+    ],
+    "aportesBloque2": [
+     8.58,
+     8.58,
+     8.58,
+     8.58,
+     8.58
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 8.58,
+    "promedioBloque2": 8.58,
+    "promedioGeneral": 8.58,
+    "promedioConRefuerzo": 8.58,
+    "componente70": 6.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 9.0,
+    "cualitativo": "A-",
+    "estandar": "DA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L17",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 8,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     8.56,
+     8.56,
+     8.56,
+     8.56,
+     8.56
+    ],
+    "aportesBloque2": [
+     8.56,
+     8.56,
+     8.56,
+     8.56,
+     8.56
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 8.56,
+    "promedioBloque2": 8.56,
+    "promedioGeneral": 8.56,
+    "promedioConRefuerzo": 8.56,
+    "componente70": 5.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 8.99,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L18",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 8,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     7.15,
+     7.15,
+     7.15,
+     7.15,
+     7.15
+    ],
+    "aportesBloque2": [
+     7.15,
+     7.15,
+     7.15,
+     7.15,
+     7.15
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 7.15,
+    "promedioBloque2": 7.15,
+    "promedioGeneral": 7.15,
+    "promedioConRefuerzo": 7.15,
+    "componente70": 5.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 8.0,
+    "cualitativo": "B+",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L19",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 7,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     7.13,
+     7.13,
+     7.13,
+     7.13,
+     7.13
+    ],
+    "aportesBloque2": [
+     7.13,
+     7.13,
+     7.13,
+     7.13,
+     7.13
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 7.13,
+    "promedioBloque2": 7.13,
+    "promedioGeneral": 7.13,
+    "promedioConRefuerzo": 7.13,
+    "componente70": 4.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 7.99,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": false,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L20",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 7,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     5.72,
+     5.72,
+     5.72,
+     5.72,
+     5.72
+    ],
+    "aportesBloque2": [
+     5.72,
+     5.72,
+     5.72,
+     5.72,
+     5.72
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 5.72,
+    "promedioBloque2": 5.72,
+    "promedioGeneral": 5.72,
+    "promedioConRefuerzo": 5.72,
+    "componente70": 4.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 7.0,
+    "cualitativo": "B-",
+    "estandar": "AA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": false
+   }
+  },
+  {
+   "id": "L21",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 6,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     5.7,
+     5.7,
+     5.7,
+     5.7,
+     5.7
+    ],
+    "aportesBloque2": [
+     5.7,
+     5.7,
+     5.7,
+     5.7,
+     5.7
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 5.7,
+    "promedioBloque2": 5.7,
+    "promedioGeneral": 5.7,
+    "promedioConRefuerzo": 5.7,
+    "componente70": 3.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 6.99,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L22",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 6,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     4.29,
+     4.29,
+     4.29,
+     4.29,
+     4.29
+    ],
+    "aportesBloque2": [
+     4.29,
+     4.29,
+     4.29,
+     4.29,
+     4.29
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 4.29,
+    "promedioBloque2": 4.29,
+    "promedioGeneral": 4.29,
+    "promedioConRefuerzo": 4.29,
+    "componente70": 3.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 6.0,
+    "cualitativo": "C+",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L23",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 5,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     4.28,
+     4.28,
+     4.28,
+     4.28,
+     4.28
+    ],
+    "aportesBloque2": [
+     4.28,
+     4.28,
+     4.28,
+     4.28,
+     4.28
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 4.28,
+    "promedioBloque2": 4.28,
+    "promedioGeneral": 4.28,
+    "promedioConRefuerzo": 4.28,
+    "componente70": 2.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 5.99,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L24",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 5,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     2.86,
+     2.86,
+     2.86,
+     2.86,
+     2.86
+    ],
+    "aportesBloque2": [
+     2.86,
+     2.86,
+     2.86,
+     2.86,
+     2.86
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 2.86,
+    "promedioBloque2": 2.86,
+    "promedioGeneral": 2.86,
+    "promedioConRefuerzo": 2.86,
+    "componente70": 2.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 5.0,
+    "cualitativo": "C-",
+    "estandar": "PA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L25",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 4,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     2.85,
+     2.85,
+     2.85,
+     2.85,
+     2.85
+    ],
+    "aportesBloque2": [
+     2.85,
+     2.85,
+     2.85,
+     2.85,
+     2.85
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 2.85,
+    "promedioBloque2": 2.85,
+    "promedioGeneral": 2.85,
+    "promedioConRefuerzo": 2.85,
+    "componente70": 1.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 4.99,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L26",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 4,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     1.43,
+     1.43,
+     1.43,
+     1.43,
+     1.43
+    ],
+    "aportesBloque2": [
+     1.43,
+     1.43,
+     1.43,
+     1.43,
+     1.43
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 1.43,
+    "promedioBloque2": 1.43,
+    "promedioGeneral": 1.43,
+    "promedioConRefuerzo": 1.43,
+    "componente70": 1.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 4.0,
+    "cualitativo": "D+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L27",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 3,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     1.42,
+     1.42,
+     1.42,
+     1.42,
+     1.42
+    ],
+    "aportesBloque2": [
+     1.42,
+     1.42,
+     1.42,
+     1.42,
+     1.42
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 1.42,
+    "promedioBloque2": 1.42,
+    "promedioGeneral": 1.42,
+    "promedioConRefuerzo": 1.42,
+    "componente70": 0.99,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 3.99,
+    "cualitativo": "D-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L28",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 3,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "aportesBloque2": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 10.0,
+    "notaExamen": 10.0
+   },
+   "esperado": {
+    "promedioBloque1": 0.0,
+    "promedioBloque2": 0.0,
+    "promedioGeneral": 0.0,
+    "promedioConRefuerzo": 0.0,
+    "componente70": 0.0,
+    "componenteProyecto15": 1.5,
+    "componenteExamen15": 1.5,
+    "notaFinal": 3.0,
+    "cualitativo": "D-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L29",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 2,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "aportesBloque2": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "refuerzo": null,
+    "notaProyecto": 9.94,
+    "notaExamen": 9.94
+   },
+   "esperado": {
+    "promedioBloque1": 0.02,
+    "promedioBloque2": 0.02,
+    "promedioGeneral": 0.02,
+    "promedioConRefuerzo": 0.02,
+    "componente70": 0.01,
+    "componenteProyecto15": 1.49,
+    "componenteExamen15": 1.49,
+    "notaFinal": 2.99,
+    "cualitativo": "E+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L30",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 2,00: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "aportesBloque2": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.67,
+    "notaExamen": 6.67
+   },
+   "esperado": {
+    "promedioBloque1": 0.0,
+    "promedioBloque2": 0.0,
+    "promedioGeneral": 0.0,
+    "promedioConRefuerzo": 0.0,
+    "componente70": 0.0,
+    "componenteProyecto15": 1.0,
+    "componenteExamen15": 1.0,
+    "notaFinal": 2.0,
+    "cualitativo": "E+",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  },
+  {
+   "id": "L31",
+   "grupo": "Casos límite",
+   "descripcion": "Nota final 1,99: umbral de la escala cualitativa",
+   "entrada": {
+    "aportesBloque1": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "aportesBloque2": [
+     0.02,
+     0.02,
+     0.02,
+     0.02,
+     0.02
+    ],
+    "refuerzo": null,
+    "notaProyecto": 6.6,
+    "notaExamen": 6.6
+   },
+   "esperado": {
+    "promedioBloque1": 0.02,
+    "promedioBloque2": 0.02,
+    "promedioGeneral": 0.02,
+    "promedioConRefuerzo": 0.02,
+    "componente70": 0.01,
+    "componenteProyecto15": 0.99,
+    "componenteExamen15": 0.99,
+    "notaFinal": 1.99,
+    "cualitativo": "E-",
+    "estandar": "NA",
+    "requiereRefuerzo": true,
+    "alertaPromedioBajo": true
+   }
+  }
+ ],
+ "cursos": [
+  {
+   "curso": "8vo EGB A",
+   "casos": [
+    "C1-E01",
+    "C1-E02",
+    "C1-E03",
+    "C1-E04",
+    "C1-E05",
+    "C1-E06",
+    "C1-E07",
+    "C1-E08",
+    "C1-E09",
+    "C1-E10",
+    "C1-E11",
+    "C1-E12",
+    "C1-E13",
+    "C1-E14",
+    "C1-E15",
+    "C1-E16",
+    "C1-E17",
+    "C1-E18",
+    "C1-E19",
+    "C1-E20",
+    "C1-E21",
+    "C1-E22",
+    "C1-E23",
+    "C1-E24",
+    "C1-E25",
+    "C1-E26",
+    "C1-E27",
+    "C1-E28",
+    "C1-E29",
+    "C1-E30"
+   ],
+   "esperado": {
+    "totalEstudiantes": 30,
+    "calificados": 29,
+    "requierenRefuerzo": 16,
+    "conteo": {
+     "DA": 1,
+     "AA": 16,
+     "PA": 11,
+     "NA": 1
+    }
+   }
+  },
+  {
+   "curso": "9no EGB A",
+   "casos": [
+    "C2-E01",
+    "C2-E02",
+    "C2-E03",
+    "C2-E04",
+    "C2-E05",
+    "C2-E06",
+    "C2-E07",
+    "C2-E08",
+    "C2-E09",
+    "C2-E10",
+    "C2-E11",
+    "C2-E12",
+    "C2-E13",
+    "C2-E14",
+    "C2-E15",
+    "C2-E16",
+    "C2-E17",
+    "C2-E18",
+    "C2-E19",
+    "C2-E20",
+    "C2-E21",
+    "C2-E22",
+    "C2-E23",
+    "C2-E24",
+    "C2-E25",
+    "C2-E26",
+    "C2-E27",
+    "C2-E28",
+    "C2-E29",
+    "C2-E30"
+   ],
+   "esperado": {
+    "totalEstudiantes": 30,
+    "calificados": 30,
+    "requierenRefuerzo": 16,
+    "conteo": {
+     "DA": 0,
+     "AA": 13,
+     "PA": 11,
+     "NA": 6
+    }
+   }
+  },
+  {
+   "curso": "9no EGB B",
+   "casos": [
+    "C3-E01",
+    "C3-E02",
+    "C3-E03",
+    "C3-E04",
+    "C3-E05",
+    "C3-E06",
+    "C3-E07",
+    "C3-E08",
+    "C3-E09",
+    "C3-E10",
+    "C3-E11",
+    "C3-E12",
+    "C3-E13",
+    "C3-E14",
+    "C3-E15",
+    "C3-E16",
+    "C3-E17",
+    "C3-E18",
+    "C3-E19",
+    "C3-E20",
+    "C3-E21",
+    "C3-E22",
+    "C3-E23",
+    "C3-E24",
+    "C3-E25",
+    "C3-E26",
+    "C3-E27",
+    "C3-E28",
+    "C3-E29",
+    "C3-E30"
+   ],
+   "esperado": {
+    "totalEstudiantes": 30,
+    "calificados": 28,
+    "requierenRefuerzo": 17,
+    "conteo": {
+     "DA": 4,
+     "AA": 11,
+     "PA": 10,
+     "NA": 3
+    }
+   }
+  },
+  {
+   "curso": "10mo EGB A",
+   "casos": [
+    "C4-E01",
+    "C4-E02",
+    "C4-E03",
+    "C4-E04",
+    "C4-E05",
+    "C4-E06",
+    "C4-E07",
+    "C4-E08",
+    "C4-E09",
+    "C4-E10",
+    "C4-E11",
+    "C4-E12",
+    "C4-E13",
+    "C4-E14",
+    "C4-E15",
+    "C4-E16",
+    "C4-E17",
+    "C4-E18",
+    "C4-E19",
+    "C4-E20",
+    "C4-E21",
+    "C4-E22",
+    "C4-E23",
+    "C4-E24",
+    "C4-E25",
+    "C4-E26",
+    "C4-E27",
+    "C4-E28",
+    "C4-E29",
+    "C4-E30"
+   ],
+   "esperado": {
+    "totalEstudiantes": 30,
+    "calificados": 28,
+    "requierenRefuerzo": 12,
+    "conteo": {
+     "DA": 6,
+     "AA": 12,
+     "PA": 8,
+     "NA": 2
+    }
+   }
+  }
+ ]
+}

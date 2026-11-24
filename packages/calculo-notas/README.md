@@ -31,7 +31,7 @@ docker build --build-context calculo-notas=packages/calculo-notas apps/pwa
 
 `infra/docker-compose.yml` y el CI (`ci-imagen.yml`) ya lo pasan. Sin ese contexto, la construcción falla en el `COPY --from=calculo-notas`.
 
-**En ms-academico:** queda pendiente. ms-academico usa módulos CommonJS y necesitará una versión compilada del paquete o un alias equivalente.
+**En ms-academico (T1117-M):** como el servicio usa CommonJS, su `postinstall` copia `src/index.ts` a `services/ms-academico/src/generado/calculo-notas.ts` (ignorado por git) y se compila junto con el servicio. Así no hay una segunda copia del código en el repositorio. La imagen recibe el paquete con el mismo contexto adicional: `docker build --build-context calculo-notas=packages/calculo-notas services/ms-academico`.
 
 ## Pruebas: hoja oficial anonimizada (T1117-A, indicador I-05)
 

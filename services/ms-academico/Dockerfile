@@ -1,8 +1,12 @@
 # Etapa de compilación de ms-academico (NestJS + TypeScript)
+# El cálculo de notas (packages/calculo-notas) llega como contexto aparte, igual que en la PWA:
+#   docker build --build-context calculo-notas=packages/calculo-notas services/ms-academico
 FROM node:24-alpine AS compilacion
-WORKDIR /app
+# Se repite la estructura del repositorio: postinstall copia ../../packages/calculo-notas/src/index.ts
+COPY --from=calculo-notas src/index.ts /repo/packages/calculo-notas/src/index.ts
+WORKDIR /repo/services/ms-academico
 COPY package.json package-lock.json prisma.config.ts ./
-# El esquema va antes de npm ci: postinstall genera el cliente de Prisma
+# El esquema va antes de npm ci: postinstall genera el cliente de Prisma y copia el cálculo de notas
 COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund
 COPY tsconfig.json tsconfig.build.json nest-cli.json ./
@@ -19,8 +23,8 @@ RUN apk upgrade --no-cache && \
     adduser -S -u 10001 -G app app
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=compilacion --chown=app:app /app/node_modules ./node_modules
-COPY --from=compilacion --chown=app:app /app/dist ./dist
+COPY --from=compilacion --chown=app:app /repo/services/ms-academico/node_modules ./node_modules
+COPY --from=compilacion --chown=app:app /repo/services/ms-academico/dist ./dist
 COPY --chown=app:app package.json ./
 USER app
 EXPOSE 3000

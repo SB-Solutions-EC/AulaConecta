@@ -126,6 +126,8 @@ jobs:
     with:
       servicio: ms-academico
       contexto: services/ms-academico
+      # Cálculo de notas compartido con la PWA (T1117-M)
+      contextos-adicionales: calculo-notas=packages/calculo-notas
       publicar: ${{ github.event_name == 'push' }}
 
   imagen-notificaciones:

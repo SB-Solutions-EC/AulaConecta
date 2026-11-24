@@ -161,6 +161,8 @@ services:
     build:
       context: ../services/ms-academico
       target: compilacion
+      additional_contexts:
+        calculo-notas: ../packages/calculo-notas
     entrypoint: ["npx", "prisma", "migrate", "deploy"]
     environment:
       DATABASE_URL: postgresql://usr_academico:${POSTGRES_ACADEMICO_PASSWORD:?Copia infra/.env.example a infra/.env}@postgres:5432/db_academico
@@ -171,7 +173,11 @@ services:
       - interna
 
   ms-academico:
-    build: ../services/ms-academico
+    build:
+      context: ../services/ms-academico
+      # Cálculo de notas compartido con la PWA (T1117-M)
+      additional_contexts:
+        calculo-notas: ../packages/calculo-notas
     read_only: true
     tmpfs:
       - /tmp

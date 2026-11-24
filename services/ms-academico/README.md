@@ -52,7 +52,8 @@ npm run start:dev
 ## Imagen de Docker
 
 ```bash
-docker build -t aulaconecta/ms-academico:dev .
+# Desde la raíz del repositorio: el cálculo de notas llega como contexto aparte
+docker build --build-context calculo-notas=packages/calculo-notas -t aulaconecta/ms-academico:dev services/ms-academico
 docker run --rm -p 3000:3000 aulaconecta/ms-academico:dev
 ```
 
@@ -141,6 +142,22 @@ listar(@UsuarioActual() usuario: UsuarioToken) { ... }   // usuario.id es el UUI
 | Rol no permitido | `403 ACCESO_DENEGADO` |
 
 Las llaves públicas se descargan de `AULACONECTA_JWKS_URL` y se guardan 10 minutos. Si llega un kid nuevo (ms-identidad rotó la llave) se recarga, como mucho una vez cada 30 s. Si ms-identidad no responde se conservan las llaves anteriores. El emisor y la audiencia se pueden cambiar con `AULACONECTA_JWT_EMISOR` y `AULACONECTA_JWT_AUDIENCIA`.
+
+## Calificaciones (T1118-M)
+
+`PUT /calificaciones` registra o actualiza el resumen trimestral de un estudiante en una materia. El servidor **siempre** recalcula la nota final y el cualitativo con [packages/calculo-notas](../../packages/calculo-notas), el mismo cálculo de la PWA, verificado contra la hoja oficial anonimizada (T1117-A). El cliente nunca los envía: si lo intenta, recibe 400.
+
+| Regla | Respuesta |
+|---|---|
+| Solo el docente de esa asignación (su `persona.usuario_id` es el `sub` del token) | Otro docente, secretaría, administrador, estudiante o representante: `403` |
+| Notas de 0 a 10 con hasta 2 decimales, hasta 20 aportes por bloque | `400 DATOS_INVALIDOS` |
+| La matrícula debe estar activa en el curso de la asignación y el trimestre, configurado | `400` |
+| Trimestre cerrado (RN-18) | `409 TRIMESTRE_CERRADO` |
+| `version` es la que el docente estaba editando (0 si es nueva). Si otro la cambió antes | `409` con `ConflictoSincronizacion`: datos del servidor, quién y cuándo, y los campos en conflicto |
+
+`GET /calificaciones?asignacionId=&matriculaId=&trimestre=` filtra por rol: el docente ve sus materias, el estudiante lo suyo y el administrador todo. La secretaría recibe `403`. El representante recibe una lista vacía hasta que exista la representación (T1111-M).
+
+El cálculo llega por `postinstall`, que copia `packages/calculo-notas/src/index.ts` a `src/generado/calculo-notas.ts`. La imagen se construye con `--build-context calculo-notas=packages/calculo-notas`.
 
 ## Comunicación con ms-identidad
 
@@ -402,6 +419,8 @@ El resumen del CI publica el **reporte de pruebas 403** por persona, en la refer
 | Sprint 4 (04/11) | Pruebas de integración con PostgreSQL real (Testcontainers) | Listo (T1104-M) |
 | Sprint 4 (05/11) | Validación del JWT con JWKS y guardas por rol | Listo (T1105-M) |
 | Sprint 5 (16/11) | Datos de prueba ficticios (seed) | Listo (T1116-M) |
+| Sprint 5 (17/11) | Cálculo de notas compartido (`packages/calculo-notas`) integrado en ms-academico | Listo (T1117-M) |
+| Sprint 5 (18/11) | Endpoints de calificaciones que recalculan con el mismo paquete | Listo (T1118-M) |
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, trimestres, cursos, paralelos y materias | Listo (T1109-M, adelantado en T1113-A) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |

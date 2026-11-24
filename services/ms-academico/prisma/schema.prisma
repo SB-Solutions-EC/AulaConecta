@@ -42,7 +42,8 @@ model Periodo {
   creadoEn      DateTime  @default(now()) @map("creado_en")
   actualizadoEn DateTime? @updatedAt @map("actualizado_en")
 
-  anioLectivo AnioLectivo @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
+  anioLectivo    AnioLectivo    @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
+  calificaciones Calificacion[]
 
   @@unique([anioLectivoId, numero])
   @@map("periodo")
@@ -71,8 +72,9 @@ model Persona {
   creadoEn        DateTime    @default(now()) @map("creado_en")
   actualizadoEn   DateTime?   @updatedAt @map("actualizado_en")
 
-  cursosTutor Curso[]     @relation("TutorCurso")
-  matriculas  Matricula[]
+  cursosTutor  Curso[]      @relation("TutorCurso")
+  matriculas   Matricula[]
+  asignaciones Asignacion[]
 
   @@index([tipo])
   @@map("persona")
@@ -95,9 +97,10 @@ model Curso {
   creadoEn      DateTime  @default(now()) @map("creado_en")
   actualizadoEn DateTime? @updatedAt @map("actualizado_en")
 
-  anioLectivo AnioLectivo @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
-  tutor       Persona?    @relation("TutorCurso", fields: [tutorId], references: [id], onDelete: Restrict)
-  matriculas  Matricula[]
+  anioLectivo  AnioLectivo  @relation(fields: [anioLectivoId], references: [id], onDelete: Restrict)
+  tutor        Persona?     @relation("TutorCurso", fields: [tutorId], references: [id], onDelete: Restrict)
+  matriculas   Matricula[]
+  asignaciones Asignacion[]
 
   @@unique([anioLectivoId, nivel, paralelo])
   @@map("curso")
@@ -112,6 +115,8 @@ model Materia {
   version       Int       @default(1)
   creadoEn      DateTime  @default(now()) @map("creado_en")
   actualizadoEn DateTime? @updatedAt @map("actualizado_en")
+
+  asignaciones Asignacion[]
 
   @@map("materia")
 }
@@ -129,8 +134,9 @@ model Matricula {
   creadoEn        DateTime        @default(now()) @map("creado_en")
   actualizadoEn   DateTime?       @updatedAt @map("actualizado_en")
 
-  estudiante Persona @relation(fields: [estudianteId], references: [id], onDelete: Restrict)
-  curso      Curso   @relation(fields: [cursoId], references: [id], onDelete: Restrict)
+  estudiante     Persona        @relation(fields: [estudianteId], references: [id], onDelete: Restrict)
+  curso          Curso          @relation(fields: [cursoId], references: [id], onDelete: Restrict)
+  calificaciones Calificacion[]
 
   @@unique([estudianteId, cursoId])
   @@index([cursoId])
@@ -140,4 +146,58 @@ model Matricula {
 enum EstadoMatricula {
   ACTIVA
   RETIRADA
+}
+
+/// Tabla intermedia N a N: qué docente dicta qué materia en qué curso (RF-05). Los endpoints son de T1110-M.
+model Asignacion {
+  id             String    @id @db.Uuid
+  docenteId      String    @map("id_docente") @db.Uuid
+  materiaId      String    @map("id_materia") @db.Uuid
+  cursoId        String    @map("id_curso") @db.Uuid
+  /// Días y horas de clase semanales (RF-37)
+  horarioResumen String?   @map("horario_resumen") @db.VarChar(150)
+  version        Int       @default(1)
+  creadoEn       DateTime  @default(now()) @map("creado_en")
+  actualizadoEn  DateTime? @updatedAt @map("actualizado_en")
+
+  docente        Persona        @relation(fields: [docenteId], references: [id], onDelete: Restrict)
+  materia        Materia        @relation(fields: [materiaId], references: [id], onDelete: Restrict)
+  curso          Curso          @relation(fields: [cursoId], references: [id], onDelete: Restrict)
+  calificaciones Calificacion[]
+
+  @@unique([materiaId, cursoId])
+  @@index([docenteId])
+  @@map("asignacion")
+}
+
+/// Resumen trimestral de un estudiante en una materia (RF-17, RF-18). La nota final y el cualitativo
+/// los calcula el servidor con packages/calculo; nunca se aceptan del cliente.
+model Calificacion {
+  id              String    @id @db.Uuid
+  matriculaId     String    @map("id_matricula") @db.Uuid
+  asignacionId    String    @map("id_asignacion") @db.Uuid
+  periodoId       String    @map("id_periodo") @db.Uuid
+  /// Aportes de cada bloque, de 0 a 10 con hasta 2 decimales (CHECK en la migración)
+  aportesBloque1  Decimal[] @map("aportes_bloque1") @db.Decimal(4, 2)
+  aportesBloque2  Decimal[] @map("aportes_bloque2") @db.Decimal(4, 2)
+  /// Promedio de los dos bloques (con refuerzo si lo hay), truncado a 2 decimales
+  promedioAportes Decimal?  @map("promedio_aportes") @db.Decimal(4, 2)
+  refuerzo        Decimal?  @db.Decimal(4, 2)
+  notaProyecto    Decimal?  @map("nota_proyecto") @db.Decimal(4, 2)
+  notaExamen      Decimal?  @map("nota_examen") @db.Decimal(4, 2)
+  notaFinal       Decimal?  @map("nota_final") @db.Decimal(4, 2)
+  cualitativo     String?   @db.Char(2)
+  /// Cuenta (ms-identidad) del docente que hizo el último cambio
+  actualizadoPor  String?   @map("actualizado_por") @db.Uuid
+  version         Int       @default(1)
+  creadoEn        DateTime  @default(now()) @map("creado_en")
+  actualizadoEn   DateTime? @updatedAt @map("actualizado_en")
+
+  matricula  Matricula  @relation(fields: [matriculaId], references: [id], onDelete: Restrict)
+  asignacion Asignacion @relation(fields: [asignacionId], references: [id], onDelete: Restrict)
+  periodo    Periodo    @relation(fields: [periodoId], references: [id], onDelete: Restrict)
+
+  @@unique([matriculaId, asignacionId, periodoId])
+  @@index([asignacionId, periodoId])
+  @@map("calificacion")
 }

@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import type { Response } from 'express';
-import { ErrorApi, ExcepcionApi } from './excepcion-api';
+import { ErrorApi, ExcepcionApi, ExcepcionConflictoVersion } from './excepcion-api';
 
 interface Traduccion {
   codigo: string;
@@ -42,6 +42,10 @@ export class FiltroErrores implements ExceptionFilter {
 
   catch(error: unknown, host: ArgumentsHost): void {
     const respuesta = host.switchToHttp().getResponse<Response>();
+    if (error instanceof ExcepcionConflictoVersion) {
+      respuesta.status(409).json(error.conflicto);
+      return;
+    }
     const { estado, cuerpo } = this.traducir(error);
     respuesta.status(estado).json(cuerpo);
   }

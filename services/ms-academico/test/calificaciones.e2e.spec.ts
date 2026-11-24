@@ -123,7 +123,9 @@ describe('PUT /calificaciones', () => {
     ['ESTUDIANTE'],
     ['REPRESENTANTE'],
   ])('el rol %s no puede calificar', async (rol) => {
-    await guardar(cuerpo({ trimestre: 2 }), como([rol], cuentas.docente)).expect(403);
+    const respuesta = await guardar(cuerpo({ trimestre: 2 }), como([rol], cuentas.docente));
+
+    expect(respuesta.status).toBe(403);
   });
 
   it.each([
@@ -147,7 +149,9 @@ describe('PUT /calificaciones', () => {
   });
 
   it('rechaza una matrícula de otro curso', async () => {
-    await guardar(cuerpo({ trimestre: 2, matriculaId: ids.matriculaOtroCurso })).expect(400);
+    const respuesta = await guardar(cuerpo({ trimestre: 2, matriculaId: ids.matriculaOtroCurso }));
+
+    expect(respuesta.status).toBe(400);
   });
 
   it('una asignación inexistente da el mismo 403 que una ajena', async () => {
@@ -158,7 +162,9 @@ describe('PUT /calificaciones', () => {
   });
 
   it('una calificación nueva necesita version 0', async () => {
-    await guardar(cuerpo({ trimestre: 2, version: 3 })).expect(409);
+    const respuesta = await guardar(cuerpo({ trimestre: 2, version: 3 }));
+
+    expect(respuesta.status).toBe(409);
   });
 });
 
@@ -179,23 +185,29 @@ describe('GET /calificaciones', () => {
   });
 
   it('403 si un estudiante pide la matrícula de un compañero', async () => {
-    await listar(como(['ESTUDIANTE'], cuentas.otroEstudiante), `?matriculaId=${ids.matricula}`).expect(403);
+    const respuesta = await listar(como(['ESTUDIANTE'], cuentas.otroEstudiante), `?matriculaId=${ids.matricula}`);
+
+    expect(respuesta.status).toBe(403);
   });
 
   it('403 si otro docente pide la libreta de una materia ajena o inventada', async () => {
-    await listar(como(['DOCENTE'], cuentas.otroDocente), `?asignacionId=${ids.asignacion}`).expect(403);
-    await listar(docente(), `?asignacionId=${randomUUID()}`).expect(403);
+    const ajena = await listar(como(['DOCENTE'], cuentas.otroDocente), `?asignacionId=${ids.asignacion}`);
+    const inventada = await listar(docente(), `?asignacionId=${randomUUID()}`);
+
+    expect([ajena.status, inventada.status]).toEqual([403, 403]);
   });
 
   it('el representante: sin filtro, lista vacía; con la matrícula de alguien, 403 (hasta T1111-M)', async () => {
     const sinFiltro = await listar(como(['REPRESENTANTE'])).expect(200);
 
     expect(sinFiltro.body).toEqual([]);
-    await listar(como(['REPRESENTANTE']), `?matriculaId=${ids.matricula}`).expect(403);
+    expect((await listar(como(['REPRESENTANTE']), `?matriculaId=${ids.matricula}`)).status).toBe(403);
   });
 
   it('la secretaría recibe 403', async () => {
-    await listar(como(['SECRETARIA'])).expect(403);
+    const respuesta = await listar(como(['SECRETARIA']));
+
+    expect(respuesta.status).toBe(403);
   });
 
   it('el administrador ve la libreta y filtra por trimestre', async () => {
@@ -207,11 +219,15 @@ describe('GET /calificaciones', () => {
   });
 
   it('rechaza filtros inválidos', async () => {
-    await listar(docente(), '?trimestre=5').expect(400);
-    await listar(docente(), "?asignacionId=' OR 1=1 --").expect(400);
+    const trimestre = await listar(docente(), '?trimestre=5');
+    const inyeccion = await listar(docente(), "?asignacionId=' OR 1=1 --");
+
+    expect([trimestre.status, inyeccion.status]).toEqual([400, 400]);
   });
 
   it('sin token responde 401', async () => {
-    await request(real.servidor()).get('/calificaciones').expect(401);
+    const respuesta = await request(real.servidor()).get('/calificaciones');
+
+    expect(respuesta.status).toBe(401);
   });
 });

@@ -69,9 +69,12 @@ src/
   swagger.ts           Configuración de Swagger
   comun/               Validación de entradas, decoradores y formato de errores (ErrorApi)
   config/              Configuración por variables de entorno
+  asignaciones/        Docente–materia–curso con bloques horarios (RF-05)
+  calificaciones/      Libreta: registrar aportes y recalcular la nota en el servidor (RF-17, RF-18)
   configuracion-academica/  Año lectivo, trimestres, cursos y materias (RF-06, RF-07)
   identidad/           Cliente de ms-identidad con token de servicio (T1110-A)
   importacion/         Controles de carga de la nómina en Excel (T1112-A)
+  personas/            Docentes, estudiantes y representantes, con su cuenta en ms-identidad (RF-02, RF-05)
   salud/               GET /health
 test/                  Pruebas e2e
   seguridad/           Suites de validación e inyección (T1109-A), privacidad (T1111-A) y carga de archivos (T1112-A)
@@ -142,6 +145,27 @@ listar(@UsuarioActual() usuario: UsuarioToken) { ... }   // usuario.id es el UUI
 | Rol no permitido | `403 ACCESO_DENEGADO` |
 
 Las llaves públicas se descargan de `AULACONECTA_JWKS_URL` y se guardan 10 minutos. Si llega un kid nuevo (ms-identidad rotó la llave) se recarga, como mucho una vez cada 30 s. Si ms-identidad no responde se conservan las llaves anteriores. El emisor y la audiencia se pueden cambiar con `AULACONECTA_JWT_EMISOR` y `AULACONECTA_JWT_AUDIENCIA`.
+
+## Personas y asignaciones (T1110-M)
+
+`POST /personas` (administrador y secretaría) registra a un docente, estudiante o representante. Funciona así:
+
+- Pide a ms-identidad la cuenta con el mismo UUID de la persona; la cédula nunca viaja allá (CR-02).
+- Devuelve la clave temporal solo en esa respuesta, dentro de `credenciales`, para que la secretaría la entregue. No se guarda en ms-academico.
+- La cédula repetida se rechaza con 409 **antes** de crear la cuenta, para no dejar cuentas sin persona.
+- La cédula no aparece en ninguna respuesta.
+
+`GET /personas?tipo=&q=`: el personal ve a todos; el estudiante y el representante, solo sus propios datos. El docente recibe 403.
+
+`POST /asignaciones` (administrador) asigna docente, materia y curso con `horarios` (`[{dia: 1–5, hora: h1–h5}]`). Se rechaza con:
+
+| Caso | Respuesta |
+|---|---|
+| La materia ya tiene docente en ese curso | `409` |
+| El docente ya tiene clase en otro curso a esa hora, o el curso ya tiene otra materia en ese bloque | `409 HORARIO_OCUPADO` |
+| Bloques repetidos, o el docente no es una persona de tipo DOCENTE | `400` |
+
+`GET /asignaciones?docenteId=&cursoId=`: el personal ve todas; el docente, solo las suyas.
 
 ## Calificaciones (T1118-M)
 
@@ -424,12 +448,12 @@ El resumen del CI publica el **reporte de pruebas 403** por persona, en la refer
 | Sprint 4 (09/11) | Validación de entradas global y pruebas de validación e inyección de RF-06 y RF-07 | Listo (T1109-A) |
 | Sprint 4 (09/11) | Endpoints de año lectivo, trimestres, cursos, paralelos y materias | Listo (T1109-M, adelantado en T1113-A) |
 | Sprint 4 (10/11) | Cliente de ms-identidad con token de servicio y prueba de integración en el CI | Listo (T1110-A) |
+| Sprint 4 (10/11) | Endpoints de personas (con la cuenta en ms-identidad) y de asignación docente–materia–curso con horarios | Listo (T1110-M) |
 | Sprint 4 (11/11) | Validación de cédula y pruebas de privacidad de matrícula y personas (RNF-04) | Listo (T1111-A) |
-| Sprint 4 (11/11) | Endpoints de matrícula individual y personas | Pendiente (T1111-M) |
+| Sprint 4 (11/11) | Endpoints de matrícula individual y representaciones | Pendiente (T1111-M) |
 | Sprint 4 (12/11) | Controles de carga de la nómina en Excel y pruebas con archivos inválidos | Listo (T1112-A) |
 | Sprint 4 (12/11) | Importador de nóminas | Pendiente (T1112-M) |
 | Sprint 5 (18/11) | Pruebas de exactitud contra la hoja oficial y de que solo el docente de la materia califica | Listo (T1118-A) |
-| Sprint 5 (18/11) | Endpoints de calificaciones que recalculan con `packages/calculo-notas` | Pendiente (T1118-M) |
 | Sprint 5 (19/11) | Pruebas de autorización de tareas y saneamiento de texto (XSS) | Listo (T1119-A) |
 | Sprint 5 (19/11) | Endpoints de tareas con fecha de entrega | Pendiente (T1119-M) |
 | Sprint 5 (20/11) | Pruebas de acceso: el estudiante solo ve sus propias notas (reporte de pruebas 403) | Listo (T1120-A) |

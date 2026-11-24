@@ -156,6 +156,8 @@ model Asignacion {
   cursoId        String    @map("id_curso") @db.Uuid
   /// Días y horas de clase semanales (RF-37)
   horarioResumen String?   @map("horario_resumen") @db.VarChar(150)
+  /// Bloques semanales [{id, dia 1-5, hora h1-h5}] (contrato BloqueHorario, RF-37)
+  horarios       Json      @default("[]")
   version        Int       @default(1)
   creadoEn       DateTime  @default(now()) @map("creado_en")
   actualizadoEn  DateTime? @updatedAt @map("actualizado_en")

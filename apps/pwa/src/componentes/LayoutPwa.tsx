@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import {
   Bell,
   BookOpen,
+  CalendarCheck,
   CalendarCog,
   ClipboardCheck,
   FileSpreadsheet,
@@ -56,6 +57,8 @@ function IconoModulo({ idModulo }: Readonly<{ idModulo: string }>) {
     case 'calificaciones-asistencia':
     case 'seguimiento-estudiantil':
       return <ClipboardCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
+    case 'asistencia-materia':
+      return <CalendarCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'tareas-evaluaciones':
       return <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'avisos-notificaciones':

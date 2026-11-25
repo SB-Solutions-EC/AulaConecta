@@ -132,6 +132,15 @@ export const CATALOGO_MODULOS: DefinicionModuloNavegacion[] = [
     sprintObjetivo: 'Sprint 5 (RF-17 a RF-27)',
   },
   {
+    id: 'asistencia-materia',
+    ruta: '/asistencia',
+    etiqueta: 'Asistencia por materia',
+    descripcion:
+      'Toma rápida de asistencia móvil por curso y materia, registro de atrasos y aprobación de justificaciones.',
+    rolesPermitidos: ['DOCENTE'],
+    sprintObjetivo: 'Sprint 5 (RF-21)',
+  },
+  {
     id: 'tareas-evaluaciones',
     ruta: '/tareas',
     etiqueta: 'Tareas, pruebas y proyectos',

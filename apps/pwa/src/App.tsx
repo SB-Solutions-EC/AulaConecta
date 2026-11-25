@@ -27,6 +27,7 @@ import { PantallaDocentes } from './componentes/PantallaDocentes';
 import { PantallaMatricula } from './componentes/PantallaMatricula';
 import { PantallaImportacion } from './componentes/PantallaImportacion';
 import { PantallaLibretaCalificaciones } from './componentes/PantallaLibretaCalificaciones';
+import { PantallaAsistencia } from './componentes/PantallaAsistencia';
 import { PantallaTareas } from './componentes/PantallaTareas';
 import {
   CATALOGO_MODULOS,
@@ -284,6 +285,8 @@ export default function App({
           <PantallaImportacion />
         ) : moduloActual.ruta === '/calificaciones' ? (
           <PantallaLibretaCalificaciones />
+        ) : moduloActual.ruta === '/asistencia' ? (
+          <PantallaAsistencia />
         ) : moduloActual.ruta === '/tareas' ? (
           <PantallaTareas rolActivo={rolActivo} nombreUsuario={nombreUsuario} />
         ) : (

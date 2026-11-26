@@ -1,27 +1,19 @@
 import { clienteHttp, type ClienteHttp } from './clienteHttp';
 
-export type EscalaComportamiento =
-  | 'SIEMPRE'
-  | 'FRECUENTEMENTE'
-  | 'OCASIONALMENTE'
-  | 'NUNCA';
+// Escalas, claves y cualitativos son los del paquete compartido: el mismo cálculo que usa ms-academico (RF-22)
+import type {
+  ClaveIndicadorComportamiento,
+  CualitativoComportamiento,
+  EscalaComportamiento,
+  IndicadoresComportamiento,
+} from '@aulaconecta/calculo-notas';
 
-export type ClaveIndicadorComportamiento =
-  | 'cog1'
-  | 'cog2'
-  | 'cog3'
-  | 'cog4'
-  | 'soc1'
-  | 'soc2'
-  | 'soc3'
-  | 'soc4'
-  | 'soc5';
-
-export type IndicadoresComportamiento = Partial<
-  Record<ClaveIndicadorComportamiento, EscalaComportamiento>
->;
-
-export type CualitativoComportamiento = 'A' | 'B' | 'C' | 'D' | 'E';
+export type {
+  ClaveIndicadorComportamiento,
+  CualitativoComportamiento,
+  EscalaComportamiento,
+  IndicadoresComportamiento,
+};
 
 export interface RegistroComportamiento {
   id: string;

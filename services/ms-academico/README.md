@@ -181,7 +181,7 @@ Las llaves públicas se descargan de `AULACONECTA_JWKS_URL` y se guardan 10 minu
 
 `GET /calificaciones?asignacionId=&matriculaId=&trimestre=` filtra por rol: el docente ve sus materias, el estudiante lo suyo y el administrador todo. La secretaría recibe `403`. El representante recibe una lista vacía hasta que exista la representación (T1111-M).
 
-El cálculo llega por `postinstall`, que copia `packages/calculo-notas/src/index.ts` a `src/generado/calculo-notas.ts`. La imagen se construye con `--build-context calculo-notas=packages/calculo-notas`.
+El cálculo llega por `postinstall`, que copia los `.ts` de `packages/calculo-notas/src/` a `src/generado/` (`index.ts` queda como `calculo-notas.ts`). Incluye `calcularComportamiento` (RF-22, T1124-A): el endpoint de comportamiento lo usa desde `../generado/calculo-notas`. La imagen se construye con `--build-context calculo-notas=packages/calculo-notas`.
 
 ## Comunicación con ms-identidad
 
@@ -460,6 +460,8 @@ El resumen del CI publica el **reporte de pruebas 403** por persona, en la refer
 | Sprint 5 (20/11) | Endpoints de entregas, nota y retroalimentación | Pendiente (T1120-M) |
 | Sprint 5 (21/11) | Pruebas de asistencia y de quién puede justificar | Listo (T1123-A) |
 | Sprint 5 (21/11) | Endpoints de asistencia, atrasos y justificación | Pendiente (T1123-M) |
+| Sprint 5 (24/11) | Pruebas del cálculo de comportamiento contra la hoja oficial (`packages/calculo-notas`) | Listo (T1124-A) |
+| Sprint 5 (24/11) | Endpoints de comportamiento con nueve indicadores y cálculo del cualitativo | Pendiente (T1124-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

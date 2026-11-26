@@ -17,7 +17,7 @@
     "test:cov": "vitest run --coverage",
     "test:integracion": "vitest run --config vitest.integracion.config.mts",
     "typecheck": "tsc --noEmit",
-    "postinstall": "prisma generate && node -e \"const fs=require('fs'),o='../../packages/calculo-notas/src/index.ts';if(fs.existsSync(o)){fs.mkdirSync('src/generado',{recursive:true});fs.copyFileSync(o,'src/generado/calculo-notas.ts')}else{console.warn('Sin packages/calculo-notas: no se copia el motor de calculo')}\"",
+    "postinstall": "prisma generate && node -e \"const fs=require('fs'),d='../../packages/calculo-notas/src';if(fs.existsSync(d)){fs.mkdirSync('src/generado',{recursive:true});for(const f of fs.readdirSync(d).filter((f)=>f.endsWith('.ts'))){fs.copyFileSync(d+'/'+f,'src/generado/'+(f==='index.ts'?'calculo-notas.ts':f))}}else{console.warn('Sin packages/calculo-notas: no se copia el motor de calculo')}\"",
     "prisma:migrar": "prisma migrate deploy",
     "prisma:validar": "prisma validate"
   },

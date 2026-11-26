@@ -206,6 +206,22 @@ jobs:
           for (const grupo of new Set([...tareasRef.keys(), ...tareasReal.keys()])) {
             lineas.push(`| ${grupo} | ${celda(tareasRef.get(grupo) ?? [])} | ${celda(tareasReal.get(grupo) ?? [])} |`);
           }
+          // Parámetros (RNF-10, T1125-A): al cambiar una ponderación se recalculan las notas
+          const parRef = porGrupo(/^test\/seguridad\/referencia-parametros\./, 'Escenario');
+          const parReal = porGrupo(/^test\/seguridad\/parametros\.e2e\./, 'Escenario');
+          const recalculos = (grupos) => [...grupos.values()].flat().filter((p) => /^las \d+ notas de la hoja se recalculan/.test(p.title));
+          lineas.push(
+            '',
+            '### Parámetros: al cambiar una ponderación se recalculan las notas (RNF-10)',
+            '',
+            `Escenarios de ponderaciones con las notas recalculadas: **${cuenta(recalculos(parRef), 'passed')} de ${recalculos(parRef).length}** en la referencia y **${cuenta(recalculos(parReal), 'passed')}** en los endpoints reales (${cuenta(recalculos(parReal), 'skipped')} omitidos hasta que existan). Solo el administrador cambia las ponderaciones.`,
+            '',
+            '| Qué se prueba | Referencia | Endpoints reales |',
+            '|---|---|---|',
+          );
+          for (const grupo of new Set([...parRef.keys(), ...parReal.keys()])) {
+            lineas.push(`| ${grupo} | ${celda(parRef.get(grupo) ?? [])} | ${celda(parReal.get(grupo) ?? [])} |`);
+          }
           // Acceso a notas (RF-20, RNF-04, T1120-A): reporte de pruebas 403 por persona
           const notasRef = porGrupo(/^test\/seguridad\/referencia-acceso-notas\./, 'Escenario');
           const notasReal = porGrupo(/^test\/seguridad\/acceso-notas\.e2e\./, 'Escenario');

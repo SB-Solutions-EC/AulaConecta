@@ -1,7 +1,7 @@
 name: CI cálculo de notas
 
-# Lo llama ci.yml para el paquete compartido packages/calculo-notas (T1117-A y T1124-A): comprueba que las hojas
-# oficiales anonimizadas (notas y comportamiento) estén al día, corre las pruebas con cobertura del 100 % y publica
+# Lo llama ci.yml para el paquete compartido packages/calculo-notas (T1117-A, T1124-A y T1125-A): comprueba que las hojas
+# oficiales anonimizadas (notas, comportamiento y ponderaciones) estén al día, corre las pruebas con cobertura del 100 % y publica
 # el indicador I-05 (porcentaje de casos de cada hoja oficial que coinciden con el cálculo).
 on:
   workflow_call:
@@ -38,6 +38,9 @@ jobs:
 
       - name: La hoja de comportamiento anonimizada coincide con su generador
         run: python3 casos/generar_casos_comportamiento.py --verificar
+
+      - name: Las notas con otras ponderaciones coinciden con su generador
+        run: python3 casos/generar_casos_ponderaciones.py --verificar
 
       - name: Verificar tipos (TypeScript)
         run: npm run typecheck
@@ -88,6 +91,29 @@ jobs:
           if (fallidos.length) {
             console.log('\n### Filas que no coinciden\n');
             fallidos.forEach((a) => console.log(`- ${a.title}`));
+          }
+          JS
+
+      - name: Ponderaciones (RNF-10) en el resumen
+        if: ${{ !cancelled() && hashFiles('packages/calculo-notas/reportes/resultados.json') != '' }}
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/resultados.json');
+          const archivo = r.testResults.find((t) => t.name.endsWith('ponderaciones.test.ts'));
+          // Una fila de un escenario = una prueba con el id de la hoja (C1-E01, L05…) dentro del escenario
+          const filas = archivo.assertionResults.filter((a) => a.ancestorTitles.length > 1 && /^(C\d-E\d\d|L\d\d)$/.test(a.title));
+          const escenarios = [...new Set(filas.map((a) => a.ancestorTitles[1]))];
+          console.log('## Ponderaciones: al cambiarlas, las notas se recalculan (RNF-10)\n');
+          console.log('| Ponderaciones (aportes / proyecto / examen) | Filas recalculadas | Coinciden con el oráculo |');
+          console.log('|---|---|---|');
+          for (const escenario of escenarios) {
+            const propias = filas.filter((a) => a.ancestorTitles[1] === escenario);
+            console.log(`| ${escenario} | ${propias.length} | ${propias.filter((a) => a.status === 'passed').length} |`);
+          }
+          const fallidas = filas.filter((a) => a.status !== 'passed');
+          if (fallidas.length) {
+            console.log('\n### Filas que no coinciden\n');
+            fallidas.forEach((a) => console.log(`- ${a.ancestorTitles[1]}: ${a.title}`));
           }
           JS
 

@@ -7,13 +7,16 @@ import { UsuarioToken } from '../../../src/autenticacion/verificador-jwt';
 import { ExcepcionApi } from '../../../src/comun/excepcion-api';
 import { Identificador, Opcional } from '../../../src/comun/validadores';
 import { AlmacenReferencia, Asignacion, ModuloMatriculaReferencia } from './modulo-matricula-referencia';
+import { AlmacenParametrosReferencia, ModuloParametrosReferencia } from './modulo-parametros-referencia';
 
 // Implementación de referencia de asignaciones (RF-05) y calificaciones (RF-17, RF-18) que cumple la suite
 // de exactitud y permisos (T1118-A). Guarda en memoria y no forma parte del servicio; muestra cómo:
 //  - recalcular SIEMPRE en el servidor con el paquete compartido packages/calculo-notas, ignorando cualquier
 //    nota final que mande el cliente;
 //  - dejar calificar solo al docente asignado a esa materia en ese curso, decidido con el usuario del token;
-//  - rechazar una versión vieja (409) para no pisar el cambio de otro docente o de otro dispositivo.
+//  - rechazar una versión vieja (409) para no pisar el cambio de otro docente o de otro dispositivo;
+//  - calcular con las ponderaciones vigentes del colegio (RNF-10, T1125-A): al cambiarlas, las notas guardadas
+//    se recalculan (aquí se recalculan al consultarlas, a partir de los aportes guardados).
 
 const MENSAJE_NOTA = 'debe ser una nota de 0 a 10';
 
@@ -92,8 +95,17 @@ class ControladorCalificacionesReferencia {
   private readonly asignaciones: Map<string, Asignacion>;
   private readonly calificaciones = new Map<string, Calificacion>();
 
-  constructor(private readonly almacen: AlmacenReferencia) {
+  constructor(
+    private readonly almacen: AlmacenReferencia,
+    private readonly parametros: AlmacenParametrosReferencia,
+  ) {
     this.asignaciones = almacen.asignaciones;
+  }
+
+  /** Nota final y cualitativo con las ponderaciones que rigen ahora (los aportes guardados no cambian). */
+  private recalculada(calificacion: Calificacion): Calificacion {
+    const { notaFinal, cualitativo } = calcularCalificacionInmediata(calificacion, this.parametros.ponderaciones());
+    return { ...calificacion, notaFinal: notaFinal ?? calificacion.notaFinal, cualitativo: cualitativo ?? calificacion.cualitativo };
   }
 
   /** Ids de persona docente de la cuenta del token: el docente se identifica solo con el token. */
@@ -165,7 +177,7 @@ class ControladorCalificacionesReferencia {
     }
 
     // El mismo cálculo que la PWA y que el libro oficial (packages/calculo-notas)
-    const resultado = calcularCalificacionInmediata(solicitud);
+    const resultado = calcularCalificacionInmediata(solicitud, this.parametros.ponderaciones());
     if (resultado.notaFinal === null || resultado.cualitativo === null) {
       throw new ExcepcionApi(400, 'DATOS_INVALIDOS', 'Registra al menos un aporte o el refuerzo.');
     }
@@ -195,7 +207,7 @@ class ControladorCalificacionesReferencia {
       (!filtro.asignacionId || c.asignacionId === filtro.asignacionId) &&
       (!filtro.matriculaId || c.matriculaId === filtro.matriculaId) &&
       (!filtro.trimestre || c.trimestre === Number(filtro.trimestre));
-    const todas = [...this.calificaciones.values()];
+    const todas = [...this.calificaciones.values()].map((c) => this.recalculada(c));
 
     if (usuario.roles.includes('ADMIN')) {
       return todas.filter(coincide);
@@ -218,7 +230,7 @@ class ControladorCalificacionesReferencia {
 }
 
 @Module({
-  imports: [ModuloMatriculaReferencia],
+  imports: [ModuloMatriculaReferencia, ModuloParametrosReferencia],
   controllers: [ControladorCalificacionesReferencia],
 })
 export class ModuloCalificacionesReferencia {}

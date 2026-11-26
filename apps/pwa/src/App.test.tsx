@@ -27,6 +27,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
             url.includes('/matriculas') ||
             url.includes('/calificaciones') ||
             url.includes('/asistencias') ||
+            url.includes('/comportamientos') ||
             url.includes('/tareas') ||
             url.includes('/entregas') ||
             url.includes('/contactos'));
@@ -183,6 +184,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     fireEvent.click(screen.getByTestId('nav-item-asistencia-materia'));
     await waitFor(() => {
       expect(screen.getByTestId('pantalla-asistencia')).toBeInTheDocument();
+    });
+
+    // Verifica que el menú lateral de Docente incluye Comportamiento
+    fireEvent.click(screen.getByTestId('nav-item-comportamiento-estudiantil'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-comportamiento')).toBeInTheDocument();
     });
 
     // Verifica que el menú lateral de Docente incluye Tareas, pruebas y proyectos

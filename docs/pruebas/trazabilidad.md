@@ -44,7 +44,8 @@ Corte: 16/11/2026, inicio del sprint 5.
 | CP-N05 | RNF-05 · consentimiento de avisos | Pendiente | Sprint 8 |
 | CP-N06 | RNF-06 · rendimiento | Pendiente | Sprint 9 (k6 con 460 usuarios) |
 | CP-N08 | RNF-08 · respaldos | Pendiente | Sprint 9 (restauración cronometrada) |
-| CP-N03, CP-N07, CP-N10, CP-N11 | RNF-03, RNF-07, RNF-10, RNF-11 | Pendiente | Sprints 5, 6 y 10 |
+| CP-N10 | RNF-10 · cambiar una ponderación y recalcular las notas | Parcial | `packages/calculo-notas/test/ponderaciones.test.ts` (T1125-A): 5 escenarios de ponderaciones (60/20/20 de la ficha, 50/25/25, 80/10/10, 100/0/0 y 33,33/33,33/33,34) por 143 filas de la hoja oficial contra un oráculo de fracciones exactas, y la validación (suman 100 %). `verificar-parametros.ts` contra la referencia: el administrador cambia las ponderaciones y las notas guardadas se recalculan; solo el administrador; ponderación inválida 400; versión vieja 409. Se aplica sola a los endpoints de T1125-M (`parametros.e2e.spec.ts`). Falta medir «en ≤ 10 min» con una persona y probar el trimestre cerrado |
+| CP-N03, CP-N07, CP-N11 | RNF-03, RNF-07, RNF-11 | Pendiente | Sprints 5, 6 y 10 |
 
 ## Integración entre servicios
 

@@ -64,15 +64,18 @@ def cualitativo(nota_final: Nota) -> str | None:
     return next(etiqueta for minimo, etiqueta in ESCALA if nota_final >= minimo)
 
 
-def calcular(entrada: dict[str, Any]) -> dict[str, Any]:
-    """Una fila del libro: devuelve cada columna calculada."""
+PONDERACIONES_OFICIALES = (Fraction(70), Fraction(15), Fraction(15))
+
+
+def calcular(entrada: dict[str, Any], ponderaciones: tuple[Fraction, Fraction, Fraction] = PONDERACIONES_OFICIALES) -> dict[str, Any]:
+    """Una fila del libro: devuelve cada columna calculada. Las ponderaciones son porcentajes (RNF-10)."""
     bloque1 = promedio(entrada["aportesBloque1"])
     bloque2 = promedio(entrada["aportesBloque2"])
     general = promedio([bloque1, bloque2])
     con_refuerzo = promedio([general, entrada["refuerzo"]]) if entrada["refuerzo"] is not None else general
-    c70 = truncar(con_refuerzo * Fraction(70, 100)) if con_refuerzo is not None else None
-    proyecto = truncar(entrada["notaProyecto"] * Fraction(15, 100)) if entrada["notaProyecto"] is not None else None
-    examen = truncar(entrada["notaExamen"] * Fraction(15, 100)) if entrada["notaExamen"] is not None else None
+    c70 = truncar(con_refuerzo * ponderaciones[0] / 100) if con_refuerzo is not None else None
+    proyecto = truncar(entrada["notaProyecto"] * ponderaciones[1] / 100) if entrada["notaProyecto"] is not None else None
+    examen = truncar(entrada["notaExamen"] * ponderaciones[2] / 100) if entrada["notaExamen"] is not None else None
     final = truncar(c70 + proyecto + examen) if None not in (c70, proyecto, examen) else None
     letra = cualitativo(final)
     return {

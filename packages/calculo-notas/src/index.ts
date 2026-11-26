@@ -1,3 +1,5 @@
+import { PONDERACIONES_OFICIALES, type PonderacionesCalificacion } from './ponderaciones';
+
 export type EstandarLogro = 'DA' | 'AA' | 'PA' | 'NA';
 
 export interface DefinicionCampoAporte {
@@ -130,8 +132,14 @@ export function obtenerEstandarDesdeCualitativo(
   return 'NA';
 }
 
+/**
+ * Nota final de un estudiante. Con las ponderaciones del colegio (RNF-10) o, si no se indican, con las
+ * oficiales 70 / 15 / 15. Los campos `componente70`, `componenteProyecto15` y `componenteExamen15` conservan su
+ * nombre aunque las ponderaciones cambien: son el componente de aportes, de proyecto y de examen.
+ */
 export function calcularCalificacionInmediata(
   entrada: Readonly<EntradaCalculoNota>,
+  ponderaciones: Readonly<PonderacionesCalificacion> = PONDERACIONES_OFICIALES,
 ): ResultadoCalculoNota {
   const promedioBloque1 = promediarValores(entrada.aportesBloque1);
   const promedioBloque2 = promediarValores(entrada.aportesBloque2);
@@ -145,19 +153,19 @@ export function calcularCalificacionInmediata(
 
   const componente70 =
     promedioConRefuerzo !== null
-      ? truncarADosDecimales(promedioConRefuerzo * 0.7)
+      ? truncarADosDecimales(promedioConRefuerzo * (ponderaciones.aportes / 100))
       : null;
 
   const componenteProyecto15 =
     typeof entrada.notaProyecto === 'number' &&
     Number.isFinite(entrada.notaProyecto)
-      ? truncarADosDecimales(entrada.notaProyecto * 0.15)
+      ? truncarADosDecimales(entrada.notaProyecto * (ponderaciones.proyecto / 100))
       : null;
 
   const componenteExamen15 =
     typeof entrada.notaExamen === 'number' &&
     Number.isFinite(entrada.notaExamen)
-      ? truncarADosDecimales(entrada.notaExamen * 0.15)
+      ? truncarADosDecimales(entrada.notaExamen * (ponderaciones.examen / 100))
       : null;
 
   const notaFinal =
@@ -224,3 +232,4 @@ export function calcularResumenEstandares(
 }
 
 export * from './comportamiento';
+export * from './ponderaciones';

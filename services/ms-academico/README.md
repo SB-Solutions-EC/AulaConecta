@@ -433,6 +433,37 @@ El resumen del CI publica el **reporte de pruebas 403** por persona, en la refer
 | En una tarea, el estudiante ve las notas de todo el curso | 4 |
 | La persona del token cuenta aunque el rol del token no corresponda | 1 |
 
+## Pruebas de parámetros: al cambiar una ponderación se recalculan las notas (RNF-10)
+
+`test/seguridad/verificar-parametros.ts` (T1125-A) parte del escenario de la suite de calificaciones (curso A con M1 y el docente D1, curso B con otro docente) y registra las **143 notas de la hoja oficial** en 3 trimestres, más una nota del estudiante de control y otra del curso B. Después hace lo que dice la ficha de RNF-10: el administrador cambia una ponderación por la API, sin tocar código, y las notas se recalculan.
+
+| Grupo | Qué comprueba |
+|---|---|
+| Punto de partida | `GET /parametros` trae `ponderaciones_calificaciones` con 70/15/15 y una versión. Las 143 notas coinciden con la hoja oficial |
+| Cambio de ponderación | Para 60/20/20 (el de la ficha), 50/25/25, 80/10/10, 100/0/0 y 33,33/33,33/33,34: el cambio responde 200, sube la versión y devuelve los valores nuevos; **las 143 notas guardadas se recalculan** y coinciden con el oráculo de fracciones exactas; el estudiante ve su nota recalculada y también cambia la del curso B, de otro docente. Volver a 70/15/15 devuelve las notas de antes |
+| Notas nuevas | Una nota guardada después del cambio usa las ponderaciones nuevas |
+| Quién cambia | Solo el administrador. Responden 403: el docente que califica la materia, otro docente, la secretaría, el estudiante, el representante, un docente sin persona y el administrador con la clave temporal pendiente. Los 13 tokens inválidos responden 401. Después de cada intento, las ponderaciones y las 143 notas siguen igual |
+| Rechazos | 400 si no suman 100 % (por 0,01), si suman de más, si una es negativa, pasa de 100, llega como texto o null, falta, tiene más de 2 decimales, o la nota mínima de aprobación no va de 1 a 10; también si el valor no es un objeto o la versión es inválida. 409 con una versión vieja. El parámetro inexistente se rechaza. Ninguno cambia nada. Acepta `18,08 + 0,07 + 81,85`, que en coma flotante no suma 100 exacto |
+
+Se ejecuta contra la referencia (`referencia/modulo-parametros-referencia.ts`, con el módulo de calificaciones leyendo sus ponderaciones) y contra los endpoints reales (`parametros.e2e.spec.ts`), que se omiten hasta que existan `GET` y `PUT /parametros` (T1125-M). Los parámetros son globales: la suite los deja en 70/15/15 al terminar.
+
+**Lo que no cubre la ficha de RNF-10:** que el cambio tome «≤ 10 min» se mide con una persona, no con esta suite, y el trimestre cerrado (RN-18) no se prueba porque el contrato no tiene cómo cerrarlo.
+
+**Comprobación de la suite.** Se debilitó la referencia de 11 maneras, una por vez (dos de ellas, quién cambia, se muestran juntas), y cada una hizo fallar pruebas:
+
+| Debilidad | Pruebas que fallan |
+|---|---|
+| Cualquier cuenta autenticada, o cualquier docente, cambia las ponderaciones | 40 |
+| Las notas nuevas ignoran las ponderaciones vigentes | 41 |
+| La secretaría también las cambia | 38 |
+| No exige que sumen 100 % | 20 |
+| Guarda la ponderación aunque la rechace | 20 |
+| Las notas ya guardadas no se recalculan | 16 |
+| Acepta una nota mínima de aprobación fuera de 1 a 10 | 11 |
+| La versión no sube al cambiar | 6 |
+| Solo se recalculan las notas de una materia (no las de otro curso) | 5 |
+| No mira la versión (pisa el cambio de otro administrador) | 1 |
+
 ## Plan
 
 | Cuándo | Qué se construye | Estado |
@@ -462,6 +493,8 @@ El resumen del CI publica el **reporte de pruebas 403** por persona, en la refer
 | Sprint 5 (21/11) | Endpoints de asistencia, atrasos y justificación | Pendiente (T1123-M) |
 | Sprint 5 (24/11) | Pruebas del cálculo de comportamiento contra la hoja oficial (`packages/calculo-notas`) | Listo (T1124-A) |
 | Sprint 5 (24/11) | Endpoints de comportamiento con nueve indicadores y cálculo del cualitativo | Pendiente (T1124-M) |
+| Sprint 5 (25/11) | Prueba: al cambiar una ponderación se recalculan las notas | Listo (T1125-A) |
+| Sprint 5 (25/11) | Endpoints de parámetros del colegio y recálculo de notas | Pendiente (T1125-M) |
 | Sprint 4 en adelante | Módulos académicos según el Product Backlog | |
 
 Responsable del área: @cmacuna7.

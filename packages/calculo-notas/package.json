@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",
-    "casos": "python casos/generar_casos.py && python casos/generar_casos_comportamiento.py",
-    "casos:verificar": "python casos/generar_casos.py --verificar && python casos/generar_casos_comportamiento.py --verificar"
+    "casos": "python casos/generar_casos.py && python casos/generar_casos_comportamiento.py && python casos/generar_casos_ponderaciones.py",
+    "casos:verificar": "python casos/generar_casos.py --verificar && python casos/generar_casos_comportamiento.py --verificar && python casos/generar_casos_ponderaciones.py --verificar"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

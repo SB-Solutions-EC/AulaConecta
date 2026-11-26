@@ -1071,9 +1071,20 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Parametro"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
     put:
       tags: [Parámetros y Auditoría]
       summary: Actualizar parámetro configurable (ADMIN, RNF-10)
+      description: |
+        Solo el administrador. El valor de `ponderaciones_calificaciones` es
+        `{ aportes, proyecto, examen, minimoAprobacion }`: cada porcentaje es un número de 0 a 100 con hasta 2 decimales
+        y los tres suman exactamente 100 % (`packages/calculo-notas`, `validarPonderaciones`); `minimoAprobacion` es una
+        nota de 1 a 10. Se rechaza con 400 y no cambia nada si algo no se cumple, y con 409 si `version` no es la vigente.
+
+        **Al cambiar una ponderación, las notas de los trimestres abiertos se recalculan** con las nuevas (RNF-10): los
+        aportes guardados no cambian, y la nota final y el cualitativo salen otra vez de `packages/calculo-notas`. Las
+        notas que se guarden después usan las ponderaciones vigentes. Los trimestres cerrados conservan sus notas (RN-18).
       operationId: actualizarParametro
       requestBody:
         required: true
@@ -1083,11 +1094,19 @@ paths:
               $ref: "#/components/schemas/SolicitudParametro"
       responses:
         "200":
-          description: Parámetro actualizado
+          description: Parámetro actualizado (la versión sube en 1)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Parametro"
+        "400":
+          $ref: "#/components/responses/SolicitudInvalida"
+        "401":
+          $ref: "#/components/responses/NoAutorizado"
+        "403":
+          $ref: "#/components/responses/Prohibido"
+        "409":
+          $ref: "#/components/responses/ConflictoVersion"
 
   /auditoria:
     get:

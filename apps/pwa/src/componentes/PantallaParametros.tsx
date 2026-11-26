@@ -13,6 +13,7 @@ import {
   servicioParametrosApi,
   type ParametroColegio,
 } from '../api/parametrosApi';
+import { calcularCalificacionInmediata } from '@aulaconecta/calculo-notas';
 
 export type PestanaParametros = 'PONDERACIONES' | 'ESCALAS' | 'TEXTOS';
 
@@ -99,11 +100,23 @@ export function simularNotaConPonderaciones(entrada: {
   pctProyecto: number;
   pctExamen: number;
 }): number {
-  const suma =
-    entrada.aportes * (entrada.pctAportes / 100) +
-    entrada.proyecto * (entrada.pctProyecto / 100) +
-    entrada.examen * (entrada.pctExamen / 100);
-  return Math.trunc(suma * 100 + 1e-9) / 100;
+  // El mismo cálculo que el servidor (paquete compartido, RNF-10): cada componente se trunca a 2 decimales
+  // antes de sumar, así que la vista previa coincide con la nota que se guardará.
+  const resultado = calcularCalificacionInmediata(
+    {
+      aportesBloque1: [entrada.aportes],
+      aportesBloque2: [entrada.aportes],
+      refuerzo: null,
+      notaProyecto: entrada.proyecto,
+      notaExamen: entrada.examen,
+    },
+    {
+      aportes: entrada.pctAportes,
+      proyecto: entrada.pctProyecto,
+      examen: entrada.pctExamen,
+    },
+  );
+  return resultado.notaFinal as number;
 }
 
 function parsearNumero(texto: string): number | null {

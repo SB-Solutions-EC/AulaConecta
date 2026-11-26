@@ -4,7 +4,7 @@ import type { Server } from 'node:http';
 import { resolve } from 'node:path';
 import request, { Response } from 'supertest';
 import { cedulaFicticia, palabraFicticia } from './datos-ficticios';
-import { Cuerpo, CURSOS, MATERIAS } from './endpoints-academicos';
+import { ANIOS_LECTIVOS, Cuerpo, MATERIAS } from './endpoints-academicos';
 import { tokensRechazados, tokenValido } from './tokens';
 import { esperarRechazo, ObtenerServidor } from './verificar-endpoint';
 
@@ -125,8 +125,24 @@ export async function construirMundoCalificaciones(servidor: Server, estudiantes
   const asignar = async (docente: ActorCalificaciones, materiaId: string, cursoId: string): Promise<string> =>
     String((await crear('/asignaciones', { docenteId: docente.personaId, materiaId, cursoId })).id);
 
-  const cursoA = String((await crear('/cursos', await CURSOS.cuerpoValido(crear))).id);
-  const cursoB = String((await crear('/cursos', await CURSOS.cuerpoValido(crear))).id);
+  // Cada curso va en su año lectivo con los tres trimestres: el servidor real rechaza las notas de un
+  // trimestre que no está definido (400) y las de uno cerrado (409, RN-18)
+  const cursoConTrimestres = async (): Promise<string> => {
+    const anio = await crear('/anios-lectivos', await ANIOS_LECTIVOS.cuerpoValido(crear));
+    const curso = await crear('/cursos', { id: randomUUID(), anioLectivoId: anio.id, nivel: `Nivel ${palabraFicticia()} EGB`, paralelo: 'A' });
+    const año = Number(String(anio.inicio).slice(0, 4));
+    const trimestres: [number, string, string][] = [
+      [1, `${año}-09-01`, `${año}-11-30`],
+      [2, `${año}-12-01`, `${año + 1}-03-31`],
+      [3, `${año + 1}-04-01`, String(anio.fin)],
+    ];
+    for (const [numero, inicio, fin] of trimestres) {
+      await crear('/periodos', { id: randomUUID(), anioLectivoId: anio.id, numero, inicio, fin });
+    }
+    return String(curso.id);
+  };
+  const cursoA = await cursoConTrimestres();
+  const cursoB = await cursoConTrimestres();
   const materia1 = String((await crear('/materias', await MATERIAS.cuerpoValido(crear))).id);
   const materia2 = String((await crear('/materias', await MATERIAS.cuerpoValido(crear))).id);
 

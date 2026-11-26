@@ -28,6 +28,7 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
             url.includes('/calificaciones') ||
             url.includes('/asistencias') ||
             url.includes('/comportamientos') ||
+            url.includes('/parametros') ||
             url.includes('/tareas') ||
             url.includes('/entregas') ||
             url.includes('/contactos'));
@@ -147,6 +148,12 @@ describe('Layout por rol, rutas protegidas y estado de la PWA de AulaConecta', (
     fireEvent.click(screen.getByTestId('nav-item-importacion-nominas'));
     await waitFor(() => {
       expect(screen.getByTestId('pantalla-importacion')).toBeInTheDocument();
+    });
+
+    // Como ADMIN ve Parámetros del colegio y puede navegar a ella
+    fireEvent.click(screen.getByTestId('nav-item-parametros-colegio'));
+    await waitFor(() => {
+      expect(screen.getByTestId('pantalla-parametros')).toBeInTheDocument();
     });
 
     // Como ADMIN ve Configuración académica y puede navegar a ella

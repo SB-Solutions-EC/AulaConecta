@@ -1,8 +1,8 @@
 name: CI cálculo de notas
 
-# Lo llama ci.yml para el paquete compartido packages/calculo-notas (T1117-A): comprueba que la hoja
-# oficial anonimizada esté al día, corre las pruebas con cobertura del 100 % y publica el indicador I-05
-# (porcentaje de casos de la hoja oficial que coinciden con el cálculo).
+# Lo llama ci.yml para el paquete compartido packages/calculo-notas (T1117-A y T1124-A): comprueba que las hojas
+# oficiales anonimizadas (notas y comportamiento) estén al día, corre las pruebas con cobertura del 100 % y publica
+# el indicador I-05 (porcentaje de casos de cada hoja oficial que coinciden con el cálculo).
 on:
   workflow_call:
 
@@ -36,6 +36,9 @@ jobs:
       - name: La hoja oficial anonimizada coincide con su generador
         run: python3 casos/generar_casos.py --verificar
 
+      - name: La hoja de comportamiento anonimizada coincide con su generador
+        run: python3 casos/generar_casos_comportamiento.py --verificar
+
       - name: Verificar tipos (TypeScript)
         run: npm run typecheck
 
@@ -61,6 +64,29 @@ jobs:
           const fallidos = casos.filter((a) => a.status !== 'passed');
           if (fallidos.length) {
             console.log('\n### Casos que no coinciden\n');
+            fallidos.forEach((a) => console.log(`- ${a.title}`));
+          }
+          JS
+
+      - name: Indicador I-05 de comportamiento en el resumen
+        if: ${{ !cancelled() && hashFiles('packages/calculo-notas/reportes/resultados.json') != '' }}
+        run: |
+          node >> "$GITHUB_STEP_SUMMARY" <<'JS'
+          const r = require('./reportes/resultados.json');
+          const archivo = r.testResults.find((t) => t.name.endsWith('comportamiento.test.ts'));
+          // Una fila de la hoja = una prueba dentro de un grupo (curso o casos límite)
+          const casos = archivo.assertionResults.filter((a) => a.ancestorTitles.length > 1);
+          const ok = casos.filter((a) => a.status === 'passed').length;
+          const porcentaje = casos.length ? ((ok / casos.length) * 100).toFixed(1) : '0.0';
+          const exhaustiva = archivo.assertionResults.find((a) => a.title.startsWith('coincide con la aritmética exacta'));
+          console.log('## Comportamiento: coincidencia con la hoja oficial (RF-22, I-05)\n');
+          console.log('| Filas de la hoja de comportamiento | Coinciden | Indicador I-05 | Combinaciones de escalas comprobadas | Pruebas del archivo |');
+          console.log('|---|---|---|---|---|');
+          console.log(`| ${casos.length} | ${ok} | **${porcentaje} %** | ${exhaustiva?.status === 'passed' ? '715 de 715' : 'con fallos'} | ${archivo.assertionResults.filter((a) => a.status === 'passed').length} de ${archivo.assertionResults.length} |`);
+          console.log('\nNota = promedio de los puntajes (Siempre 10, Frecuentemente 8, Ocasionalmente 6, Nunca 2) truncado a 2 decimales. Cualitativo: A desde 9, B desde 7,5, C desde 6, D desde 4 y E por debajo.');
+          const fallidos = casos.filter((a) => a.status !== 'passed');
+          if (fallidos.length) {
+            console.log('\n### Filas que no coinciden\n');
             fallidos.forEach((a) => console.log(`- ${a.title}`));
           }
           JS

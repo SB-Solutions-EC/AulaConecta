@@ -222,3 +222,5 @@ export function calcularResumenEstandares(
     conteo,
   };
 }
+
+export * from './comportamiento';

@@ -23,6 +23,15 @@ import {
   type IndicadoresComportamiento,
   type RegistroComportamiento,
 } from '../api/comportamientoApi';
+import {
+  PUNTAJE_POR_ESCALA,
+  calcularComportamiento,
+  type ResultadoCalculoComportamiento,
+} from '@aulaconecta/calculo-notas';
+
+// El cálculo (puntajes, nota truncada y cualitativo) vive en el paquete compartido con ms-academico (RF-22, RNF-02)
+export { calcularComportamiento };
+export type { ResultadoCalculoComportamiento };
 
 export interface IndicadorDefinicion {
   clave: ClaveIndicadorComportamiento;
@@ -34,16 +43,6 @@ export interface EscalaDefinicion {
   valor: EscalaComportamiento;
   etiqueta: string;
   puntaje: number;
-}
-
-export interface ResultadoCalculoComportamiento {
-  completados: number;
-  total: number;
-  completo: boolean;
-  nota: number | null;
-  cualitativo: CualitativoComportamiento | null;
-  etiqueta: string | null;
-  descripcion: string | null;
 }
 
 export interface FilaComportamiento {
@@ -112,60 +111,10 @@ export const INDICADORES_COMPORTAMIENTO: ReadonlyArray<IndicadorDefinicion> = [
 ];
 
 export const ESCALAS_COMPORTAMIENTO: ReadonlyArray<EscalaDefinicion> = [
-  { valor: 'SIEMPRE', etiqueta: 'Siempre', puntaje: 10 },
-  { valor: 'FRECUENTEMENTE', etiqueta: 'Frecuentemente', puntaje: 8 },
-  { valor: 'OCASIONALMENTE', etiqueta: 'Ocasionalmente', puntaje: 6 },
-  { valor: 'NUNCA', etiqueta: 'Nunca', puntaje: 2 },
-];
-
-const PUNTAJE_POR_ESCALA: Record<EscalaComportamiento, number> = {
-  SIEMPRE: 10,
-  FRECUENTEMENTE: 8,
-  OCASIONALMENTE: 6,
-  NUNCA: 2,
-};
-
-const TRAMOS_CUALITATIVOS: ReadonlyArray<{
-  min: number;
-  cualitativo: CualitativoComportamiento;
-  etiqueta: string;
-  descripcion: string;
-}> = [
-  {
-    min: 9.0,
-    cualitativo: 'A',
-    etiqueta: 'Muy satisfactorio',
-    descripcion:
-      'Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social.',
-  },
-  {
-    min: 7.5,
-    cualitativo: 'B',
-    etiqueta: 'Satisfactorio',
-    descripcion:
-      'Cumple con los compromisos establecidos para la sana convivencia social.',
-  },
-  {
-    min: 6.0,
-    cualitativo: 'C',
-    etiqueta: 'Poco satisfactorio',
-    descripcion:
-      'Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social.',
-  },
-  {
-    min: 4.0,
-    cualitativo: 'D',
-    etiqueta: 'Mejorable',
-    descripcion:
-      'Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social.',
-  },
-  {
-    min: 0,
-    cualitativo: 'E',
-    etiqueta: 'Insatisfactorio',
-    descripcion:
-      'No cumple con los compromisos establecidos para la sana convivencia social.',
-  },
+  { valor: 'SIEMPRE', etiqueta: 'Siempre', puntaje: PUNTAJE_POR_ESCALA.SIEMPRE },
+  { valor: 'FRECUENTEMENTE', etiqueta: 'Frecuentemente', puntaje: PUNTAJE_POR_ESCALA.FRECUENTEMENTE },
+  { valor: 'OCASIONALMENTE', etiqueta: 'Ocasionalmente', puntaje: PUNTAJE_POR_ESCALA.OCASIONALMENTE },
+  { valor: 'NUNCA', etiqueta: 'Nunca', puntaje: PUNTAJE_POR_ESCALA.NUNCA },
 ];
 
 const CATALOGO_DEMO_CURSOS: ReadonlyArray<Curso> = [
@@ -240,50 +189,6 @@ const FILAS_DEMO_COMPORTAMIENTO: ReadonlyArray<FilaComportamiento> = [
     modificada: false,
   },
 ];
-
-export function calcularComportamiento(
-  indicadores: IndicadoresComportamiento,
-): ResultadoCalculoComportamiento {
-  let suma = 0;
-  let completados = 0;
-
-  for (const ind of INDICADORES_COMPORTAMIENTO) {
-    const valor = indicadores[ind.clave];
-    if (valor) {
-      suma += PUNTAJE_POR_ESCALA[valor];
-      completados += 1;
-    }
-  }
-
-  const total = INDICADORES_COMPORTAMIENTO.length;
-  if (completados === 0) {
-    return {
-      completados: 0,
-      total,
-      completo: false,
-      nota: null,
-      cualitativo: null,
-      etiqueta: null,
-      descripcion: null,
-    };
-  }
-
-  const promedio = suma / completados;
-  const nota = Math.trunc(promedio * 100 + 1e-9) / 100;
-  const tramo =
-    TRAMOS_CUALITATIVOS.find((t) => nota >= t.min) ??
-    TRAMOS_CUALITATIVOS[TRAMOS_CUALITATIVOS.length - 1];
-
-  return {
-    completados,
-    total,
-    completo: completados === total,
-    nota,
-    cualitativo: tramo.cualitativo,
-    etiqueta: tramo.etiqueta,
-    descripcion: tramo.descripcion,
-  };
-}
 
 function claseBadgeCualitativo(
   cualitativo: CualitativoComportamiento | null,

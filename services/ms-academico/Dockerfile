@@ -2,8 +2,8 @@
 # El cálculo de notas (packages/calculo-notas) llega como contexto aparte, igual que en la PWA:
 #   docker build --build-context calculo-notas=packages/calculo-notas services/ms-academico
 FROM node:24-alpine AS compilacion
-# Se repite la estructura del repositorio: postinstall copia ../../packages/calculo-notas/src/index.ts
-COPY --from=calculo-notas src/index.ts /repo/packages/calculo-notas/src/index.ts
+# Se repite la estructura del repositorio: postinstall copia ../../packages/calculo-notas/src/*.ts
+COPY --from=calculo-notas src /repo/packages/calculo-notas/src
 WORKDIR /repo/services/ms-academico
 COPY package.json package-lock.json prisma.config.ts ./
 # El esquema va antes de npm ci: postinstall genera el cliente de Prisma y copia el cálculo de notas

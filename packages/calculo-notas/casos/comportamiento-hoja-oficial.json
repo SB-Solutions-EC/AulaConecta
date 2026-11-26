@@ -1,0 +1,3647 @@
+{
+ "descripcion": "Hoja oficial de comportamiento anonimizada: nueve indicadores, nota truncada y cualitativo",
+ "origen": "Fórmulas de la hoja «Registro de comportamiento»; indicadores generados con semilla fija, nunca transcritos (docs/seguridad/datos_sensibles.md, sección 3)",
+ "generadoPor": "packages/calculo-notas/casos/generar_casos_comportamiento.py",
+ "semilla": 20261124,
+ "totalCasos": 140,
+ "casos": [
+  {
+   "id": "C1-E01",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 01",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E02",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 02",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E03",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 03",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.77,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E04",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 04",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.66,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E05",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 05",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "NUNCA",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E06",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 06",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "NUNCA",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.77,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E07",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 07",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E08",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 08",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E09",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 09",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.66,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E10",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 10",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.77,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E11",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 11",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E12",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 12",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E13",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 13",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "SIEMPRE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E14",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 14",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E15",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 15",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.77,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E16",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 16",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.77,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E17",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 17",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.66,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E18",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 18",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "NUNCA",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.66,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E19",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 19",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "NUNCA",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E20",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 20",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "SIEMPRE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.88,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E21",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 21",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.55,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E22",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 22",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "NUNCA",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.44,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E23",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 23",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E24",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 24",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E25",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 25",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "NUNCA",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.33,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E26",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 26",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E27",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 27",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "NUNCA",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E28",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 28",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.44,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E29",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 29",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.22,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C1-E30",
+   "grupo": "8vo EGB A",
+   "descripcion": "Estudiante 30",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "NUNCA",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E01",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 01",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "NUNCA",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E02",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 02",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "NUNCA",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.66,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E03",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 03",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E04",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 04",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.88,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E05",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 05",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.33,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E06",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 06",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.33,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E07",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 07",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.88,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E08",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 08",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.66,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E09",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 09",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.77,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E10",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 10",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "SIEMPRE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "NUNCA",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.33,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E11",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 11",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E12",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 12",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "NUNCA",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.22,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E13",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 13",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "NUNCA",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 4.66,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E14",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 14",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 4.44,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E15",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 15",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.33,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E16",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 16",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.0,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E17",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 17",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "NUNCA",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.33,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E18",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 18",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "NUNCA",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.33,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E19",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 19",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.22,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E20",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 20",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E21",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 21",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.66,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E22",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 22",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E23",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 23",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E24",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 24",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E25",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 25",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.55,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E26",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 26",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "NUNCA",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "NUNCA",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.66,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E27",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 27",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.44,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E28",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 28",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.44,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E29",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 29",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C2-E30",
+   "grupo": "9no EGB A",
+   "descripcion": "Estudiante 30",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E01",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 01",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.77,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E02",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 02",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.11,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E03",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 03",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.11,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E04",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 04",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E05",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 05",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.44,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E06",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 06",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.44,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E07",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 07",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "NUNCA",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E08",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 08",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.0,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E09",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 09",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E10",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 10",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E11",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 11",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.88,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E12",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 12",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.88,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E13",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 13",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.55,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E14",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 14",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "NUNCA",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.66,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E15",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 15",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.55,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E16",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 16",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.11,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E17",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 17",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "NUNCA",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E18",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 18",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.66,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E19",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 19",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "NUNCA",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "NUNCA",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.11,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E20",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 20",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "SIEMPRE",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.88,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E21",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 21",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "NUNCA",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E22",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 22",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "NUNCA",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E23",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 23",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "NUNCA",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.77,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E24",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 24",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.0,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E25",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 25",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E26",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 26",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.55,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E27",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 27",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E28",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 28",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "NUNCA",
+    "soc2": "SIEMPRE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.77,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E29",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 29",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.33,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C3-E30",
+   "grupo": "9no EGB B",
+   "descripcion": "Estudiante 30",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "NUNCA",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.55,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E01",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 01",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.44,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E02",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 02",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E03",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 03",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.22,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E04",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 04",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E05",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 05",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E06",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 06",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.66,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E07",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 07",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "NUNCA",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.11,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E08",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 08",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E09",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 09",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "NUNCA",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.22,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E10",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 10",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "SIEMPRE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.77,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E11",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 11",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "NUNCA",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.55,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E12",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 12",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E13",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 13",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E14",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 14",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E15",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 15",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "NUNCA",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.11,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E16",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 16",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.88,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E17",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 17",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "NUNCA",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E18",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 18",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E19",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 19",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E20",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 20",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E21",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 21",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.44,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E22",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 22",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "SIEMPRE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.66,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E23",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 23",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.22,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E24",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 24",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.77,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E25",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 25",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E26",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 26",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E27",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 27",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "SIEMPRE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 7.77,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E28",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 28",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "SIEMPRE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "NUNCA",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.66,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E29",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 29",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "NUNCA",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.11,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "C4-E30",
+   "grupo": "10mo EGB A",
+   "descripcion": "Estudiante 30",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L01",
+   "grupo": "Casos límite",
+   "descripcion": "Los nueve en Siempre: 10, A",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE",
+    "soc5": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L02",
+   "grupo": "Casos límite",
+   "descripcion": "Los nueve en Frecuentemente: 8, B",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "FRECUENTEMENTE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L03",
+   "grupo": "Casos límite",
+   "descripcion": "Los nueve en Ocasionalmente: 6, C (el corte es inclusivo)",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L04",
+   "grupo": "Casos límite",
+   "descripcion": "Los nueve en Nunca: 2, E",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 2.0,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L05",
+   "grupo": "Casos límite",
+   "descripcion": "Ningún indicador marcado: sin nota",
+   "indicadores": {},
+   "esperado": {
+    "completados": 0,
+    "total": 9,
+    "completo": false,
+    "nota": null,
+    "cualitativo": null,
+    "etiqueta": null,
+    "descripcion": null
+   }
+  },
+  {
+   "id": "L06",
+   "grupo": "Casos límite",
+   "descripcion": "Un solo indicador marcado: vista previa",
+   "indicadores": {
+    "cog1": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 1,
+    "total": 9,
+    "completo": false,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L07",
+   "grupo": "Casos límite",
+   "descripcion": "Cuatro cognitivos marcados, sociales sin marcar",
+   "indicadores": {
+    "cog1": "FRECUENTEMENTE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "FRECUENTEMENTE",
+    "cog4": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 4,
+    "total": 9,
+    "completo": false,
+    "nota": 8.0,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L08",
+   "grupo": "Casos límite",
+   "descripcion": "Ocho de nueve marcados: falta uno, no es oficial",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "SIEMPRE"
+   },
+   "esperado": {
+    "completados": 8,
+    "total": 9,
+    "completo": false,
+    "nota": 10.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L09",
+   "grupo": "Casos límite",
+   "descripcion": "Promedio periódico 8,666…: se trunca a 8,66 y no se redondea a 8,67",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "FRECUENTEMENTE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 9.33,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L10",
+   "grupo": "Casos límite",
+   "descripcion": "Cinco marcados, 46 ÷ 5 = 9,2 exacto (en coma flotante se trunca a 9,19)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "FRECUENTEMENTE"
+   },
+   "esperado": {
+    "completados": 5,
+    "total": 9,
+    "completo": false,
+    "nota": 9.2,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L11",
+   "grupo": "Casos límite",
+   "descripcion": "Promedio 4,22 (38 ÷ 9 = 4,2222…): D",
+   "indicadores": {
+    "cog1": "OCASIONALMENTE",
+    "cog2": "OCASIONALMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "OCASIONALMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 4.22,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L12",
+   "grupo": "Casos límite",
+   "descripcion": "Mismos indicadores en otro orden: misma nota",
+   "indicadores": {
+    "cog1": "NUNCA",
+    "cog2": "NUNCA",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "OCASIONALMENTE",
+    "soc4": "OCASIONALMENTE",
+    "soc5": "OCASIONALMENTE"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 4.22,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L13",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 9 justo en el corte (con 8 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "NUNCA"
+   },
+   "esperado": {
+    "completados": 8,
+    "total": 9,
+    "completo": false,
+    "nota": 9.0,
+    "cualitativo": "A",
+    "etiqueta": "Muy satisfactorio",
+    "descripcion": "Lidera el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L14",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 8.88, la más cercana por debajo del corte 9 (con 9 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "SIEMPRE",
+    "soc3": "SIEMPRE",
+    "soc4": "FRECUENTEMENTE",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 8.88,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L15",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 7.5 justo en el corte (con 8 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "SIEMPRE",
+    "soc2": "OCASIONALMENTE",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA"
+   },
+   "esperado": {
+    "completados": 8,
+    "total": 9,
+    "completo": false,
+    "nota": 7.5,
+    "cualitativo": "B",
+    "etiqueta": "Satisfactorio",
+    "descripcion": "Cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L16",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 7.42, la más cercana por debajo del corte 7.5 (con 7 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "FRECUENTEMENTE",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA"
+   },
+   "esperado": {
+    "completados": 7,
+    "total": 9,
+    "completo": false,
+    "nota": 7.42,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L17",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 6 justo en el corte (con 9 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "SIEMPRE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 6.0,
+    "cualitativo": "C",
+    "etiqueta": "Poco satisfactorio",
+    "descripcion": "Falla ocasionalmente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L18",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 5.77, la más cercana por debajo del corte 6 (con 9 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "SIEMPRE",
+    "cog4": "FRECUENTEMENTE",
+    "soc1": "OCASIONALMENTE",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 5.77,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L19",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 4 justo en el corte (con 9 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "FRECUENTEMENTE",
+    "cog3": "OCASIONALMENTE",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 4.0,
+    "cualitativo": "D",
+    "etiqueta": "Mejorable",
+    "descripcion": "Falla reiteradamente en el cumplimiento de los compromisos establecidos para la sana convivencia social."
+   }
+  },
+  {
+   "id": "L20",
+   "grupo": "Casos límite",
+   "descripcion": "Nota 3.77, la más cercana por debajo del corte 4 (con 9 indicadores marcados)",
+   "indicadores": {
+    "cog1": "SIEMPRE",
+    "cog2": "SIEMPRE",
+    "cog3": "NUNCA",
+    "cog4": "NUNCA",
+    "soc1": "NUNCA",
+    "soc2": "NUNCA",
+    "soc3": "NUNCA",
+    "soc4": "NUNCA",
+    "soc5": "NUNCA"
+   },
+   "esperado": {
+    "completados": 9,
+    "total": 9,
+    "completo": true,
+    "nota": 3.77,
+    "cualitativo": "E",
+    "etiqueta": "Insatisfactorio",
+    "descripcion": "No cumple con los compromisos establecidos para la sana convivencia social."
+   }
+  }
+ ],
+ "cursos": [
+  {
+   "curso": "8vo EGB A",
+   "casos": [
+    "C1-E01",
+    "C1-E02",
+    "C1-E03",
+    "C1-E04",
+    "C1-E05",
+    "C1-E06",
+    "C1-E07",
+    "C1-E08",
+    "C1-E09",
+    "C1-E10",
+    "C1-E11",
+    "C1-E12",
+    "C1-E13",
+    "C1-E14",
+    "C1-E15",
+    "C1-E16",
+    "C1-E17",
+    "C1-E18",
+    "C1-E19",
+    "C1-E20",
+    "C1-E21",
+    "C1-E22",
+    "C1-E23",
+    "C1-E24",
+    "C1-E25",
+    "C1-E26",
+    "C1-E27",
+    "C1-E28",
+    "C1-E29",
+    "C1-E30"
+   ],
+   "esperado": {
+    "A": 9,
+    "B": 10,
+    "C": 6,
+    "D": 1,
+    "E": 4
+   }
+  },
+  {
+   "curso": "9no EGB A",
+   "casos": [
+    "C2-E01",
+    "C2-E02",
+    "C2-E03",
+    "C2-E04",
+    "C2-E05",
+    "C2-E06",
+    "C2-E07",
+    "C2-E08",
+    "C2-E09",
+    "C2-E10",
+    "C2-E11",
+    "C2-E12",
+    "C2-E13",
+    "C2-E14",
+    "C2-E15",
+    "C2-E16",
+    "C2-E17",
+    "C2-E18",
+    "C2-E19",
+    "C2-E20",
+    "C2-E21",
+    "C2-E22",
+    "C2-E23",
+    "C2-E24",
+    "C2-E25",
+    "C2-E26",
+    "C2-E27",
+    "C2-E28",
+    "C2-E29",
+    "C2-E30"
+   ],
+   "esperado": {
+    "A": 5,
+    "B": 11,
+    "C": 8,
+    "D": 3,
+    "E": 3
+   }
+  },
+  {
+   "curso": "9no EGB B",
+   "casos": [
+    "C3-E01",
+    "C3-E02",
+    "C3-E03",
+    "C3-E04",
+    "C3-E05",
+    "C3-E06",
+    "C3-E07",
+    "C3-E08",
+    "C3-E09",
+    "C3-E10",
+    "C3-E11",
+    "C3-E12",
+    "C3-E13",
+    "C3-E14",
+    "C3-E15",
+    "C3-E16",
+    "C3-E17",
+    "C3-E18",
+    "C3-E19",
+    "C3-E20",
+    "C3-E21",
+    "C3-E22",
+    "C3-E23",
+    "C3-E24",
+    "C3-E25",
+    "C3-E26",
+    "C3-E27",
+    "C3-E28",
+    "C3-E29",
+    "C3-E30"
+   ],
+   "esperado": {
+    "A": 6,
+    "B": 7,
+    "C": 5,
+    "D": 2,
+    "E": 10
+   }
+  },
+  {
+   "curso": "10mo EGB A",
+   "casos": [
+    "C4-E01",
+    "C4-E02",
+    "C4-E03",
+    "C4-E04",
+    "C4-E05",
+    "C4-E06",
+    "C4-E07",
+    "C4-E08",
+    "C4-E09",
+    "C4-E10",
+    "C4-E11",
+    "C4-E12",
+    "C4-E13",
+    "C4-E14",
+    "C4-E15",
+    "C4-E16",
+    "C4-E17",
+    "C4-E18",
+    "C4-E19",
+    "C4-E20",
+    "C4-E21",
+    "C4-E22",
+    "C4-E23",
+    "C4-E24",
+    "C4-E25",
+    "C4-E26",
+    "C4-E27",
+    "C4-E28",
+    "C4-E29",
+    "C4-E30"
+   ],
+   "esperado": {
+    "A": 10,
+    "B": 8,
+    "C": 10,
+    "D": 1,
+    "E": 1
+   }
+  }
+ ]
+}

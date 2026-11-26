@@ -141,6 +141,15 @@ export const CATALOGO_MODULOS: DefinicionModuloNavegacion[] = [
     sprintObjetivo: 'Sprint 5 (RF-21)',
   },
   {
+    id: 'comportamiento-estudiantil',
+    ruta: '/comportamiento',
+    etiqueta: 'Comportamiento',
+    descripcion:
+      'Evaluación trimestral de los 9 indicadores cognitivos y sociales con cálculo automático del cualitativo.',
+    rolesPermitidos: ['DOCENTE'],
+    sprintObjetivo: 'Sprint 5 (RF-22)',
+  },
+  {
     id: 'tareas-evaluaciones',
     ruta: '/tareas',
     etiqueta: 'Tareas, pruebas y proyectos',

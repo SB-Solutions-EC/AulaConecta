@@ -151,12 +151,12 @@ describe('Sesión, cierre por inactividad y menú según el rol (T1106-C)', () =
       );
     });
 
-    // Verifica que solo se muestran los 2 roles asignados a hugo.arias y el menú de Docente (6 módulos)
+    // Verifica que solo se muestran los 2 roles asignados a hugo.arias y el menú de Docente (7 módulos)
     expect(screen.getByTestId('resumen-roles-asignados')).toHaveTextContent(
       'Roles en sesión: 2',
     );
     expect(screen.getByTestId('contador-modulos-rol')).toHaveTextContent(
-      '6 módulos',
+      '7 módulos',
     );
 
     // Cierre manual de sesión desde el botón de la barra superior

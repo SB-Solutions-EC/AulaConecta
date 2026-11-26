@@ -8,6 +8,7 @@ import {
   FileSpreadsheet,
   FileText,
   GraduationCap,
+  HeartHandshake,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -59,6 +60,8 @@ function IconoModulo({ idModulo }: Readonly<{ idModulo: string }>) {
       return <ClipboardCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'asistencia-materia':
       return <CalendarCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
+    case 'comportamiento-estudiantil':
+      return <HeartHandshake className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'tareas-evaluaciones':
       return <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'avisos-notificaciones':

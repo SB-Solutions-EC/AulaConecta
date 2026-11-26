@@ -29,6 +29,7 @@ import { PantallaImportacion } from './componentes/PantallaImportacion';
 import { PantallaLibretaCalificaciones } from './componentes/PantallaLibretaCalificaciones';
 import { PantallaAsistencia } from './componentes/PantallaAsistencia';
 import { PantallaComportamiento } from './componentes/PantallaComportamiento';
+import { PantallaParametros } from './componentes/PantallaParametros';
 import { PantallaTareas } from './componentes/PantallaTareas';
 import {
   CATALOGO_MODULOS,
@@ -290,6 +291,8 @@ export default function App({
           <PantallaAsistencia />
         ) : moduloActual.ruta === '/comportamiento' ? (
           <PantallaComportamiento />
+        ) : moduloActual.ruta === '/parametros' ? (
+          <PantallaParametros />
         ) : moduloActual.ruta === '/tareas' ? (
           <PantallaTareas rolActivo={rolActivo} nombreUsuario={nombreUsuario} />
         ) : (

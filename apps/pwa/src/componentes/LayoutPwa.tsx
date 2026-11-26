@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  SlidersHorizontal,
   UserCheck,
   Users,
   Wifi,
@@ -66,6 +67,8 @@ function IconoModulo({ idModulo }: Readonly<{ idModulo: string }>) {
       return <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />;
     case 'avisos-notificaciones':
       return <Bell className="w-4 h-4 shrink-0" aria-hidden="true" />;
+    case 'parametros-colegio':
+      return <SlidersHorizontal className="w-4 h-4 shrink-0" aria-hidden="true" />;
     default:
       return <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />;
   }

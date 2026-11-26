@@ -185,6 +185,15 @@ export const CATALOGO_MODULOS: DefinicionModuloNavegacion[] = [
     rolesPermitidos: ['ADMIN'],
     sprintObjetivo: 'Sprint 4 (RNF-09, RNF-12)',
   },
+  {
+    id: 'parametros-colegio',
+    ruta: '/parametros',
+    etiqueta: 'Parámetros del colegio',
+    descripcion:
+      'Ponderaciones de calificación, escalas cualitativas y textos oficiales de comportamiento.',
+    rolesPermitidos: ['ADMIN'],
+    sprintObjetivo: 'Sprint 5 (RNF-10)',
+  },
 ];
 
 export function obtenerModulosPorRol(
